@@ -116,6 +116,20 @@ Learn more about [agents](https://opencode.ai/docs/agents).
 
 For more info on how to configure OpenCode, [**head over to our docs**](https://opencode.ai/docs).
 
+### Local Web App
+
+The real web app is `packages/app`.
+
+`packages/web` is the docs site.
+
+For local web app development, use:
+
+```bash
+make web
+```
+
+More details are in [WEB_APP_DEV.md](./WEB_APP_DEV.md).
+
 ### Contributing
 
 If you're interested in contributing to OpenCode, please read our [contributing docs](./CONTRIBUTING.md) before submitting a pull request.

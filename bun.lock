@@ -253,6 +253,30 @@
         "vite": "catalog:",
       },
     },
+    "packages/embed": {
+      "name": "@opencode-ai/embed",
+      "version": "1.0.0",
+      "dependencies": {
+        "@opencode-ai/app": "workspace:*",
+        "@opencode-ai/ui": "workspace:*",
+        "@opencode-ai/util": "workspace:*",
+        "@solidjs/meta": "0.29.4",
+        "@solidjs/router": "0.15.4",
+        "@tanstack/solid-query": "5.91.4",
+        "effect": "4.0.0-beta.43",
+        "solid-js": "1.9.10",
+        "tailwindcss": "4.1.11",
+        "zod": "4.1.8",
+      },
+      "devDependencies": {
+        "@tailwindcss/vite": "4.1.11",
+        "@tsconfig/bun": "1.0.9",
+        "@types/bun": "1.3.11",
+        "typescript": "5.8.2",
+        "vite": "7.1.4",
+        "vite-plugin-solid": "2.11.10",
+      },
+    },
     "packages/enterprise": {
       "name": "@opencode-ai/enterprise",
       "version": "1.4.0",
@@ -1506,6 +1530,8 @@
     "@opencode-ai/desktop": ["@opencode-ai/desktop@workspace:packages/desktop"],
 
     "@opencode-ai/desktop-electron": ["@opencode-ai/desktop-electron@workspace:packages/desktop-electron"],
+
+    "@opencode-ai/embed": ["@opencode-ai/embed@workspace:packages/embed"],
 
     "@opencode-ai/enterprise": ["@opencode-ai/enterprise@workspace:packages/enterprise"],
 
