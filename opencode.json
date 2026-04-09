@@ -18,6 +18,9 @@
   },
   "model": "llama-local/unsloth/Qwen3.5-9B-GGUF",
   "small_model": "llama-local/unsloth/Qwen3.5-9B-GGUF",
+  "instructions": [
+    "/opt/openzero/config/MASTER_PROMPT.md"
+  ],
   "mcp": {
     "centauro": {
       "type": "remote",
