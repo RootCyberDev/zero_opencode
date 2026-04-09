@@ -22,6 +22,8 @@ a.out
 target
 .scripts
 .direnv/
+deploy/embed/runtime/*
+!deploy/embed/runtime/.gitkeep
 
 # Local dev files
 opencode-dev

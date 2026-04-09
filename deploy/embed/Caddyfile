@@ -1,0 +1,15 @@
+:8080 {
+	root * /srv
+	encode zstd gzip
+	file_server
+
+	@api path /embed* /global* /provider* /project* /session* /agent* /path* /command* /permission* /question* /mcp* /file* /vcs* /config* /auth*
+	handle @api {
+		reverse_proxy backend:4096
+	}
+
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+}

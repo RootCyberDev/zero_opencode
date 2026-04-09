@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: ../..
+      dockerfile: deploy/embed/backend.Dockerfile
+    container_name: openzero-backend
+    restart: unless-stopped
+    env_file:
+      - /opt/openzero/config/.env.embed
+    working_dir: /app
+    volumes:
+      - /opt/openzero/config/opencode.json:/app/opencode.json:ro
+      - /opt/openzero/data:/data
+    ports:
+      - "127.0.0.1:4096:4096"
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/embed/frontend.Dockerfile
+    container_name: openzero-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8081:8080"
