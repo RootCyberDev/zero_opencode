@@ -13,6 +13,7 @@ type Boot = {
 }
 
 const EMBED_READY_STORE_KEY = "opencode.embed.ready"
+const EMBED_READY_EVENT = "opencode-embed-ready"
 let run:
   | {
       key: string
@@ -25,9 +26,11 @@ function setReady(value: boolean) {
   try {
     if (value) {
       sessionStorage.setItem(EMBED_READY_STORE_KEY, "1")
+      if (typeof window === "object") window.dispatchEvent(new CustomEvent(EMBED_READY_EVENT))
       return
     }
     sessionStorage.removeItem(EMBED_READY_STORE_KEY)
+    if (typeof window === "object") window.dispatchEvent(new CustomEvent(EMBED_READY_EVENT))
   } catch {
     return
   }

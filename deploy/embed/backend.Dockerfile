@@ -28,4 +28,4 @@ ENV OPENCODE_EMBED_ROOT=/data
 
 EXPOSE 4096
 
-CMD ["bun", "run", "--cwd", "packages/opencode", "src/index.ts", "serve", "--hostname", "0.0.0.0", "--port", "4096"]
+CMD ["bun", "run", "packages/opencode/src/index.ts", "serve", "--hostname", "0.0.0.0", "--port", "4096"]

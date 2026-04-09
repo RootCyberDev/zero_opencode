@@ -53,6 +53,7 @@ const Session = lazy(loadSession)
 const Loading = () => <div class="size-full" />
 const EMBED_TOKEN_STORE_KEY = "opencode.embed.token"
 const EMBED_READY_STORE_KEY = "opencode.embed.ready"
+const EMBED_READY_EVENT = "opencode-embed-ready"
 
 if (typeof location === "object" && /\/session(?:\/|$)/.test(location.pathname)) {
   void loadSession()
@@ -312,7 +313,13 @@ export function AppInterface(props: {
   router?: Component<BaseRouterProps>
   disableHealthCheck?: boolean
 }) {
-  const booting = typeof sessionStorage !== "undefined" && !!embedToken() && !embedReady()
+  const [booting, setBooting] = createSignal(typeof sessionStorage !== "undefined" && !!embedToken() && !embedReady())
+
+  if (typeof window === "object") {
+    const sync = () => setBooting(!!embedToken() && !embedReady())
+    window.addEventListener(EMBED_READY_EVENT, sync)
+    onCleanup(() => window.removeEventListener(EMBED_READY_EVENT, sync))
+  }
 
   return (
     <ServerProvider
@@ -323,7 +330,7 @@ export function AppInterface(props: {
       <ConnectionGate disableHealthCheck={props.disableHealthCheck}>
         <ServerKey>
           <Show
-            when={!booting}
+            when={!booting()}
             fallback={
               <Dynamic component={props.router ?? Router} root={(routerProps) => <EmbedRouterRoot>{routerProps.children}</EmbedRouterRoot>}>
                 <Route path="/" component={RootRoute} />
