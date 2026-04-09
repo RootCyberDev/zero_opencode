@@ -16,5 +16,17 @@
       }
     }
   },
-  "model": "llama-local/unsloth/Qwen3.5-9B-GGUF"
+  "model": "llama-local/unsloth/Qwen3.5-9B-GGUF",
+  "small_model": "llama-local/unsloth/Qwen3.5-9B-GGUF",
+  "mcp": {
+    "centauro": {
+      "type": "remote",
+      "url": "https://devapi.centauro.host/api/v1/core/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:CENTAURO_MCP_API_KEY}"
+      },
+      "timeout": 60000
+    }
+  }
 }
