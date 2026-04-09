@@ -120,7 +120,6 @@ export const { use: useModels, provider: ModelsProvider } = createSimpleContext(
       const state = visibility().get(key)
       if (state === "hide") return false
       if (state === "show") return true
-      if (embed()) return false
       if (latestSet().has(key)) return true
       const date = release().get(key)
       if (!date?.isValid) return true

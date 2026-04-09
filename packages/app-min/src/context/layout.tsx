@@ -363,13 +363,6 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
       prune(active)
     })
 
-    createEffect(() => {
-      if (!ready()) return
-      if (!embed()) return
-      if (store.fileTree?.opened) setStore("fileTree", "opened", false)
-      if (store.review?.panelOpened) setStore("review", "panelOpened", false)
-    })
-
     onMount(() => {
       const flush = () => batch(() => scroll.flushAll())
       const handleVisibility = () => {
