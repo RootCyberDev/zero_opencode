@@ -22,6 +22,7 @@ import { focusTerminalById } from "@/pages/session/helpers"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { messageAgentColor } from "@/utils/agent"
 import { decode64 } from "@/utils/base64"
+import { embed } from "@/utils/embed"
 import { Persist, persisted } from "@/utils/persist"
 import { StatusPopover } from "../status-popover"
 
@@ -264,6 +265,7 @@ export function SessionHeader() {
 
   const centerMount = createMemo(() => document.getElementById("opencode-titlebar-center"))
   const rightMount = createMemo(() => document.getElementById("opencode-titlebar-right"))
+  const locked = embed()
 
   return (
     <>
@@ -307,17 +309,19 @@ export function SessionHeader() {
                     when={canOpen()}
                     fallback={
                       <div class="flex h-[24px] box-border items-center rounded-md border border-border-weak-base bg-surface-panel overflow-hidden">
-                        <Button
-                          variant="ghost"
-                          class="rounded-none h-full py-0 pr-3 pl-0.5 gap-1.5 border-none shadow-none"
-                          onClick={copyPath}
-                          aria-label={language.t("session.header.open.copyPath")}
-                        >
-                          <Icon name="copy" size="small" class="text-icon-base" />
-                          <span class="text-12-regular text-text-strong">
-                            {language.t("session.header.open.copyPath")}
-                          </span>
-                        </Button>
+                        <Show when={!locked} fallback={<div class="w-[1px] h-full" />}>
+                          <Button
+                            variant="ghost"
+                            class="rounded-none h-full py-0 pr-3 pl-0.5 gap-1.5 border-none shadow-none"
+                            onClick={copyPath}
+                            aria-label={language.t("session.header.open.copyPath")}
+                          >
+                            <Icon name="copy" size="small" class="text-icon-base" />
+                            <span class="text-12-regular text-text-strong">
+                              {language.t("session.header.open.copyPath")}
+                            </span>
+                          </Button>
+                        </Show>
                       </div>
                     }
                   >
@@ -392,20 +396,22 @@ export function SessionHeader() {
                                   </For>
                                 </DropdownMenu.RadioGroup>
                               </DropdownMenu.Group>
-                              <DropdownMenu.Separator />
-                              <DropdownMenu.Item
-                                onSelect={() => {
-                                  setMenu("open", false)
-                                  copyPath()
-                                }}
-                              >
-                                <div class="flex size-5 shrink-0 items-center justify-center">
-                                  <Icon name="copy" size="small" class="text-icon-weak" />
-                                </div>
-                                <DropdownMenu.ItemLabel>
-                                  {language.t("session.header.open.copyPath")}
-                                </DropdownMenu.ItemLabel>
-                              </DropdownMenu.Item>
+                              <Show when={!locked}>
+                                <DropdownMenu.Separator />
+                                <DropdownMenu.Item
+                                  onSelect={() => {
+                                    setMenu("open", false)
+                                    copyPath()
+                                  }}
+                                >
+                                  <div class="flex size-5 shrink-0 items-center justify-center">
+                                    <Icon name="copy" size="small" class="text-icon-weak" />
+                                  </div>
+                                  <DropdownMenu.ItemLabel>
+                                    {language.t("session.header.open.copyPath")}
+                                  </DropdownMenu.ItemLabel>
+                                </DropdownMenu.Item>
+                              </Show>
                             </DropdownMenu.Content>
                           </DropdownMenu.Portal>
                         </DropdownMenu>

@@ -11,6 +11,7 @@ import { useGlobalSync } from "@/context/global-sync"
 import { DialogConnectProvider } from "./dialog-connect-provider"
 import { DialogSelectProvider } from "./dialog-select-provider"
 import { DialogCustomProvider } from "./dialog-custom-provider"
+import { embed } from "@/utils/embed"
 import { SettingsList } from "./settings-list"
 
 type ProviderSource = "env" | "api" | "config" | "custom"
@@ -33,6 +34,7 @@ export const SettingsProviders: Component = () => {
   const globalSDK = useGlobalSDK()
   const globalSync = useGlobalSync()
   const providers = useProviders()
+  const locked = embed()
 
   const connected = createMemo(() => {
     return providers
@@ -155,7 +157,7 @@ export const SettingsProviders: Component = () => {
                       <Tag>{type(item)}</Tag>
                     </div>
                     <Show
-                      when={canDisconnect(item)}
+                      when={!locked && canDisconnect(item)}
                       fallback={
                         <span class="text-14-regular text-text-base opacity-0 group-hover:opacity-100 transition-opacity duration-200 pr-3 cursor-default">
                           {language.t("settings.providers.connected.environmentDescription")}
@@ -173,7 +175,8 @@ export const SettingsProviders: Component = () => {
           </SettingsList>
         </div>
 
-        <div class="flex flex-col gap-1">
+        <Show when={!locked}>
+          <div class="flex flex-col gap-1">
           <h3 class="text-14-medium text-text-strong pb-2">{language.t("settings.providers.section.popular")}</h3>
           <SettingsList>
             <For each={popular()}>
@@ -244,7 +247,8 @@ export const SettingsProviders: Component = () => {
           >
             {language.t("dialog.provider.viewAll")}
           </Button>
-        </div>
+          </div>
+        </Show>
       </div>
     </div>
   )

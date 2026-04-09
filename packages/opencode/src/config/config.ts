@@ -1246,6 +1246,16 @@ export namespace Config {
           return result
         })
 
+        const loadRoot = Effect.fnUntraced(function* () {
+          if (!Flag.OPENCODE_EMBED) return {} as Info
+          const root = process.cwd()
+          return pipe(
+            {},
+            mergeDeep(yield* loadFile(path.join(root, "opencode.json"))),
+            mergeDeep(yield* loadFile(path.join(root, "opencode.jsonc"))),
+          )
+        })
+
         const [cachedGlobal, invalidateGlobal] = yield* Effect.cachedInvalidateWithTTL(
           loadGlobal().pipe(
             Effect.tapError((error) =>
@@ -1314,6 +1324,9 @@ export namespace Config {
 
           const global = yield* getGlobal()
           merge(Global.Path.config, global, "global")
+
+          const root = yield* loadRoot()
+          if (Object.keys(root).length) merge(process.cwd(), root, "global")
 
           if (Flag.OPENCODE_CONFIG) {
             merge(Flag.OPENCODE_CONFIG, yield* loadFile(Flag.OPENCODE_CONFIG))

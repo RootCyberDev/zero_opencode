@@ -8,6 +8,7 @@ import { ProviderIcon } from "@opencode-ai/ui/provider-icon"
 import { DialogConnectProvider } from "./dialog-connect-provider"
 import { useLanguage } from "@/context/language"
 import { DialogCustomProvider } from "./dialog-custom-provider"
+import { embed } from "@/utils/embed"
 
 const CUSTOM_ID = "_custom"
 
@@ -15,6 +16,9 @@ export const DialogSelectProvider: Component = () => {
   const dialog = useDialog()
   const providers = useProviders()
   const language = useLanguage()
+  if (embed()) {
+    return <Dialog title={language.t("settings.providers.title")} transition />
+  }
 
   const popularGroup = () => language.t("dialog.provider.group.popular")
   const otherGroup = () => language.t("dialog.provider.group.other")

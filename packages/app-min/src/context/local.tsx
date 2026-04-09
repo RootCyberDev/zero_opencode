@@ -6,6 +6,7 @@ import { createStore } from "solid-js/store"
 import { useModels } from "@/context/models"
 import { useProviders } from "@/hooks/use-providers"
 import { modelEnabled, modelProbe } from "@/testing/model-selection"
+import { embed } from "@/utils/embed"
 import { Persist, persisted } from "@/utils/persist"
 import { cycleModelVariant, getConfiguredAgentVariant, resolveModelVariant } from "./model-variant"
 import { useSDK } from "./sdk"
@@ -148,6 +149,11 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
       if (validModel(model)) return model
     }
 
+    const locked = () => {
+      if (!embed()) return
+      return configuredModel()
+    }
+
     const recentModel = () => {
       for (const item of models.recent.list()) {
         if (validModel(item)) return item
@@ -273,7 +279,11 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
       ready: models.ready,
       current,
       recent,
-      list: models.list,
+      list() {
+        const item = locked()
+        if (!item) return models.list()
+        return models.list().filter((model) => model.provider.id === item.providerID && model.id === item.modelID)
+      },
       cycle(direction: 1 | -1) {
         const items = recent()
         const item = current()
@@ -291,24 +301,28 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
         model.set({ providerID: entry.provider.id, modelID: entry.id })
       },
       set(item: ModelKey | undefined, options?: { recent?: boolean }) {
+        const next = locked() ?? item
         batch(() => {
           setStore("last", {
             type: "model",
             agent: agent.current()?.name,
-            model: item ?? null,
+            model: next ?? null,
             variant: selected(),
           })
-          write({ model: item })
-          if (!item) return
-          models.setVisibility(item, true)
+          write({ model: next })
+          if (!next) return
+          models.setVisibility(next, true)
           if (!options?.recent) return
-          models.recent.push(item)
+          models.recent.push(next)
         })
       },
       visible(item: ModelKey) {
+        const lock = locked()
+        if (lock) return item.providerID === lock.providerID && item.modelID === lock.modelID
         return models.visible(item)
       },
       setVisibility(item: ModelKey, visible: boolean) {
+        if (locked()) return
         models.setVisibility(item, visible)
       },
       variant: {

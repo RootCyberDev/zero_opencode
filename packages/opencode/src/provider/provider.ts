@@ -1056,6 +1056,11 @@ export namespace Provider {
           const configProviders = Object.entries(cfg.provider ?? {})
           const disabled = new Set(cfg.disabled_providers ?? [])
           const enabled = cfg.enabled_providers ? new Set(cfg.enabled_providers) : null
+          const keep = [cfg.model, cfg.small_model]
+            .filter(Boolean)
+            .map((item) => item!.split("/")[0]!)
+
+          for (const item of keep) disabled.delete(item)
 
           function isProviderAllowed(providerID: ProviderID): boolean {
             if (enabled && !enabled.has(providerID)) return false

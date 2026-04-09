@@ -16,8 +16,12 @@ import { useGlobalSDK } from "@/context/global-sdk"
 import { useGlobalSync } from "@/context/global-sync"
 import { useLanguage } from "@/context/language"
 import { useProviders } from "@/hooks/use-providers"
+import { embed } from "@/utils/embed"
 
 export function DialogConnectProvider(props: { provider: string }) {
+  if (embed()) {
+    return <Dialog title="" />
+  }
   const dialog = useDialog()
   const globalSync = useGlobalSync()
   const globalSDK = useGlobalSDK()
