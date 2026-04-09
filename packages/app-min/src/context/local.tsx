@@ -230,6 +230,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
 
     const current = () => {
       const item = firstModel(
+        locked,
         () => scope()?.model,
         () => agent.current()?.model,
         fallback,
