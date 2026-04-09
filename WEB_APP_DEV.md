@@ -49,6 +49,12 @@ The backend must be started with the headless `serve` command:
 
 - `packages/opencode/src/cli/cmd/serve.ts`
 
+The correct local invocation is:
+
+```bash
+bun run --cwd packages/opencode dev -- serve --port 4096
+```
+
 The server listens on `4096` by default when available:
 
 - `packages/opencode/src/server/server.ts`
