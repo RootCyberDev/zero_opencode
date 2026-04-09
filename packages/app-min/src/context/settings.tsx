@@ -2,6 +2,7 @@ import { createStore, reconcile } from "solid-js/store"
 import { createEffect, createMemo } from "solid-js"
 import { createSimpleContext } from "@opencode-ai/ui/context"
 import { persisted } from "@/utils/persist"
+import { embed } from "@/utils/embed"
 
 export interface NotificationSettings {
   agent: boolean
@@ -163,8 +164,8 @@ export const { use: useSettings, provider: SettingsProvider } = createSimpleCont
           setStore("general", "followup", value === "queue" ? "steer" : value)
         },
         showReasoningSummaries: withFallback(
-          () => store.general?.showReasoningSummaries,
-          defaultSettings.general.showReasoningSummaries,
+          () => (embed() ? true : store.general?.showReasoningSummaries),
+          embed() ? true : defaultSettings.general.showReasoningSummaries,
         ),
         setShowReasoningSummaries(value: boolean) {
           setStore("general", "showReasoningSummaries", value)
