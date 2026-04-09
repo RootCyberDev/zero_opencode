@@ -12,6 +12,7 @@ import { decode64 } from "@/utils/base64"
 import { same } from "@/utils/same"
 import { createScrollPersistence, type SessionScroll } from "./layout-scroll"
 import { createPathHelpers } from "./file/path"
+import { embed, embedStorage } from "@/utils/embed"
 
 const AVATAR_COLOR_KEYS = ["pink", "mint", "orange", "purple", "cyan", "lime"] as const
 const DEFAULT_SIDEBAR_WIDTH = 344
@@ -226,7 +227,9 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
       }
     }
 
-    const target = Persist.global("layout", ["layout.v6"])
+    const target = embed()
+      ? { storage: embedStorage("global") ?? "opencode.embed.global.dat", key: "layout" }
+      : Persist.global("layout", ["layout.v6"])
     const [store, setStore, _, ready] = persisted(
       { ...target, migrate },
       createStore({
@@ -242,7 +245,7 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
         },
         review: {
           diffStyle: "split" as ReviewDiffStyle,
-          panelOpened: true,
+          panelOpened: embed() ? false : true,
         },
         fileTree: {
           opened: false,
@@ -358,6 +361,13 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
       if (!active) return
       usage.pruned = true
       prune(active)
+    })
+
+    createEffect(() => {
+      if (!ready()) return
+      if (!embed()) return
+      if (store.fileTree?.opened) setStore("fileTree", "opened", false)
+      if (store.review?.panelOpened) setStore("review", "panelOpened", false)
     })
 
     onMount(() => {

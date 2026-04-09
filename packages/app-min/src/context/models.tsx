@@ -5,6 +5,7 @@ import { filter, firstBy, flat, groupBy, mapValues, pipe, uniqueBy, values } fro
 import { createSimpleContext } from "@opencode-ai/ui/context"
 import { useProviders } from "@/hooks/use-providers"
 import { Persist, persisted } from "@/utils/persist"
+import { embed, embedStorage } from "@/utils/embed"
 
 export type ModelKey = { providerID: string; modelID: string }
 
@@ -26,9 +27,12 @@ export const { use: useModels, provider: ModelsProvider } = createSimpleContext(
   name: "Models",
   init: () => {
     const providers = useProviders()
+    const target = embed()
+      ? { storage: embedStorage("global") ?? "opencode.embed.global.dat", key: "model" }
+      : Persist.global("model", ["model.v1"])
 
     const [store, setStore, _, ready] = persisted(
-      Persist.global("model", ["model.v1"]),
+      target,
       createStore<Store>({
         user: [],
         recent: [],
@@ -116,6 +120,7 @@ export const { use: useModels, provider: ModelsProvider } = createSimpleContext(
       const state = visibility().get(key)
       if (state === "hide") return false
       if (state === "show") return true
+      if (embed()) return false
       if (latestSet().has(key)) return true
       const date = release().get(key)
       if (!date?.isValid) return true

@@ -79,6 +79,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
     const [store, setStore] = createStore<{
       current?: string
       draft?: State
+      manual: Record<string, ModelKey | undefined>
       last?: {
         type: "agent" | "model" | "variant"
         agent?: string
@@ -88,6 +89,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
     }>({
       current: list()[0]?.name,
       draft: undefined,
+      manual: {},
       last: undefined,
     })
 
@@ -122,8 +124,22 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
 
     const scope = createMemo<State | undefined>(() => {
       const session = id()
-      if (!session) return store.draft
-      return saved.session[session] ?? handoff.get(handoffKey(sdk.directory, session))
+      if (!session) {
+        if (!embed()) return store.draft
+        return store.draft
+          ? {
+              ...store.draft,
+              model: undefined,
+            }
+          : undefined
+      }
+
+      const value = saved.session[session] ?? handoff.get(handoffKey(sdk.directory, session))
+      if (!embed() || !value) return value
+      return {
+        ...value,
+        model: undefined,
+      }
     })
 
     createEffect(() => {
@@ -149,12 +165,8 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
       if (validModel(model)) return model
     }
 
-    const locked = () => {
-      if (!embed()) return
-      return configuredModel()
-    }
-
     const recentModel = () => {
+      if (embed()) return
       for (const item of models.recent.list()) {
         if (validModel(item)) return item
       }
@@ -229,9 +241,11 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
     }
 
     const current = () => {
+      const key = id() ?? "__draft__"
       const item = firstModel(
-        locked,
+        () => store.manual[key],
         () => scope()?.model,
+        configuredModel,
         () => agent.current()?.model,
         fallback,
       )
@@ -281,9 +295,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
       current,
       recent,
       list() {
-        const item = locked()
-        if (!item) return models.list()
-        return models.list().filter((model) => model.provider.id === item.providerID && model.id === item.modelID)
+        return models.list()
       },
       cycle(direction: 1 | -1) {
         const items = recent()
@@ -302,7 +314,8 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
         model.set({ providerID: entry.provider.id, modelID: entry.id })
       },
       set(item: ModelKey | undefined, options?: { recent?: boolean }) {
-        const next = locked() ?? item
+        const next = item
+        const key = id() ?? "__draft__"
         batch(() => {
           setStore("last", {
             type: "model",
@@ -310,7 +323,11 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
             model: next ?? null,
             variant: selected(),
           })
-          write({ model: next })
+          if (embed()) {
+            setStore("manual", key, next)
+          } else {
+            write({ model: next })
+          }
           if (!next) return
           models.setVisibility(next, true)
           if (!options?.recent) return
@@ -318,12 +335,11 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
         })
       },
       visible(item: ModelKey) {
-        const lock = locked()
-        if (lock) return item.providerID === lock.providerID && item.modelID === lock.modelID
+        const cfg = configuredModel()
+        if (embed() && cfg && item.providerID === cfg.providerID && item.modelID === cfg.modelID) return true
         return models.visible(item)
       },
       setVisibility(item: ModelKey, visible: boolean) {
-        if (locked()) return
         models.setVisibility(item, visible)
       },
       variant: {
@@ -397,7 +413,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
 
           setSaved("session", session, {
             agent: msg.agent,
-            model: msg.model,
+            model: embed() ? undefined : msg.model,
             variant: msg.model.variant ?? null,
           })
         },
