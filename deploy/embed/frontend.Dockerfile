@@ -6,6 +6,7 @@ ARG VITE_OPENCODE_SERVER_URL=https://ozeroapi.centauro.host
 ENV VITE_OPENCODE_SERVER_URL=${VITE_OPENCODE_SERVER_URL}
 
 COPY package.json bun.lock ./
+COPY patches patches
 COPY packages/app-min/package.json packages/app-min/package.json
 COPY packages/app/package.json packages/app/package.json
 COPY packages/sdk/js/package.json packages/sdk/js/package.json
@@ -21,7 +22,7 @@ COPY packages/console/function/package.json packages/console/function/package.js
 COPY packages/console/mail/package.json packages/console/mail/package.json
 COPY packages/console/resource/package.json packages/console/resource/package.json
 
-RUN bun install
+RUN bun install --ignore-scripts
 
 COPY . .
 

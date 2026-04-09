@@ -3,6 +3,7 @@ FROM oven/bun:1.3.11
 WORKDIR /app
 
 COPY package.json bun.lock ./
+COPY patches patches
 COPY packages/opencode/package.json packages/opencode/package.json
 COPY packages/app-min/package.json packages/app-min/package.json
 COPY packages/app/package.json packages/app/package.json
@@ -18,7 +19,7 @@ COPY packages/console/function/package.json packages/console/function/package.js
 COPY packages/console/mail/package.json packages/console/mail/package.json
 COPY packages/console/resource/package.json packages/console/resource/package.json
 
-RUN bun install
+RUN bun install --ignore-scripts
 
 COPY . .
 
