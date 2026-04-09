@@ -83,6 +83,12 @@ export namespace Flag {
   export const OPENCODE_DISABLE_CHANNEL_DB = truthy("OPENCODE_DISABLE_CHANNEL_DB")
   export const OPENCODE_SKIP_MIGRATIONS = truthy("OPENCODE_SKIP_MIGRATIONS")
   export const OPENCODE_STRICT_CONFIG_DEPS = truthy("OPENCODE_STRICT_CONFIG_DEPS")
+  export const OPENCODE_EMBED = truthy("OPENCODE_EMBED")
+  export const OPENCODE_EMBED_ROOT = process.env["OPENCODE_EMBED_ROOT"]
+  export const OPENCODE_EMBED_ISSUER = process.env["OPENCODE_EMBED_ISSUER"]
+  export const OPENCODE_EMBED_JWKS_URL = process.env["OPENCODE_EMBED_JWKS_URL"]
+  export const OPENCODE_EMBED_AUDIENCE = process.env["OPENCODE_EMBED_AUDIENCE"]
+  export const OPENCODE_EMBED_AZP = process.env["OPENCODE_EMBED_AZP"]
 
   function number(key: string) {
     const value = process.env[key]

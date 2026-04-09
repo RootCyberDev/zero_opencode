@@ -23,6 +23,43 @@ Open:
 http://localhost:3000
 ```
 
+## Embed Mode
+
+For the minimified embeddable app:
+
+1. Create local env file:
+
+```bash
+cp .env.embed.example .env.embed
+```
+
+2. Adjust the values in `.env.embed`
+
+Important fields:
+
+- `OPENCODE_EMBED=1`
+- `KEYCLOAK_URL`
+- `KEYCLOAK_REALM`
+- `OPENCODE_EMBED_AZP`
+
+3. Start embed mode:
+
+```bash
+make web-min-embed
+```
+
+Open:
+
+```text
+http://localhost:3001/?token=YOUR_KEYCLOAK_ACCESS_TOKEN
+```
+
+Notes:
+
+- the backend auto-loads `.env.embed` in `make web-backend-embed` and `make web-min-embed`
+- if `OPENCODE_EMBED_ISSUER` and `OPENCODE_EMBED_JWKS_URL` are not set, OpenCode derives them from `KEYCLOAK_URL` and `KEYCLOAK_REALM`
+- this matches the same Keycloak env structure already used in Centauro
+
 ## Manual Start
 
 Backend:

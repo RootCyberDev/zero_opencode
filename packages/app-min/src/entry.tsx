@@ -10,6 +10,8 @@ import pkg from "../package.json"
 import { ServerConnection } from "./context/server"
 
 const DEFAULT_SERVER_URL_KEY = "opencode.settings.dat:defaultServerUrl"
+const EMBED_TOKEN_KEY = "token"
+const EMBED_TOKEN_STORE_KEY = "opencode.embed.token"
 
 const getLocale = () => {
   if (typeof navigator !== "object") return "en" as const
@@ -51,6 +53,28 @@ const setStorage = (key: string, value: string | null) => {
 
 const readDefaultServerUrl = () => getStorage(DEFAULT_SERVER_URL_KEY)
 const writeDefaultServerUrl = (url: string | null) => setStorage(DEFAULT_SERVER_URL_KEY, url)
+
+const getSessionStorage = (key: string) => {
+  if (typeof sessionStorage === "undefined") return null
+  try {
+    return sessionStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+const setSessionStorage = (key: string, value: string | null) => {
+  if (typeof sessionStorage === "undefined") return
+  try {
+    if (value !== null) {
+      sessionStorage.setItem(key, value)
+      return
+    }
+    sessionStorage.removeItem(key)
+  } catch {
+    return
+  }
+}
 
 const notify: Platform["notify"] = async (title, description, href) => {
   if (!("Notification" in window)) return
@@ -104,6 +128,13 @@ const getCurrentUrl = () => {
   return location.origin
 }
 
+const getEmbedToken = () => {
+  if (typeof location !== "object") return
+  const token = new URLSearchParams(location.search).get(EMBED_TOKEN_KEY) ?? getSessionStorage(EMBED_TOKEN_STORE_KEY) ?? undefined
+  if (token) setSessionStorage(EMBED_TOKEN_STORE_KEY, token)
+  return token
+}
+
 const getDefaultUrl = () => {
   const lsDefault = readDefaultServerUrl()
   if (lsDefault) return lsDefault
@@ -126,7 +157,7 @@ const platform: Platform = {
 }
 
 if (root instanceof HTMLElement) {
-  const server: ServerConnection.Http = { type: "http", http: { url: getCurrentUrl() } }
+  const server: ServerConnection.Http = { type: "http", http: { url: getCurrentUrl(), token: getEmbedToken() } }
   render(
     () => (
       <PlatformProvider value={platform}>

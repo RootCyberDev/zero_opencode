@@ -1,4 +1,4 @@
-.PHONY: dev build install help backend web-backend web-app web web-min-app web-min
+.PHONY: dev build install help backend web-backend web-app web web-min-app web-min web-min-embed web-backend-embed
 
 help:
 	@echo "OpenCode Embed Commands:"
@@ -11,6 +11,8 @@ help:
 	@echo "  make web     - Start backend and frontend for the real web app"
 	@echo "  make web-min-app - Start the minimified web frontend app"
 	@echo "  make web-min - Start backend and frontend for the minimified web app"
+	@echo "  make web-backend-embed - Start backend with .env.embed"
+	@echo "  make web-min-embed - Start minimified web app with .env.embed"
 
 install:
 	bun install
@@ -27,6 +29,9 @@ backend:
 web-backend:
 	bun run --cwd packages/opencode dev -- serve --port 4096
 
+web-backend-embed:
+	@bash -lc 'set -euo pipefail; cd /home/metrofico/WebstormProjects/zero_opencode; if [ -f .env.embed ]; then set -a; . ./.env.embed; set +a; fi; bun run --cwd packages/opencode dev -- serve --port 4096'
+
 web-app:
 	bun run dev:web
 
@@ -38,3 +43,6 @@ web-min-app:
 
 web-min:
 	@bash -lc 'set -euo pipefail; cd /home/metrofico/WebstormProjects/zero_opencode; bun run --cwd packages/opencode dev -- serve --port 4096 & pid=$$!; trap "kill $$pid" EXIT INT TERM; bun run dev:web:min'
+
+web-min-embed:
+	@bash -lc 'set -euo pipefail; cd /home/metrofico/WebstormProjects/zero_opencode; if [ -f .env.embed ]; then set -a; . ./.env.embed; set +a; fi; bun run --cwd packages/opencode dev -- serve --port 4096 & pid=$$!; trap "kill $$pid" EXIT INT TERM; bun run dev:web:min'

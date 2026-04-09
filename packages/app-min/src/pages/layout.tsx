@@ -574,6 +574,20 @@ export default function Layout(props: ParentProps) {
     return projects.find((p) => p.worktree === root)
   })
 
+  createEffect(() => {
+    const token = server.current?.http.token
+    const directory = currentDir()
+    if (!token || !directory) return
+
+    const root = projectRoot(directory)
+    const list = layout.projects.list()
+    for (const item of list) {
+      if (workspaceKey(item.worktree) === workspaceKey(root)) continue
+      layout.projects.close(item.worktree)
+    }
+    layout.projects.open(root)
+  })
+
   const [autoselecting] = createResource(async () => {
     await ready.promise
     await layout.ready.promise

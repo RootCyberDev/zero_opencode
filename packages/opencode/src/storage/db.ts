@@ -1,19 +1,18 @@
 import { type SQLiteBunDatabase } from "drizzle-orm/bun-sqlite"
 import { migrate } from "drizzle-orm/bun-sqlite/migrator"
 import { type SQLiteTransaction } from "drizzle-orm/sqlite-core"
+import type { Database as Sqlite } from "bun:sqlite"
 export * from "drizzle-orm"
 import { Context } from "../util/context"
-import { lazy } from "../util/lazy"
 import { Global } from "../global"
 import { Log } from "../util/log"
 import { NamedError } from "@opencode-ai/util/error"
 import z from "zod"
-import path from "path"
+import nodepath from "path"
 import { readFileSync, readdirSync, existsSync } from "fs"
 import { Flag } from "../flag/flag"
 import { CHANNEL } from "../installation/meta"
 import { InstanceState } from "@/effect/instance-state"
-import { iife } from "@/util/iife"
 import { init } from "#db"
 
 declare const OPENCODE_MIGRATIONS: { sql: string; timestamp: number; name: string }[] | undefined
@@ -28,24 +27,36 @@ export const NotFoundError = NamedError.create(
 const log = Log.create({ service: "db" })
 
 export namespace Database {
-  export function getChannelPath() {
-    if (["latest", "beta"].includes(CHANNEL) || Flag.OPENCODE_DISABLE_CHANNEL_DB)
-      return path.join(Global.Path.data, "opencode.db")
-    const safe = CHANNEL.replace(/[^a-zA-Z0-9._-]/g, "-")
-    return path.join(Global.Path.data, `opencode-${safe}.db`)
-  }
-
-  export const Path = iife(() => {
+  function currentPath() {
     if (Flag.OPENCODE_DB) {
-      if (Flag.OPENCODE_DB === ":memory:" || path.isAbsolute(Flag.OPENCODE_DB)) return Flag.OPENCODE_DB
-      return path.join(Global.Path.data, Flag.OPENCODE_DB)
+      if (Flag.OPENCODE_DB === ":memory:" || nodepath.isAbsolute(Flag.OPENCODE_DB)) return Flag.OPENCODE_DB
+      return nodepath.join(Global.Path.data, Flag.OPENCODE_DB)
     }
     return getChannelPath()
-  })
+  }
+
+  export function getChannelPath() {
+    if (["latest", "beta"].includes(CHANNEL) || Flag.OPENCODE_DISABLE_CHANNEL_DB)
+      return nodepath.join(Global.Path.data, "opencode.db")
+    const safe = CHANNEL.replace(/[^a-zA-Z0-9._-]/g, "-")
+    return nodepath.join(Global.Path.data, `opencode-${safe}.db`)
+  }
 
   export type Transaction = SQLiteTransaction<"sync", void>
 
-  type Client = SQLiteBunDatabase
+  type Client = SQLiteBunDatabase & {
+    $client: {
+      close(): void
+    }
+  }
+
+  export function path() {
+    return currentPath()
+  }
+
+  export function sqlite() {
+    return Client().$client as Sqlite
+  }
 
   type Journal = { sql: string; timestamp: number; name: string }[]
 
@@ -69,7 +80,7 @@ export namespace Database {
 
     const sql = dirs
       .map((name) => {
-        const file = path.join(dir, name, "migration.sql")
+        const file = nodepath.join(dir, name, "migration.sql")
         if (!existsSync(file)) return
         return {
           sql: readFileSync(file, "utf-8"),
@@ -82,10 +93,16 @@ export namespace Database {
     return sql.sort((a, b) => a.timestamp - b.timestamp)
   }
 
-  export const Client = lazy(() => {
-    log.info("opening database", { path: Path })
+  const cache = new Map<string, Client>()
 
-    const db = init(Path)
+  export function Client() {
+    const file = currentPath()
+    const found = cache.get(file)
+    if (found) return found
+
+    log.info("opening database", { path: file })
+
+    const db = init(file) as Client
 
     db.run("PRAGMA journal_mode = WAL")
     db.run("PRAGMA synchronous = NORMAL")
@@ -98,7 +115,7 @@ export namespace Database {
     const entries =
       typeof OPENCODE_MIGRATIONS !== "undefined"
         ? OPENCODE_MIGRATIONS
-        : migrations(path.join(import.meta.dirname, "../../migration"))
+        : migrations(nodepath.join(import.meta.dirname, "../../migration"))
     if (entries.length > 0) {
       log.info("applying migrations", {
         count: entries.length,
@@ -112,12 +129,15 @@ export namespace Database {
       migrate(db, entries)
     }
 
+    cache.set(file, db)
     return db
-  })
+  }
 
-  export function close() {
-    Client().$client.close()
-    Client.reset()
+  export function close(file = currentPath()) {
+    const db = cache.get(file)
+    if (!db) return
+    db.$client.close()
+    cache.delete(file)
   }
 
   export type TxOrDb = Transaction | Client

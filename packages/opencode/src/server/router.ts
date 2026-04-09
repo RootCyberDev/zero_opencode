@@ -9,6 +9,8 @@ import { Filesystem } from "@/util/filesystem"
 import { Instance } from "@/project/instance"
 import { InstanceBootstrap } from "@/project/bootstrap"
 import { InstanceRoutes } from "./instance"
+import { Flag } from "@/flag/flag"
+import { Tenant } from "@/tenant"
 
 type Rule = { method?: string; path: string; exact?: boolean; action: "local" | "forward" }
 
@@ -30,7 +32,9 @@ export function WorkspaceRouterMiddleware(upgrade: UpgradeWebSocket): Middleware
   const routes = lazy(() => InstanceRoutes(upgrade))
 
   return async (c) => {
-    const raw = c.req.query("directory") || c.req.header("x-opencode-directory") || process.cwd()
+    const raw = Flag.OPENCODE_EMBED
+      ? Tenant.use().workspace
+      : c.req.query("directory") || c.req.header("x-opencode-directory") || process.cwd()
     const directory = Filesystem.resolve(
       (() => {
         try {
@@ -42,7 +46,9 @@ export function WorkspaceRouterMiddleware(upgrade: UpgradeWebSocket): Middleware
     )
 
     const url = new URL(c.req.url)
-    const workspaceParam = url.searchParams.get("workspace") || c.req.header("x-opencode-workspace")
+    const workspaceParam = Flag.OPENCODE_EMBED
+      ? undefined
+      : url.searchParams.get("workspace") || c.req.header("x-opencode-workspace")
 
     // TODO: If session is being routed, force it to lookup the
     // project/workspace

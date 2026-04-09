@@ -19,6 +19,8 @@ import { lazy } from "@/util/lazy"
 import { errorHandler } from "./middleware"
 import { InstanceRoutes } from "./instance"
 import { initProjectors } from "./projectors"
+import { EmbedAuth, EmbedRoutes } from "./embed"
+import { Tenant } from "@/tenant"
 
 // @ts-ignore This global is needed to prevent ai-sdk from logging warnings to stdout https://github.com/vercel/ai/blob/2dc67e0ef538307f21368db32d5a12345d98831b/packages/ai/src/logger/log-warnings.ts#L85
 globalThis.AI_SDK_LOG_WARNINGS = false
@@ -91,11 +93,21 @@ export namespace Server {
           },
         }),
       )
+      .use(async (c, next) => {
+        const info = await EmbedAuth({
+          method: c.req.method,
+          path: c.req.path,
+          header: c.req.header("authorization"),
+        })
+        if (!info) return next()
+        return Tenant.provide(info, next)
+      })
       .use((c, next) => {
         if (skipCompress(c.req.path, c.req.method)) return next()
         return zipped(c, next)
       })
       .route("/global", GlobalRoutes())
+      .route("/embed", EmbedRoutes())
       .put(
         "/auth/:providerID",
         describeRoute({

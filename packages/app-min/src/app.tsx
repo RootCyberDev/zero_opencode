@@ -47,21 +47,49 @@ import { ErrorPage } from "./pages/error"
 import { useCheckServerHealth } from "./utils/server-health"
 
 const HomeRoute = lazy(() => import("@/pages/home"))
+const EmbedRoute = lazy(() => import("@/pages/embed"))
 const loadSession = () => import("@/pages/session")
 const Session = lazy(loadSession)
 const Loading = () => <div class="size-full" />
+const EMBED_TOKEN_STORE_KEY = "opencode.embed.token"
+const EMBED_READY_STORE_KEY = "opencode.embed.ready"
 
 if (typeof location === "object" && /\/session(?:\/|$)/.test(location.pathname)) {
   void loadSession()
 }
 
+function embedToken() {
+  if (typeof sessionStorage === "undefined") return
+  return sessionStorage.getItem(EMBED_TOKEN_STORE_KEY) ?? undefined
+}
+
+function embedReady() {
+  if (typeof sessionStorage === "undefined") return false
+  return sessionStorage.getItem(EMBED_READY_STORE_KEY) === "1"
+}
+
+const EmbedGuard = (props: ParentProps) => {
+  if (typeof location !== "object") return props.children
+  if (!embedToken()) return props.children
+  if (embedReady()) return props.children
+  return <Navigate href="/embed" />
+}
+
 const SessionRoute = () => (
-  <SessionProviders>
-    <Session />
-  </SessionProviders>
+  <EmbedGuard>
+    <SessionProviders>
+      <Session />
+    </SessionProviders>
+  </EmbedGuard>
 )
 
 const SessionIndexRoute = () => <Navigate href="session" />
+const RootRoute = () => {
+  if (typeof location !== "object") return <HomeRoute />
+  const token = new URLSearchParams(location.search).get("token") ?? embedToken()
+  if (token) return <Navigate href="/embed" />
+  return <HomeRoute />
+}
 
 function UiI18nBridge(props: ParentProps) {
   const language = useLanguage()
@@ -84,6 +112,10 @@ declare global {
 function QueryProvider(props: ParentProps) {
   const client = new QueryClient()
   return <QueryClientProvider client={client}>{props.children}</QueryClientProvider>
+}
+
+function EmbedRouterRoot(props: ParentProps) {
+  return <Suspense fallback={<Loading />}>{props.children}</Suspense>
 }
 
 function AppShellProviders(props: ParentProps) {
@@ -280,6 +312,8 @@ export function AppInterface(props: {
   router?: Component<BaseRouterProps>
   disableHealthCheck?: boolean
 }) {
+  const booting = typeof sessionStorage !== "undefined" && !!embedToken() && !embedReady()
+
   return (
     <ServerProvider
       defaultServer={props.defaultServer}
@@ -288,20 +322,31 @@ export function AppInterface(props: {
     >
       <ConnectionGate disableHealthCheck={props.disableHealthCheck}>
         <ServerKey>
-          <GlobalSDKProvider>
-            <GlobalSyncProvider>
-              <Dynamic
-                component={props.router ?? Router}
-                root={(routerProps) => <RouterRoot appChildren={props.children}>{routerProps.children}</RouterRoot>}
-              >
-                <Route path="/" component={HomeRoute} />
-                <Route path="/:dir" component={DirectoryLayout}>
-                  <Route path="/" component={SessionIndexRoute} />
-                  <Route path="/session/:id?" component={SessionRoute} />
-                </Route>
+          <Show
+            when={!booting}
+            fallback={
+              <Dynamic component={props.router ?? Router} root={(routerProps) => <EmbedRouterRoot>{routerProps.children}</EmbedRouterRoot>}>
+                <Route path="/" component={RootRoute} />
+                <Route path="/embed" component={EmbedRoute} />
               </Dynamic>
-            </GlobalSyncProvider>
-          </GlobalSDKProvider>
+            }
+          >
+            <GlobalSDKProvider>
+              <GlobalSyncProvider>
+                <Dynamic
+                  component={props.router ?? Router}
+                  root={(routerProps) => <RouterRoot appChildren={props.children}>{routerProps.children}</RouterRoot>}
+                >
+                  <Route path="/" component={RootRoute} />
+                  <Route path="/embed" component={EmbedRoute} />
+                  <Route path="/:dir" component={DirectoryLayout}>
+                    <Route path="/" component={SessionIndexRoute} />
+                    <Route path="/session/:id?" component={SessionRoute} />
+                  </Route>
+                </Dynamic>
+              </GlobalSyncProvider>
+            </GlobalSDKProvider>
+          </Show>
         </ServerKey>
       </ConnectionGate>
     </ServerProvider>
