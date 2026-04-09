@@ -2,6 +2,9 @@ FROM oven/bun:1.3.11 AS build
 
 WORKDIR /app
 
+ARG VITE_OPENCODE_SERVER_URL=https://ozeroapi.centauro.host
+ENV VITE_OPENCODE_SERVER_URL=${VITE_OPENCODE_SERVER_URL}
+
 COPY package.json bun.lock ./
 COPY packages/app-min/package.json packages/app-min/package.json
 COPY packages/app/package.json packages/app/package.json

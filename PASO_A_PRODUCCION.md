@@ -9,6 +9,21 @@ El objetivo es desplegar:
 - modo embed con Keycloak
 - modelo global fijo desde `opencode.json`
 
+## Dominios Obligatorios
+
+La configuracion obligatoria queda asi:
+
+- frontend: `https://openzero.centauro.host`
+- backend: `https://ozeroapi.centauro.host`
+
+El frontend ya queda preparado para apuntar por defecto al backend usando:
+
+- `VITE_OPENCODE_SERVER_URL=https://ozeroapi.centauro.host`
+
+Y el backend debe aceptar CORS desde:
+
+- `https://openzero.centauro.host`
+
 ## Recomendacion Actual
 
 La forma mas limpia para este proyecto es usar `docker compose` con directorios reales del host.
@@ -67,10 +82,17 @@ newgrp docker
 ```bash
 sudo mkdir -p /opt/openzero
 sudo chown -R $USER:$USER /opt/openzero
+chmod 755 /opt/openzero
 cd /opt/openzero
-git clone <URL_DE_TU_REPO> app
+mkdir -p app
 cd /opt/openzero/app
+git clone <URL_DE_TU_REPO> .
 ```
+
+Importante:
+
+- usa `git clone <URL> .` para clonar dentro de la carpeta actual
+- no uses `git clone <URL>` porque eso crea una subcarpeta adicional
 
 ### 3. Crear directorios obligatorios
 
@@ -78,6 +100,9 @@ cd /opt/openzero/app
 sudo mkdir -p /opt/openzero/config
 sudo mkdir -p /opt/openzero/data
 sudo chown -R $USER:$USER /opt/openzero
+chmod 755 /opt/openzero/app
+chmod 755 /opt/openzero/config
+chmod 755 /opt/openzero/data
 ```
 
 ### 4. Crear `.env.embed`
@@ -85,6 +110,7 @@ sudo chown -R $USER:$USER /opt/openzero
 ```bash
 cp .env.embed.example /opt/openzero/config/.env.embed
 nano /opt/openzero/config/.env.embed
+chmod 600 /opt/openzero/config/.env.embed
 ```
 
 Contenido base:
@@ -92,6 +118,7 @@ Contenido base:
 ```bash
 OPENCODE_EMBED=1
 OPENCODE_DISABLE_PROJECT_CONFIG=1
+OPENCODE_SERVER_CORS=https://openzero.centauro.host
 
 KEYCLOAK_URL=https://auth.centauro.host
 KEYCLOAK_REALM=centauro
@@ -104,6 +131,7 @@ OPENCODE_EMBED_ROOT=/data
 
 ```bash
 nano /opt/openzero/config/opencode.json
+chmod 644 /opt/openzero/config/opencode.json
 ```
 
 Ejemplo:
@@ -155,7 +183,7 @@ http://TU_SERVIDOR:8081/?token=ACCESS_TOKEN
 Si lo pasas por Cloudflare Tunnel:
 
 ```text
-https://tu-dominio.com/?token=ACCESS_TOKEN
+https://openzero.centauro.host/?token=ACCESS_TOKEN
 ```
 
 ## Como Funciona Esta Pila
@@ -180,24 +208,32 @@ Eso es importante porque `app-min` en produccion usa `location.origin`.
 
 ## Cloudflare Tunnel
 
-Como ya usaras Cloudflare Tunnel por dominio, lo ideal es apuntarlo al puerto del Caddy de este stack:
+Debes crear dos rutas en Cloudflare Tunnel:
+
+- `openzero.centauro.host` -> `http://127.0.0.1:8081`
+- `ozeroapi.centauro.host` -> `http://127.0.0.1:4096`
+
+El frontend usa el dominio API por defecto, por eso necesitas ambas.
+
+Como ya usaras Cloudflare Tunnel por dominio, lo ideal es apuntarlo asi:
+
+```text
+openzero.centauro.host -> http://127.0.0.1:8081
+ozeroapi.centauro.host -> http://127.0.0.1:4096
+```
+
+No necesitas exponer puertos publicos del servidor fuera del tunnel.
+
+Cloudflare debe ver:
 
 ```text
 http://127.0.0.1:8081
+http://127.0.0.1:4096
 ```
 
-No necesitas exponer el `4096` públicamente.
+Y Caddy se encarga de servir la SPA del frontend.
 
-Cloudflare solo debe ver:
-
-```text
-http://127.0.0.1:8081
-```
-
-Y Caddy se encarga de:
-
-- servir la SPA
-- hacer reverse proxy al backend
+El backend queda servido directo por su propio dominio API.
 
 ## Actualizar El Deploy
 

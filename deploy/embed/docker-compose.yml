@@ -18,6 +18,8 @@ services:
     build:
       context: ../..
       dockerfile: deploy/embed/frontend.Dockerfile
+      args:
+        VITE_OPENCODE_SERVER_URL: https://ozeroapi.centauro.host
     container_name: openzero-web
     restart: unless-stopped
     depends_on:
