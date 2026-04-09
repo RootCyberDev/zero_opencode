@@ -38,6 +38,7 @@ La estructura obligatoria del servidor es esta:
   config/
     .env.embed
     opencode.json
+    MASTER_PROMPT.md
   data/
 ```
 
@@ -140,8 +141,30 @@ Ejemplo:
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "llama-local/tu-modelo",
-  "small_model": "llama-local/tu-modelo"
+  "small_model": "llama-local/tu-modelo",
+  "instructions": [
+    "/config/MASTER_PROMPT.md"
+  ]
 }
+```
+
+### 5.1. Crear `MASTER_PROMPT.md`
+
+```bash
+nano /opt/openzero/config/MASTER_PROMPT.md
+chmod 644 /opt/openzero/config/MASTER_PROMPT.md
+```
+
+Ese archivo se monta dentro del contenedor backend como:
+
+```text
+/config/MASTER_PROMPT.md
+```
+
+Por eso en `opencode.json` la ruta correcta es:
+
+```json
+"/config/MASTER_PROMPT.md"
 ```
 
 ### 6. Levantar el stack
