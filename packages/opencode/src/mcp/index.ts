@@ -128,9 +128,21 @@ export namespace MCP {
   }
 
   const sanitize = (s: string) => s.replace(/[^a-zA-Z0-9_-]/g, "_")
+  const msg = (err: unknown) => (err instanceof Error ? err.message : String(err))
+  const stale = (err: unknown) => {
+    const text = msg(err)
+    return (
+      text.includes("Error POSTing to endpoint: Not Found") ||
+      text.includes("MCP session") ||
+      /\b404\b/.test(text)
+    )
+  }
 
   // Convert MCP tool definition to AI SDK Tool type
-  function convertMcpTool(mcpTool: MCPToolDef, client: MCPClient, timeout?: number): Tool {
+  function convertMcpTool(
+    mcpTool: MCPToolDef,
+    call: (args: Record<string, unknown>) => Promise<Awaited<ReturnType<MCPClient["callTool"]>>>,
+  ): Tool {
     const inputSchema = mcpTool.inputSchema
 
     // Spread first, then override type to ensure it's always "object"
@@ -144,19 +156,7 @@ export namespace MCP {
     return dynamicTool({
       description: mcpTool.description ?? "",
       inputSchema: jsonSchema(schema),
-      execute: async (args: unknown) => {
-        return client.callTool(
-          {
-            name: mcpTool.name,
-            arguments: (args || {}) as Record<string, unknown>,
-          },
-          CallToolResultSchema,
-          {
-            resetTimeoutOnProgress: true,
-            timeout,
-          },
-        )
-      },
+      execute: async (args: unknown) => call((args || {}) as Record<string, unknown>),
     })
   }
 
@@ -635,7 +635,29 @@ export namespace MCP {
 
               const timeout = entry?.timeout ?? defaultTimeout
               for (const mcpTool of listed) {
-                result[sanitize(clientName) + "_" + sanitize(mcpTool.name)] = convertMcpTool(mcpTool, client, timeout)
+                result[sanitize(clientName) + "_" + sanitize(mcpTool.name)] = convertMcpTool(mcpTool, async (args) => {
+                  const out = await Effect.runPromise(
+                    withClient(
+                      clientName,
+                      (item) =>
+                        item.callTool(
+                          {
+                            name: mcpTool.name,
+                            arguments: args,
+                          },
+                          CallToolResultSchema,
+                          {
+                            resetTimeoutOnProgress: true,
+                            timeout,
+                          },
+                        ),
+                      "callTool",
+                      { tool: mcpTool.name },
+                    ),
+                  )
+                  if (!out) throw new Error(`failed to call MCP tool ${clientName}:${mcpTool.name}`)
+                  return out
+                })
               }
             }),
           { concurrency: "unbounded" },
@@ -678,13 +700,30 @@ export namespace MCP {
           log.warn(`client not found for ${label}`, { clientName })
           return undefined
         }
-        return yield* Effect.tryPromise({
-          try: () => fn(client),
-          catch: (e: any) => {
-            log.error(`failed to ${label}`, { clientName, ...meta, error: e?.message })
-            return e
-          },
-        }).pipe(Effect.orElseSucceed(() => undefined))
+        const run = (item: MCPClient) =>
+          Effect.tryPromise({
+            try: () => fn(item),
+            catch: (e: any) => e,
+          })
+        const first = yield* run(client).pipe(
+          Effect.map((value) => ({ ok: true as const, value })),
+          Effect.catch((err) => Effect.succeed({ ok: false as const, err })),
+        )
+        if (first.ok) return first.value
+        const err = first.err
+        log.error(`failed to ${label}`, { clientName, ...meta, error: err?.message })
+        const ok = yield* revive(clientName, err)
+        if (!ok) return undefined
+        const next = (yield* InstanceState.get(state)).clients[clientName]
+        if (!next) return undefined
+        return yield* run(next).pipe(
+          Effect.tapError((e) =>
+            Effect.sync(() => {
+              log.error(`failed to ${label} after reconnect`, { clientName, ...meta, error: e?.message })
+            }),
+          ),
+          Effect.orElseSucceed(() => undefined),
+        )
       })
 
       const getPrompt = Effect.fn("MCP.getPrompt")(function* (
@@ -708,6 +747,15 @@ export namespace MCP {
         const mcpConfig = cfg.mcp?.[mcpName]
         if (!mcpConfig || !isMcpConfigured(mcpConfig)) return undefined
         return mcpConfig
+      })
+
+      const revive = Effect.fnUntraced(function* (name: string, err: unknown) {
+        if (!stale(err)) return false
+        const cfg = yield* getMcpConfig(name)
+        if (!cfg || cfg.type !== "remote") return false
+        log.warn("mcp remote session looks stale, reconnecting", { name, error: msg(err) })
+        const status = yield* createAndStore(name, { ...cfg, enabled: true }).pipe(Effect.catch(() => Effect.succeed(undefined)))
+        return status?.status === "connected"
       })
 
       const startAuth = Effect.fn("MCP.startAuth")(function* (mcpName: string) {

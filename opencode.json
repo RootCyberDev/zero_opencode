@@ -26,6 +26,7 @@
       "type": "remote",
       "url": "https://devapi.centauro.host/api/v1/core/mcp",
       "enabled": true,
+      "oauth": false,
       "headers": {
         "Authorization": "Bearer {env:CENTAURO_MCP_API_KEY}"
       },
