@@ -1,4 +1,5 @@
 import { Splash } from "@opencode-ai/ui/logo"
+import { base64Encode } from "@opencode-ai/util/encode"
 import { createEffect, createSignal, onMount, Show } from "solid-js"
 import { useNavigate } from "@solidjs/router"
 import { usePlatform } from "@/context/platform"
@@ -12,6 +13,12 @@ type Boot = {
 }
 
 const EMBED_READY_STORE_KEY = "opencode.embed.ready"
+let run:
+  | {
+      key: string
+      promise: Promise<Boot>
+    }
+  | undefined
 
 function setReady(value: boolean) {
   if (typeof sessionStorage === "undefined") return
@@ -79,21 +86,29 @@ export default function EmbedPage() {
       return
     }
 
-    void (platform.fetch ?? fetch)(`${current.http.url}/embed/bootstrap`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const key = `${current.http.url}\n${token}`
+    const promise =
+      run?.key === key
+        ? run.promise
+        : ((run = {
+            key,
+            promise: (platform.fetch ?? fetch)(`${current.http.url}/embed/bootstrap`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }).then(async (res) => {
+              if (!res.ok) {
+                const body = await res.text().catch(() => "")
+                throw new Error(body || `Embed bootstrap failed with ${res.status}`)
+              }
+              return (await res.json()) as Boot
+            }),
+          }).promise)
+
+    void promise
       .then(async (res) => {
-        if (!res.ok) {
-          const body = await res.text().catch(() => "")
-          throw new Error(body || `Embed bootstrap failed with ${res.status}`)
-        }
-        return (await res.json()) as Boot
-      })
-      .then((data) => {
-        setState({ loading: false, data })
+        setState({ loading: false, data: res })
       })
       .catch((error) => {
         const message = error instanceof Error ? error.message : String(error)
@@ -105,7 +120,7 @@ export default function EmbedPage() {
     const data = state().data
     if (!data) return
     setReady(true)
-    nav(`/${encodeURIComponent(data.workspace)}/session/${data.session_id}`, { replace: true })
+    nav(`/${base64Encode(data.workspace)}/session/${data.session_id}`, { replace: true })
   })
 
   return (
