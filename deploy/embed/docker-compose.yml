@@ -12,7 +12,7 @@ services:
       - /opt/openzero/config/opencode.json:/app/opencode.json:ro
       - /opt/openzero/data:/data
     ports:
-      - "127.0.0.1:4096:4096"
+      - "4096:4096"
 
   web:
     build:
