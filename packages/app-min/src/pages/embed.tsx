@@ -4,20 +4,13 @@ import { createEffect, createSignal, onMount, Show } from "solid-js"
 import { useNavigate } from "@solidjs/router"
 import { usePlatform } from "@/context/platform"
 import { useServer } from "@/context/server"
+import { embedPost, type EmbedBoot, setEmbedBoot, EMBED_READY_KEY } from "@/utils/embed"
 
-type Boot = {
-  tenant_id: string
-  session_id: string
-  workspace: string
-  path: string
-}
-
-const EMBED_READY_STORE_KEY = "opencode.embed.ready"
 const EMBED_READY_EVENT = "opencode-embed-ready"
 let run:
   | {
       key: string
-      promise: Promise<Boot>
+      promise: Promise<EmbedBoot>
     }
   | undefined
 
@@ -25,11 +18,11 @@ function setReady(value: boolean) {
   if (typeof sessionStorage === "undefined") return
   try {
     if (value) {
-      sessionStorage.setItem(EMBED_READY_STORE_KEY, "1")
+      sessionStorage.setItem(EMBED_READY_KEY, "1")
       if (typeof window === "object") window.dispatchEvent(new CustomEvent(EMBED_READY_EVENT))
       return
     }
-    sessionStorage.removeItem(EMBED_READY_STORE_KEY)
+    sessionStorage.removeItem(EMBED_READY_KEY)
     if (typeof window === "object") window.dispatchEvent(new CustomEvent(EMBED_READY_EVENT))
   } catch {
     return
@@ -71,13 +64,14 @@ export default function EmbedPage() {
   const [state, setState] = createSignal<{
     loading: boolean
     error?: string
-    data?: Boot
+    data?: EmbedBoot
   }>({
     loading: true,
   })
 
   onMount(() => {
     setReady(false)
+    setEmbedBoot()
     const current = server.current
     const token = current?.http.token
     if (!current) {
@@ -105,7 +99,7 @@ export default function EmbedPage() {
                 const body = await res.text().catch(() => "")
                 throw new Error(body || `Embed bootstrap failed with ${res.status}`)
               }
-              return (await res.json()) as Boot
+              return (await res.json()) as EmbedBoot
             }),
           }).promise)
 
@@ -122,7 +116,9 @@ export default function EmbedPage() {
   createEffect(() => {
     const data = state().data
     if (!data) return
+    setEmbedBoot(data)
     setReady(true)
+    embedPost("openzero.ready", data)
     nav(`/${base64Encode(data.workspace)}/session/${data.session_id}`, { replace: true })
   })
 

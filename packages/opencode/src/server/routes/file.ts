@@ -1,5 +1,6 @@
 import { Hono } from "hono"
 import { describeRoute, validator, resolver } from "hono-openapi"
+import path from "path"
 import z from "zod"
 import { File } from "../../file"
 import { Ripgrep } from "../../file/ripgrep"
@@ -170,6 +171,38 @@ export const FileRoutes = lazy(() =>
         const path = c.req.valid("query").path
         const content = await File.read(path)
         return c.json(content)
+      },
+    )
+    .get(
+      "/file/download",
+      describeRoute({
+        summary: "Download file",
+        description: "Download a file from the current workspace as raw bytes.",
+        operationId: "file.download",
+        responses: {
+          200: {
+            description: "Binary file download",
+          },
+        },
+      }),
+      validator(
+        "query",
+        z.object({
+          path: z.string(),
+        }),
+      ),
+      async (c) => {
+        const file = c.req.valid("query").path
+        const full = path.join(Instance.directory, file)
+        if (!Instance.containsPath(full)) throw new Error("Access denied: path escapes project directory")
+        const body = Bun.file(full)
+        if (!(await body.exists())) return c.notFound()
+        return new Response(body, {
+          headers: {
+            "content-type": body.type || "application/octet-stream",
+            "content-disposition": `attachment; filename="${path.basename(full)}"`,
+          },
+        })
       },
     )
     .get(

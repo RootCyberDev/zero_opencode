@@ -37,6 +37,7 @@ import { useLanguage } from "@/context/language"
 import { useLayout } from "@/context/layout"
 import { usePrompt } from "@/context/prompt"
 import { useSDK } from "@/context/sdk"
+import { useServer } from "@/context/server"
 import { useSettings } from "@/context/settings"
 import { useSync } from "@/context/sync"
 import { useTerminal } from "@/context/terminal"
@@ -58,6 +59,7 @@ import { TerminalPanel } from "@/pages/session/terminal-panel"
 import { useSessionCommands } from "@/pages/session/use-session-commands"
 import { useSessionHashScroll } from "@/pages/session/use-session-hash-scroll"
 import { Identifier } from "@/utils/id"
+import { embed, embedBoot, embedListen, embedPost, type EmbedEvent } from "@/utils/embed"
 import { Persist, persisted } from "@/utils/persist"
 import { extractPromptFromParts } from "@/utils/prompt"
 import { same } from "@/utils/same"
@@ -325,6 +327,7 @@ export default function Page() {
   const dialog = useDialog()
   const language = useLanguage()
   const sdk = useSDK()
+  const server = useServer()
   const settings = useSettings()
   const prompt = usePrompt()
   const comments = useComments()
@@ -358,6 +361,165 @@ export default function Page() {
 
   const workspaceKey = createMemo(() => params.dir ?? "")
   const workspaceTabs = createMemo(() => layout.tabs(workspaceKey))
+  const boot = createMemo(() => embedBoot())
+  const diffsReady = createMemo(() => {
+    const id = params.id
+    if (!id) return false
+    return sync.data.session_diff[id] !== undefined
+  })
+  let seeded: string | undefined
+  let seen = new Set<string>()
+  let queue: Array<{ requestId?: string; auto?: boolean }> = []
+
+  const detail = () => {
+    const id = params.id
+    const info = boot()
+    if (!id || !info) return
+    return {
+      tenant_id: info.tenant_id,
+      session_id: id,
+      workspace: info.workspace,
+      path: `/${params.dir}/session/${id}`,
+      url: typeof location === "object" ? location.href : undefined,
+    }
+  }
+
+  const pdf = (file: string) => /\.pdf$/i.test(file)
+
+  const report = (cedula: string) =>
+    [
+      `Crear un PDF ejecutivo de la persona con numero de cedula: ${cedula}.`,
+      "El resumen ejecutivo creado por IA debe ser diferente para cada persona y redactado en lenguaje natural.",
+      "Debes generar un reporte global de esa persona que un humano pueda leer rapidamente.",
+      "El PDF debe tener colores, jerarquia visual clara y tono ejecutivo.",
+      "No entregues un PDF con datos crudos o tablas simples sin interpretacion.",
+      "El resultado debe ser un resumen detallado ejecutivo usando el LLM configurado en este chat.",
+      "Guarda el archivo final como PDF dentro del workspace.",
+      "El nombre del archivo debe ser unico y obligatorio con este patron: reporte-ejecutivo-<cedula>-<timestamp6>.pdf.",
+      `Usa exactamente la cedula ${cedula} y un sufijo temporal numerico de 6 digitos para evitar colisiones.`,
+      "No reutilices nombres anteriores ni sobrescribas un PDF existente.",
+      "Responde con el nombre exacto del archivo generado.",
+    ].join(" ")
+
+  const download = (file: string) => {
+    const token = server.current?.http.token
+    if (!token) return Promise.resolve()
+    return fetch(`${sdk.url}/file/download?path=${encodeURIComponent(file)}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Download failed with ${res.status}`)
+        return Promise.all([res.blob(), Promise.resolve(res.headers.get("content-type") ?? "application/pdf")])
+      })
+      .then(([blob, type]) => {
+        const url = URL.createObjectURL(new Blob([blob], { type }))
+        const link = document.createElement("a")
+        link.href = url
+        link.download = file.split("/").at(-1) ?? "reporte.pdf"
+        document.body.append(link)
+        link.click()
+        link.remove()
+        setTimeout(() => URL.revokeObjectURL(url), 1_000)
+      })
+  }
+
+  const post = (type: string, payload?: unknown) => {
+    if (!embed()) return
+    embedPost(type, payload)
+  }
+
+  const send = (event: Extract<EmbedEvent, { type: "openzero.prompt" | "openzero.action" }>) => {
+    const id = params.id
+    if (!id) {
+      post("openzero.error", {
+        requestId: event.requestId,
+        message: "No active session",
+      })
+      return Promise.resolve()
+    }
+
+    const text = event.type === "openzero.prompt" ? event.text : report(event.cedula)
+    if (event.type === "openzero.action") {
+      queue = [...queue, { requestId: event.requestId, auto: event.autoDownload !== false }]
+    }
+
+    return sdk.client.session
+      .promptAsync({
+        sessionID: id,
+        parts: [{ type: "text", text }],
+      })
+      .then(() => {
+        post("openzero.prompt.accepted", {
+          requestId: event.requestId,
+          session_id: id,
+          action: event.type === "openzero.action" ? event.action : undefined,
+        })
+      })
+      .catch((err) => {
+        post("openzero.error", {
+          requestId: event.requestId,
+          message: formatServerError(err),
+        })
+      })
+  }
+
+  onMount(() => {
+    if (!embed()) return
+    const off = embedListen((event) => {
+      if (event.type === "openzero.getSession") {
+        post("openzero.session", {
+          requestId: event.requestId,
+          ...detail(),
+        })
+        return
+      }
+      if (event.type === "openzero.prompt" || event.type === "openzero.action") {
+        void send(event)
+      }
+    })
+    onCleanup(off)
+  })
+
+  createEffect(() => {
+    if (!embed()) return
+    const data = detail()
+    if (!data) return
+    post("openzero.session", data)
+  })
+
+  createEffect(() => {
+    const id = params.id
+    if (!embed() || !id || !diffsReady()) return
+    if (seeded !== id) {
+      seeded = id
+      seen = new Set(diffs().filter((item) => pdf(item.file)).map((item) => `${id}:${item.file}`))
+      return
+    }
+
+    diffs()
+      .filter((item) => pdf(item.file))
+      .forEach((item) => {
+        const key = `${id}:${item.file}`
+        if (seen.has(key)) return
+        seen.add(key)
+        const next = queue.shift()
+        post("openzero.pdf.ready", {
+          requestId: next?.requestId,
+          session_id: id,
+          path: item.file,
+          name: item.file.split("/").at(-1),
+        })
+        if (!next?.auto) return
+        void download(item.file).catch((err) => {
+          post("openzero.error", {
+            requestId: next?.requestId,
+            message: formatServerError(err),
+          })
+        })
+      })
+  })
 
   createEffect(
     on(
