@@ -22,7 +22,35 @@ print(f"Pages: {len(reader.pages)}")
 # Extract text
 text = ""
 for page in reader.pages:
-    text += page.extract_text()
+text += page.extract_text()
+```
+
+## OpenCode Execution Rules
+
+When the user wants to generate a PDF in OpenCode:
+
+1. Prefer creating a real file in the workspace, not just describing the PDF.
+2. Prefer Python with `reportlab` for PDF creation when the environment supports it.
+3. Write the script to disk first, then execute it.
+4. Verify that the expected `.pdf` file exists before claiming success.
+5. If generation fails, inspect the error, fix the script, and retry.
+6. Use unique filenames and avoid overwriting an existing PDF unless the user explicitly asks.
+7. For visually polished output, prefer `SimpleDocTemplate`, `Paragraph`, `Spacer`, `Table`, `TableStyle`, `HRFlowable`, and custom `ParagraphStyle` values instead of low-level one-off `canvas.drawString` output.
+8. For modern executive layouts, use:
+   - clear title/subtitle hierarchy
+   - accent color
+   - section blocks
+   - whitespace and separators
+   - concise, scannable paragraphs
+9. Do not stop after writing the script. Execute it and confirm the file.
+
+Recommended OpenCode workflow:
+
+```text
+1. Write python script into workspace
+2. Execute python3 script.py
+3. Confirm target.pdf exists
+4. Return exact path or filename
 ```
 
 ## Python Libraries
@@ -138,6 +166,67 @@ c.line(100, height - 140, 400, height - 140)
 # Save
 c.save()
 ```
+
+#### Preferred Pattern For Modern PDFs
+Use Platypus with custom styles instead of building the whole document with raw `canvas.drawString` calls whenever the user wants a polished or executive-looking PDF.
+
+Recommended building blocks:
+
+- `SimpleDocTemplate`
+- `Paragraph`
+- `Spacer`
+- `Table`
+- `TableStyle`
+- `HRFlowable`
+- `ParagraphStyle`
+
+Preferred strategy:
+
+```python
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+
+doc = SimpleDocTemplate(
+    "output.pdf",
+    pagesize=letter,
+    leftMargin=0.65 * inch,
+    rightMargin=0.65 * inch,
+    topMargin=0.5 * inch,
+    bottomMargin=0.5 * inch,
+)
+
+styles = getSampleStyleSheet()
+title_style = ParagraphStyle(
+    "Title",
+    fontSize=24,
+    fontName="Helvetica-Bold",
+    textColor=colors.HexColor("#0B1F3A"),
+    alignment=TA_CENTER,
+)
+body_style = ParagraphStyle(
+    "Body",
+    fontSize=10,
+    leading=14,
+    alignment=TA_JUSTIFY,
+    textColor=colors.HexColor("#1E293B"),
+)
+
+story = [
+    Paragraph("Executive Title", title_style),
+    Spacer(1, 12),
+    HRFlowable(width="100%", thickness=1.2, color=colors.HexColor("#1A73C8")),
+    Spacer(1, 12),
+    Paragraph("Well-structured executive content goes here.", body_style),
+]
+
+doc.build(story)
+```
+
+This pattern is preferred over ad-hoc line-by-line text placement when document quality matters.
 
 #### Create PDF with Multiple Pages
 ```python
@@ -312,3 +401,7 @@ with open("encrypted.pdf", "wb") as output:
 - For JavaScript libraries (pdf-lib), see REFERENCE.md
 - If you need to fill out a PDF form, follow the instructions in FORMS.md
 - For troubleshooting guides, see REFERENCE.md
+
+## OpenCode-Specific Reminder
+
+If the user asks for a PDF document, do not just provide content. Generate the file, verify it exists, and return the exact filename or path.

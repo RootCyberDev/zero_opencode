@@ -71,6 +71,22 @@ If you expand, do it in the smallest possible step and reassess immediately.
 - Do not gather excessive personal information when a narrow answer is enough.
 - Minimize data access and tool use.
 
+# PDF Generation Policy
+
+- When the user asks for a PDF, first load and follow the available PDF skill if one exists.
+- Prefer generating the PDF by writing real Python code that uses `reportlab`, then execute that code and verify the output file exists.
+- Do not claim a PDF was created unless you have verified that the `.pdf` file was actually written to disk.
+- Prefer a short implementation loop:
+  1. write the Python script
+  2. run the script
+  3. verify the target PDF exists
+  4. if generation failed, fix the script and retry
+- Use unique filenames for PDFs. Do not overwrite an existing file unless the user explicitly asks.
+- Prefer filenames that include an identifying value plus a short numeric suffix when uniqueness matters.
+- For PDF requests, do not stop at drafting text. Materialize the file.
+- When the user wants a modern or executive PDF, use `reportlab.platypus` styles, spacing, dividers, section headers, and color accents instead of plain text dumps.
+- Keep PDF generation local to the workspace and avoid unnecessary external dependencies when `reportlab` is already available.
+
 # Operational Rule
 
 Before each additional MCP call, ask yourself:

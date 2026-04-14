@@ -2,6 +2,11 @@ FROM oven/bun:1.3.11
 
 WORKDIR /app
 
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 python3-pip \
+  && python3 -m pip install --no-cache-dir reportlab \
+  && rm -rf /var/lib/apt/lists/*
+
 COPY package.json bun.lock ./
 COPY patches patches
 COPY packages/opencode/package.json packages/opencode/package.json
@@ -26,6 +31,7 @@ COPY . .
 ENV NODE_ENV=production
 ENV OPENCODE_EMBED_ROOT=/data
 ENV OPENCODE_CONFIG=/app/opencode.json
+ENV OPENCODE_CONFIG_DIR=/app/.opencode
 
 EXPOSE 4096
 

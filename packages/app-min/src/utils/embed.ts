@@ -15,7 +15,7 @@ export type EmbedBoot = {
 
 export type EmbedEvent =
   | { source: typeof PARENT; type: "openzero.getSession"; requestId?: string }
-  | { source: typeof PARENT; type: "openzero.prompt"; requestId?: string; text: string }
+  | { source: typeof PARENT; type: "openzero.prompt"; requestId?: string; text: string; newSession?: boolean }
   | {
       source: typeof PARENT
       type: "openzero.action"
@@ -23,6 +23,7 @@ export type EmbedEvent =
       action: "person_report_pdf"
       cedula: string
       autoDownload?: boolean
+      newSession?: boolean
     }
 
 export function embedToken() {

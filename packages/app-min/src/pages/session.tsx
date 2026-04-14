@@ -28,7 +28,7 @@ import { previewSelectedLines } from "@opencode-ai/ui/pierre/selection-bridge"
 import { Button } from "@opencode-ai/ui/button"
 import { showToast } from "@opencode-ai/ui/toast"
 import { checksum } from "@opencode-ai/util/encode"
-import { useSearchParams } from "@solidjs/router"
+import { useNavigate, useSearchParams } from "@solidjs/router"
 import { NewSessionView, SessionHeader } from "@/components/session"
 import { useComments } from "@/context/comments"
 import { getSessionPrefetch, SESSION_PREFETCH_TTL } from "@/context/global-sync/session-prefetch"
@@ -60,6 +60,7 @@ import { useSessionCommands } from "@/pages/session/use-session-commands"
 import { useSessionHashScroll } from "@/pages/session/use-session-hash-scroll"
 import { Identifier } from "@/utils/id"
 import { embed, embedBoot, embedListen, embedPost, type EmbedEvent } from "@/utils/embed"
+import { base64Encode } from "@opencode-ai/util/encode"
 import { Persist, persisted } from "@/utils/persist"
 import { extractPromptFromParts } from "@/utils/prompt"
 import { same } from "@/utils/same"
@@ -332,6 +333,7 @@ export default function Page() {
   const prompt = usePrompt()
   const comments = useComments()
   const terminal = useTerminal()
+  const nav = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams<{ prompt?: string }>()
   const { params, sessionKey, tabs, view } = useSessionLayout()
 
@@ -431,26 +433,37 @@ export default function Page() {
   }
 
   const send = (event: Extract<EmbedEvent, { type: "openzero.prompt" | "openzero.action" }>) => {
-    const id = params.id
-    if (!id) {
-      post("openzero.error", {
-        requestId: event.requestId,
-        message: "No active session",
-      })
-      return Promise.resolve()
-    }
-
     const text = event.type === "openzero.prompt" ? event.text : report(event.cedula)
+    const next =
+      event.newSession || !params.id
+        ? sdk.client.session
+            .create({
+              title: event.type === "openzero.action" ? `PDF ${event.cedula}` : "Nueva sesion",
+            })
+            .then((res) => {
+              const id = res.data?.id
+              const bootInfo = boot()
+              if (!id || !bootInfo) throw new Error("Failed to create session")
+              nav(`/${base64Encode(bootInfo.workspace)}/session/${id}`)
+              return id
+            })
+        : Promise.resolve(params.id)
+
     if (event.type === "openzero.action") {
       queue = [...queue, { requestId: event.requestId, auto: event.autoDownload !== false }]
     }
 
-    return sdk.client.session
-      .promptAsync({
-        sessionID: id,
-        parts: [{ type: "text", text }],
+    return next
+      .then((id) => {
+        if (!id) throw new Error("No active session")
+        return sdk.client.session
+          .promptAsync({
+            sessionID: id,
+            parts: [{ type: "text", text }],
+          })
+          .then(() => id)
       })
-      .then(() => {
+      .then((id) => {
         post("openzero.prompt.accepted", {
           requestId: event.requestId,
           session_id: id,

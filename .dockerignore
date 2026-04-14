@@ -2,6 +2,14 @@
 .gitignore
 .turbo
 .opencode
+!.opencode/
+!.opencode/package.json
+!.opencode/opencode.jsonc
+!.opencode/env.d.ts
+!.opencode/tool/
+!.opencode/tool/**
+!.opencode/skills/
+!.opencode/skills/**
 .sst
 .idea
 .vscode
