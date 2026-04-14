@@ -212,6 +212,8 @@ export function BasicTool(props: BasicToolProps) {
           <Collapsible.Trigger
             as="a"
             href={href()}
+            target="_blank"
+            rel="noopener noreferrer"
             data-hide-details={props.hideDetails ? "true" : undefined}
             onClick={props.onTriggerClick}
           >

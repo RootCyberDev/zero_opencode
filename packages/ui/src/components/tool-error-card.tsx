@@ -100,6 +100,8 @@ export function ToolErrorCard(props: ToolErrorCardProps) {
                         data-slot="basic-tool-tool-subtitle"
                         class="clickable subagent-link"
                         href={split.href!}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {subtitle()}
