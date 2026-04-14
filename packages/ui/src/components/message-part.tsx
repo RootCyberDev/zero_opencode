@@ -1045,6 +1045,15 @@ export function UserMessageDisplay(props: { message: UserMessage; parts: PartTyp
     dialog.show(() => <ImagePreview src={url} alt={alt} />)
   }
 
+  const saveFile = (url: string, name: string) => {
+    const link = document.createElement("a")
+    link.href = url
+    link.download = name
+    link.target = "_blank"
+    link.rel = "noopener noreferrer"
+    link.click()
+  }
+
   const handleCopy = async () => {
     const content = text()
     if (!content) return
@@ -1080,10 +1089,11 @@ export function UserMessageDisplay(props: { message: UserMessage; parts: PartTyp
                 <div
                   data-slot="user-message-attachment"
                   data-type={type}
-                  data-clickable={type === "image" ? "true" : undefined}
+                  data-clickable="true"
                   title={type === "file" ? name : undefined}
                   onClick={() => {
                     if (type === "image") openImagePreview(file.url, name)
+                    if (type === "file") saveFile(file.url, name)
                   }}
                 >
                   <Show
@@ -2322,6 +2332,68 @@ ToolRegistry.register({
     )
   },
 })
+
+const pdfEvent = "opencode:file-action"
+
+function registerPdf(name: string) {
+  ToolRegistry.register({
+    name,
+    render(props) {
+      const i18n = useI18n()
+      const pending = createMemo(() => props.status === "pending" || props.status === "running")
+      const file = createMemo(() => {
+        const value = props.metadata.path
+        if (typeof value === "string" && value) return value
+        return ""
+      })
+      const title = createMemo(() => {
+        const value = props.input.title
+        if (typeof value === "string" && value) return value
+        return i18n.t("ui.basicTool.called", { tool: "pdf_create" })
+      })
+      const filename = createMemo(() => getFilename(file() || (typeof props.input.filename === "string" ? props.input.filename : "")))
+      const click = (event?: MouseEvent) => {
+        event?.preventDefault()
+        event?.stopPropagation()
+        const path = file()
+        if (!path) return
+        window.dispatchEvent(new CustomEvent(pdfEvent, { detail: { action: "download", path } }))
+      }
+
+      return (
+        <BasicTool
+          icon="archive"
+          status={props.status}
+          hideDetails
+          clickable={!pending() && !!file()}
+          onTriggerClick={click}
+          trigger={
+            <div data-component="task-tool-card">
+              <div data-slot="basic-tool-tool-info-structured">
+                <div data-slot="basic-tool-tool-info-main">
+                  <span data-component="task-tool-title" style={{ color: "var(--text-strong)" }}>
+                    <TextShimmer text={pending() ? "Generando PDF" : title()} active={pending()} />
+                  </span>
+                  <Show when={!pending() && filename()}>
+                    <span data-slot="basic-tool-tool-subtitle">{filename()}</span>
+                  </Show>
+                </div>
+              </div>
+              <Show when={!pending() && file()}>
+                <div data-component="task-tool-action">
+                  <Icon name="download" size="small" />
+                </div>
+              </Show>
+            </div>
+          }
+        />
+      )
+    },
+  })
+}
+
+registerPdf("pdf_create")
+registerPdf("pdf-create")
 
 ToolRegistry.register({
   name: "skill",

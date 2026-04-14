@@ -41,22 +41,18 @@ import { useSDK } from "@/context/sdk"
 import { useServer } from "@/context/server"
 import { useSettings } from "@/context/settings"
 import { useSync } from "@/context/sync"
-import { useTerminal } from "@/context/terminal"
 import { type FollowupDraft, sendFollowupDraft } from "@/components/prompt-input/submit"
 import { createSessionComposerState, SessionComposerRegion } from "@/pages/session/composer"
 import {
   createOpenReviewFile,
   createSessionTabs,
   createSizing,
-  focusTerminalById,
-  shouldFocusTerminalOnKeyDown,
 } from "@/pages/session/helpers"
 import { MessageTimeline } from "@/pages/session/message-timeline"
 import { type DiffStyle, SessionReviewTab, type SessionReviewTabProps } from "@/pages/session/review-tab"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { syncSessionModel } from "@/pages/session/session-model-helpers"
 import { SessionSidePanel } from "@/pages/session/session-side-panel"
-import { TerminalPanel } from "@/pages/session/terminal-panel"
 import { useSessionCommands } from "@/pages/session/use-session-commands"
 import { useSessionHashScroll } from "@/pages/session/use-session-hash-scroll"
 import { Identifier } from "@/utils/id"
@@ -68,6 +64,7 @@ import { same } from "@/utils/same"
 import { formatServerError } from "@/utils/server-errors"
 
 const emptyUserMessages: UserMessage[] = []
+const fileEvent = "opencode:file-action"
 type FollowupItem = FollowupDraft & { id: string }
 type FollowupEdit = Pick<FollowupItem, "id" | "prompt" | "context">
 const emptyFollowups: FollowupItem[] = []
@@ -333,7 +330,6 @@ export default function Page() {
   const settings = useSettings()
   const prompt = usePrompt()
   const comments = useComments()
-  const terminal = useTerminal()
   const nav = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams<{ prompt?: string }>()
   const { params, sessionKey, tabs, view } = useSessionLayout()
@@ -1215,12 +1211,6 @@ export default function Page() {
       return
     }
 
-    // Prefer the open terminal over the composer when it can take focus
-    if (view().terminal.opened()) {
-      const id = terminal.active()
-      if (id && shouldFocusTerminalOnKeyDown(event) && focusTerminalById(id)) return
-    }
-
     // Only treat explicit scroll keys as potential "user scroll" gestures.
     if (event.key === "PageUp" || event.key === "PageDown" || event.key === "Home" || event.key === "End") {
       markScrollGesture()
@@ -1663,6 +1653,13 @@ export default function Page() {
     </div>
   )
 
+  const treeKey = createMemo(() =>
+    reviewDiffs()
+      .map((item) => `${item.status}:${item.file}`)
+      .sort()
+      .join("\n"),
+  )
+
   const autoScroll = createAutoScroll({
     working: () => true,
     overflowAnchor: "dynamic",
@@ -1723,6 +1720,18 @@ export default function Page() {
   )
 
   let fill = () => {}
+
+  createEffect(
+    on(
+      () => [sdk.directory, params.id, mobileChanges(), layout.fileTree.opened(), fileTreeTab(), treeKey()] as const,
+      ([dir, id, mobile, opened, tab]) => {
+        if (!id) return
+        if (!mobile && (!opened || tab !== "all")) return
+        void file.tree.refresh("")
+      },
+      { defer: true },
+    ),
+  )
 
   const setScrollRef = (el: HTMLDivElement | undefined) => {
     scroller = el
@@ -2120,6 +2129,18 @@ export default function Page() {
 
   onMount(() => {
     makeEventListener(document, "keydown", handleKeyDown)
+    makeEventListener(window, fileEvent, (event) => {
+      const detail = (event as CustomEvent<{ action?: string; path?: string }>).detail
+      if (detail?.action !== "download") return
+      if (!detail.path) return
+      void download(detail.path).catch((err) => {
+        showToast({
+          variant: "error",
+          title: language.t("toast.file.loadFailed.title"),
+          description: formatServerError(err),
+        })
+      })
+    })
   })
 
   onCleanup(() => {
@@ -2295,8 +2316,6 @@ export default function Page() {
           size={size}
         />
       </div>
-
-      <TerminalPanel />
     </div>
   )
 }

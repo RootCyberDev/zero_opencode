@@ -11,6 +11,13 @@ const section = tool.schema.object({
   body: tool.schema.string().describe("Section content in plain text or markdown-like text"),
 })
 
+function mark(dir: string) {
+  const parts = dir.split(path.sep).filter(Boolean)
+  const idx = parts.lastIndexOf("data")
+  if (idx >= 0 && parts[idx + 1]) return parts[idx + 1]
+  return parts.at(-2) || parts.at(-1) || "account"
+}
+
 function slug(value: string) {
   const base = value
     .normalize("NFKD")
@@ -65,6 +72,7 @@ Returns the saved PDF path inside the workspace.`,
         summary: args.summary,
         accent: args.accent,
         sections: args.sections,
+        watermark: mark(ctx.directory),
         output: out,
       }),
     )

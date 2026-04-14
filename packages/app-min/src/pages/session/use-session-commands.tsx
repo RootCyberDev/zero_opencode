@@ -10,7 +10,6 @@ import { usePermission } from "@/context/permission"
 import { usePrompt } from "@/context/prompt"
 import { useSDK } from "@/context/sdk"
 import { useSync } from "@/context/sync"
-import { useTerminal } from "@/context/terminal"
 import { showToast } from "@opencode-ai/ui/toast"
 import { findLast } from "@opencode-ai/util/array"
 import { createSessionTabs } from "@/pages/session/helpers"
@@ -42,7 +41,6 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
   const prompt = usePrompt()
   const sdk = useSDK()
   const sync = useSync()
-  const terminal = useTerminal()
   const layout = useLayout()
   const navigate = useNavigate()
   const { params, tabs, view } = useSessionLayout()
@@ -113,7 +111,6 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
   const fileCommand = withCategory(language.t("command.category.file"))
   const contextCommand = withCategory(language.t("command.category.context"))
   const viewCommand = withCategory(language.t("command.category.view"))
-  const terminalCommand = withCategory(language.t("command.category.terminal"))
   const modelCommand = withCategory(language.t("command.category.model"))
   const mcpCommand = withCategory(language.t("command.category.mcp"))
   const agentCommand = withCategory(language.t("command.category.agent"))
@@ -241,11 +238,6 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
     }
 
     addSelectionToContext(path, selectionFromLines(range))
-  }
-
-  const openTerminal = () => {
-    if (terminal.all().length > 0) terminal.new()
-    view().terminal.open()
   }
 
   const chooseModel = () => {
@@ -445,13 +437,6 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
 
   const viewCmds = () => [
     viewCommand({
-      id: "terminal.toggle",
-      title: language.t("command.terminal.toggle"),
-      keybind: "ctrl+`",
-      slash: "terminal",
-      onSelect: () => view().terminal.toggle(),
-    }),
-    viewCommand({
       id: "review.toggle",
       title: language.t("command.review.toggle"),
       keybind: "mod+shift+r",
@@ -468,16 +453,6 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
       title: language.t("command.input.focus"),
       keybind: "ctrl+l",
       onSelect: focusInput,
-    }),
-  ]
-
-  const terminalCmds = () => [
-    terminalCommand({
-      id: "terminal.new",
-      title: language.t("command.terminal.new"),
-      description: language.t("command.terminal.new.description"),
-      keybind: "ctrl+alt+t",
-      onSelect: openTerminal,
     }),
   ]
 
@@ -565,7 +540,6 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
     ...fileCmds(),
     ...contextCmds(),
     ...viewCmds(),
-    ...terminalCmds(),
     ...messageCmds(),
     ...modelCmds(),
     ...mcpCmds(),
