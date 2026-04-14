@@ -30,6 +30,7 @@ import { showToast } from "@opencode-ai/ui/toast"
 import { checksum } from "@opencode-ai/util/encode"
 import { useNavigate, useSearchParams } from "@solidjs/router"
 import { NewSessionView, SessionHeader } from "@/components/session"
+import FileTree from "@/components/file-tree"
 import { useComments } from "@/context/comments"
 import { getSessionPrefetch, SESSION_PREFETCH_TTL } from "@/context/global-sync/session-prefetch"
 import { useGlobalSync } from "@/context/global-sync"
@@ -1233,6 +1234,11 @@ export default function Page() {
   }
 
   const mobileChanges = createMemo(() => !isDesktop() && store.mobileTab === "changes")
+  const nofiles = createMemo(() => {
+    const state = file.tree.state("")
+    if (!state?.loaded) return false
+    return file.tree.children("").length === 0
+  })
   const wantsReview = createMemo(() =>
     isDesktop()
       ? desktopFileTreeOpen() || (desktopReviewOpen() && activeTab() === "review")
@@ -1566,7 +1572,14 @@ export default function Page() {
   let treeDir: string | undefined
   createEffect(() => {
     const dir = sdk.directory
-    if (!isDesktop()) return
+    if (!isDesktop() && !mobileChanges()) return
+    if (!isDesktop() && sync.status === "loading") return
+    if (!isDesktop()) {
+      const refresh = treeDir !== dir
+      treeDir = dir
+      void (refresh ? file.tree.refresh("") : file.tree.list(""))
+      return
+    }
     if (!layout.fileTree.opened()) return
     if (sync.status === "loading") return
 
@@ -1588,6 +1601,66 @@ export default function Page() {
       },
       { defer: true },
     ),
+  )
+
+  const openPath = (value: string) => {
+    if (/\.pdf$/i.test(value)) {
+      void download(value).catch((err) => {
+        showToast({
+          variant: "error",
+          title: language.t("toast.file.loadFailed.title"),
+          description: formatServerError(err),
+        })
+      })
+      return
+    }
+    const tab = file.tab(value)
+    tabs().open(tab)
+    tabs().setActive(tab)
+    void file.load(value)
+  }
+
+  const mobileDiffFiles = createMemo(() => reviewDiffs().map((item) => item.file))
+  const mobileKinds = createMemo(() => {
+    const merge = (a: "add" | "del" | "mix" | undefined, b: "add" | "del" | "mix") => {
+      if (!a) return b
+      if (a === b) return a
+      return "mix" as const
+    }
+
+    const normalize = (value: string) => value.replaceAll("\\\\", "/").replace(/\/+$/, "")
+    const out = new Map<string, "add" | "del" | "mix">()
+
+    reviewDiffs().forEach((item) => {
+      const file = normalize(item.file)
+      const kind = item.status === "added" ? "add" : item.status === "deleted" ? "del" : "mix"
+      out.set(file, kind)
+      const parts = file.split("/")
+      parts.slice(0, -1).forEach((_, idx) => {
+        const dir = parts.slice(0, idx + 1).join("/")
+        if (!dir) return
+        out.set(dir, merge(out.get(dir), kind))
+      })
+    })
+
+    return out
+  })
+
+  const mobileFiles = () => (
+    <div class="relative h-full overflow-hidden bg-background-stronger px-3 py-0">
+      <Switch>
+        <Match when={nofiles()}>{empty(language.t("session.files.empty"))}</Match>
+        <Match when={true}>
+          <FileTree
+            path=""
+            class="pt-3"
+            modified={mobileDiffFiles()}
+            kinds={mobileKinds()}
+            onFileClick={(node) => openPath(node.path)}
+          />
+        </Match>
+      </Switch>
+    </div>
   )
 
   const autoScroll = createAutoScroll({
@@ -2082,9 +2155,7 @@ export default function Page() {
                 classes={{ button: "w-full" }}
                 onClick={() => setStore("mobileTab", "changes")}
               >
-                {hasReview()
-                  ? language.t("session.review.filesChanged", { count: reviewCount() })
-                  : language.t("session.review.change.other")}
+                {language.t("session.files.all")}
               </Tabs.Trigger>
             </Tabs.List>
           </Tabs>
@@ -2107,16 +2178,7 @@ export default function Page() {
                 <Show when={messagesReady()}>
                   <MessageTimeline
                     mobileChanges={mobileChanges()}
-                    mobileFallback={reviewContent({
-                      diffStyle: "unified",
-                      classes: {
-                        root: "pb-8",
-                        header: "px-4",
-                        container: "px-4",
-                      },
-                      loadingClass: "px-4 py-4 text-text-weak",
-                      emptyClass: "h-full pb-64 -mt-4 flex flex-col items-center justify-center text-center gap-6",
-                    })}
+                    mobileFallback={mobileFiles()}
                     actions={actions}
                     scroll={ui.scroll}
                     onResumeScroll={resumeScroll}
