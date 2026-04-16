@@ -32,6 +32,8 @@ The tool will:
 - add page numbering through the base stylesheet
 - return a real PDF file in the workspace
 
+**Critical usage rule:** Pass the complete HTML document as the `html` parameter value — a string inline in the tool call. Do NOT use the `Write` tool, `Edit` tool, or any file operation to create an intermediate `.html` file before calling `pdf`. There is no intermediate file step. The workflow is: compose HTML → call `pdf` tool with that HTML as parameter → done.
+
 ## Design Rules
 
 The HTML must be designed like a print document, not a responsive web page.

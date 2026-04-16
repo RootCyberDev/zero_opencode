@@ -52,23 +52,20 @@ function stripScripts(value: string) {
 }
 
 export default tool({
-  description: `Render a premium A4 PDF from handcrafted HTML and optional CSS.
+  description: `Render a premium A4 PDF from HTML and optional CSS passed directly as parameters.
 
-Use this tool whenever the user wants a visually polished PDF.
+IMPORTANT: Pass the complete HTML string as the \`html\` parameter. Do NOT write an HTML file to disk first. The HTML lives only as a parameter value — this tool handles rendering internally.
 
-Workflow:
-- write complete print-oriented HTML
-- optionally add CSS overrides
-- the tool renders the document to a real A4 PDF
+Use this tool as the single and final step to produce the PDF. Do not use Write, Edit, or any file tool to create intermediate HTML files.
 
 Requirements:
+- compose the full HTML in-memory and pass it here as the \`html\` parameter
 - design for A4 print, not browser viewport behavior
-- prefer semantic HTML, elegant hierarchy, whitespace, and modern table design
-- use the PDF skill HTML starter as the baseline when helpful
-- keep assets local or inline; remote URLs and script tags are blocked
-- if you need watermark text, embed ${"${ACCOUNT_ID}"} or ${"${WATERMARK}"} in HTML/CSS
+- use the PDF skill HTML starter as the structural baseline
+- remote URLs, CDN links, and script tags are auto-stripped — use only local or inline assets
+- if you need a watermark, embed ${"${ACCOUNT_ID}"} or ${"${WATERMARK}"} anywhere in the HTML or CSS
 
-The saved PDF path inside the workspace is the contract.`,
+The filename returned by this tool is the only valid PDF path. Do not announce a filename before calling this tool.`,
   args: {
     filename: tool.schema.string().describe("Desired output filename. It will be sanitized and forced to end in .pdf"),
     html: tool.schema.string().describe("Complete HTML markup for the PDF document"),

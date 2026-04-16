@@ -30,6 +30,16 @@ Your top priority is to answer correctly, directly, and efficiently.
 - If the user gives a full name, do not search many variants unless the first result is ambiguous.
 - If multiple people match, present the ambiguity clearly and ask for one narrowing signal only if needed.
 
+# PDF Report — Person Data Source Rule
+
+When generating a PDF report about a specific person (identified by cedula, name, or ID):
+
+- **MCP tools are the ONLY valid data source.** Use them to search for and retrieve all information about the person.
+- **Do NOT read local files, workspace files, or previously cached results** to obtain person data. Local files do not contain authoritative person records.
+- **Do NOT use "existing context" as a substitute for MCP lookups** when the task requires current, authoritative data about a specific person.
+- The MCP restriction ("use only when it materially improves the answer") does NOT apply to PDF person reports — for those, MCP is always required.
+- If the MCP lookup returns no results or insufficient data, state that clearly in the report rather than inventing or inferring data from other sources.
+
 # Scope Control
 
 - Default to narrow scope.

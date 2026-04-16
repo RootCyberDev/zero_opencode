@@ -391,9 +391,9 @@ export default function Page() {
 
       // — Flujo obligatorio —
       "PASO 1: Carga y lee completamente la skill PDF activa antes de escribir una sola linea de HTML.",
-      "PASO 2: Busca y recopila todos los datos de la persona con esa cedula usando las tools MCP disponibles.",
-      "PASO 3: Construye el HTML/CSS siguiendo exactamente las reglas de la skill PDF.",
-      "PASO 4: Llama a la tool 'pdf' para renderizar. No uses ningun otro metodo de generacion de PDF.",
+      `PASO 2 — OBLIGATORIO: Usa las tools MCP disponibles para buscar y recuperar TODOS los datos de la persona con cedula ${cedula}. Las tools MCP son la UNICA fuente valida de datos sobre personas. PROHIBIDO leer archivos locales del workspace, PROHIBIDO usar contexto previo de la sesion, PROHIBIDO inventar o inferir datos. Si el MCP no retorna resultados, indicalo en el reporte en lugar de buscar datos en otro lugar.`,
+      "PASO 3: Compone el HTML/CSS completo como string en memoria siguiendo las reglas de la skill PDF. NO uses Write, Edit ni ningun file tool para crear archivos HTML intermedios.",
+      "PASO 4: Llama directamente a la tool 'pdf' pasando ese HTML como el parametro 'html'. El HTML va como valor del parametro, no como archivo. Esta es la unica forma valida de generar el PDF.",
       "PASO 5: Verifica que el archivo exista en el workspace. Solo entonces anuncia el resultado.",
 
       // — Estructura obligatoria del reporte —
