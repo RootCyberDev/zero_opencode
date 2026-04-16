@@ -34,13 +34,25 @@ body {
   background: white !important;
 }
 
+/* ── Width control ─────────────────────────────────────────────
+   Hard-clamp everything to the A4 content area.
+   Nothing may overflow to the right.                          */
 .doc {
   width: var(--page-width);
+  max-width: var(--page-width);
 }
 
 * {
   box-sizing: border-box;
   overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Inline elements must not inherit max-width: 100% — it breaks flex/inline layout */
+span, a, strong, em, b, i, code, small, sup, sub,
+.icon, .icon-font, .chip, .badge, .metric-pill, .action-tag {
+  max-width: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -49,6 +61,7 @@ h1, h2, h3, h4, h5, h6 {
   page-break-after: avoid;
   orphans: 3;
   widows: 3;
+  max-width: none;
 }
 
 p, li, blockquote {
@@ -56,44 +69,75 @@ p, li, blockquote {
   widows: 3;
 }
 
-section,
+/* ── Break rules ───────────────────────────────────────────────
+   Do NOT apply break-inside to <section> — sections can be
+   arbitrarily long. WeasyPrint will cut them mid-content if
+   they don't fit, creating worse breaks than natural flow.
+   Only apply to small, bounded components.                   */
 .hero,
 .summary,
 .band,
-.grid,
 .card,
 .chip-row,
 .badge-row,
 .fact-grid,
 .metric-grid,
 .callout,
-.timeline,
 .timeline-row,
 .table-wrap,
-.footer-note {
+.footer-note,
+.chart-wrap {
   break-inside: avoid-page;
   page-break-inside: avoid;
 }
 
+/* Grids may contain many items — allow natural breaks between rows */
+.grid {
+  break-inside: auto;
+}
+
+/* ── Tables ────────────────────────────────────────────────────
+   Tables always occupy the full content-area width.
+   They must NEVER be placed inside .grid or multi-column containers. */
 table {
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
   border-collapse: collapse;
-  page-break-inside: avoid;
-  break-inside: avoid-page;
+  table-layout: auto;
+  page-break-inside: auto;
+  break-inside: auto;
 }
 
 thead {
   display: table-header-group;
 }
 
-tr, td, th {
+tr {
+  break-inside: avoid-page;
   page-break-inside: avoid;
+}
+
+td, th {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ── Media and charts ──────────────────────────────────────────*/
+img, svg {
+  max-width: 100%;
+  height: auto;
   break-inside: avoid-page;
 }
 
-img, svg {
-  max-width: 100%;
-  break-inside: avoid-page;
+.chart-wrap svg {
+  width: 100% !important;
+  height: auto !important;
+}
+
+pre, code {
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .page-break {

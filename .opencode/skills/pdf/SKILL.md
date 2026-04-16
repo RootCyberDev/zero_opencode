@@ -179,6 +179,8 @@ The document may use any of these visual devices when they improve clarity:
 - Header rows should feel distinct but not heavy.
 - Long values must wrap cleanly.
 - Avoid spreadsheet aesthetics.
+- **NEVER place a `<table>` inside a `.grid`, `.fact-grid`, `.metric-grid`, or any multi-column container.** Tables must live inside a `.table-wrap` which is a full-width block. Placing a table in a 2-column grid compresses it to half width — this is always wrong.
+- Tables always use the full content-area width (178mm). Do not add `width` constraints on tables or `.table-wrap`.
 
 ### Facts, Cards, and Grids
 
@@ -288,9 +290,43 @@ When the data includes numerical, time-based, or comparative values, render an i
 - Charts must be inline SVG — no external images, no canvas, no script-based charting libraries.
 - Always include: axis labels, value labels on bars or points, a baseline, and a title or caption.
 - Chart colors must match the document palette — use `fill` values consistent with `--accent`, `--primary`, or their tints.
-- Keep SVG charts at natural proportions: bar charts ~400×160 viewBox, line charts ~400×130, donuts ~200×200.
+- Keep SVG charts at natural proportions: bar charts ~420×170 viewBox, line charts ~420×140, donuts ~200×200.
 - Always set `style="width:100%;height:auto;"` on the SVG so it scales to the content area.
 - Wrap each chart in a `<div class="chart-wrap">` for spacing.
+
+### Chart math — MANDATORY proportional calculation
+
+**The number of bars in the SVG MUST equal exactly the number of data points. Never more, never less.**
+
+Before writing any SVG, compute the bar geometry from the real data:
+
+```
+GIVEN: values = [v1, v2, v3, ...vN]   ← your actual data
+CONSTANTS:
+  maxBarH  = 110   ← tallest bar height in viewBox units
+  baseline = 145   ← y coordinate of the x-axis line
+  maxValue = max(values)
+
+FOR EACH value[i]:
+  barHeight[i] = round( (value[i] / maxValue) * maxBarH )
+  barY[i]      = baseline - barHeight[i]
+  labelY[i]    = barY[i] - 4            ← value label above bar
+  slotWidth    = floor(360 / N)         ← distribute bars evenly
+  barWidth     = round(slotWidth * 0.6) ← bar is 60% of slot
+  barX[i]      = 30 + i * slotWidth + round(slotWidth * 0.2)
+  labelX[i]    = barX[i] + round(barWidth / 2)  ← centered
+```
+
+Example — values = [45, 120, 80, 200], N=4, maxValue=200:
+
+| i | value | barHeight | barY | barX | labelX |
+|---|-------|-----------|------|------|--------|
+| 0 | 45    | 25        | 120  | 48   | 75     |
+| 1 | 120   | 66        | 79   | 138  | 165    |
+| 2 | 80    | 44        | 101  | 228  | 255    |
+| 3 | 200   | 110       | 35   | 318  | 345    |
+
+**Never copy the example SVG code verbatim** — always recompute every `x`, `y`, `height`, and label from real data using the formula above.
 
 ### Bar chart example
 
@@ -546,6 +582,11 @@ Do not:
 - generate chips, badges, metric pills, or callout elements without paired SVG icons
 - omit the mandatory page-1 heading sequence: eyebrow → h1 → subtitle → summary → chip-row
 - produce a simpler document than the STARTER — the starter is the minimum richness level, not a ceiling
+- place a `<table>` inside a `.grid`, `.fact-grid`, `.metric-grid`, or any multi-column container — tables are always full-width standalone blocks inside `.table-wrap`
+- copy chart SVG examples verbatim — always recompute every bar `x`, `y`, `height` and every label from real data using the proportional formula
+- render more bars than data points, or fewer bars than data points — bar count must equal data point count exactly
+- apply `break-inside: avoid-page` to `<section>` elements — large sections will be cut mid-content by WeasyPrint regardless; only apply this to small bounded components (cards, chips, callouts, table-wrap)
+- use fixed pixel or mm widths on tables or `.table-wrap` — tables always fill 100% of the content area
 
 ## Completion Rule
 
