@@ -30,10 +30,21 @@ function file(value: string) {
   return `${stem}.pdf`
 }
 
-function guard(value: string) {
-  const lower = value.toLowerCase()
-  if (/https?:\/\//.test(lower)) throw new Error("pdf blocks remote asset URLs")
-  if (/file:\/\//.test(lower)) throw new Error("pdf blocks file URLs")
+function stripRemoteAssets(value: string) {
+  return (
+    value
+      // Remove CSS @import of remote URLs (Google Fonts, CDN stylesheets, etc.)
+      .replace(/@import\s+url\s*\(\s*['"]?https?:\/\/[^'")\s]+['"]?\s*\)\s*;?/gi, "/* remote @import removed */")
+      .replace(/@import\s+['"]https?:\/\/[^'"]+['"]\s*;?/gi, "/* remote @import removed */")
+      // Remove <link> tags pointing to remote stylesheets or fonts
+      .replace(/<link\b[^>]*\bhref\s*=\s*['"]https?:\/\/[^'"]+['"][^>]*\/?>/gi, "<!-- remote link removed -->")
+      // Replace remote url() references in CSS properties with empty (keeps property, drops remote src)
+      .replace(/url\s*\(\s*['"]?https?:\/\/[^'")\s]+['"]?\s*\)/gi, "url('')")
+      // Remove src/href attributes pointing to remote URLs on img, source, etc.
+      .replace(/(<(?:img|source|image)\b[^>]*)\bsrc\s*=\s*['"]https?:\/\/[^'"]+['"]/gi, "$1 src=\"\"")
+      // Remove file:// references
+      .replace(/url\s*\(\s*['"]?file:\/\/[^'")\s]+['"]?\s*\)/gi, "url('')")
+  )
 }
 
 function stripScripts(value: string) {
@@ -64,9 +75,8 @@ The saved PDF path inside the workspace is the contract.`,
     css: tool.schema.string().optional().describe("Optional extra CSS layered on top of the base print CSS"),
   },
   async execute(args, ctx) {
-    const html = stripScripts(args.html)
-    guard(html)
-    if (args.css) guard(args.css)
+    const html = stripRemoteAssets(stripScripts(args.html))
+    const css = args.css ? stripRemoteAssets(args.css) : undefined
     const name = file(args.filename)
     const out = path.join(ctx.directory, name)
     const input = path.join("/tmp", `opencode-pdf-${Date.now()}-${Math.random().toString(36).slice(2)}.json`)
@@ -79,7 +89,7 @@ The saved PDF path inside the workspace is the contract.`,
         output: out,
         base: ctx.directory,
         html: html.replaceAll("${ACCOUNT_ID}", watermark).replaceAll("${WATERMARK}", watermark),
-        css: args.css?.replaceAll("${ACCOUNT_ID}", watermark).replaceAll("${WATERMARK}", watermark),
+        css: css?.replaceAll("${ACCOUNT_ID}", watermark).replaceAll("${WATERMARK}", watermark),
       }),
     )
 
