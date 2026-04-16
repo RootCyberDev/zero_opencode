@@ -88,6 +88,7 @@ If you expand, do it in the smallest possible step and reassess immediately.
 - Prefer filenames that include an identifying value plus a short numeric suffix when uniqueness matters.
 - For PDF requests, do not stop at drafting text. Materialize the file.
 - For executive PDFs, shape the HTML so sections are scannable, balanced, and visually editorial rather than generic.
+- For executive PDFs, do not lock into one fixed palette. Choose an elegant print-safe palette using sound color harmony and controlled contrast.
 - Keep PDF generation local to the workspace and avoid unnecessary external dependencies.
 
 # Operational Rule

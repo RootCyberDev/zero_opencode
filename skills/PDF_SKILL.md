@@ -81,12 +81,22 @@ The document should feel like it was intentionally laid out by a human.
 
 ## Visual Rules
 
-- Use a restrained palette.
-- Prefer deep navy, slate, graphite, soft neutrals, and one controlled accent.
+- Use a restrained but variable palette.
+- Do not lock yourself to one fixed set of colors.
+- Choose colors using color harmony principles:
+  - analogous
+  - complementary
+  - split-complementary
+  - triadic, only when kept elegant and controlled
+- Use one dominant tone, one support tone, and one restrained accent.
+- Keep saturation controlled for executive documents.
+- Prefer visual sophistication over “random colorful”.
+- Ensure contrast is sufficient for readability in print.
+- If the subject suggests a stronger or softer mood, adapt the palette intentionally.
 - Use contrast to create hierarchy, not noise.
 - Avoid thick black table borders.
 - Avoid overusing bold text.
-- Avoid bright default blues that look like office software.
+- Avoid default office-looking palettes and obvious template colors.
 - Watermarks must be subtle.
 - Footers must be quiet and professional.
 

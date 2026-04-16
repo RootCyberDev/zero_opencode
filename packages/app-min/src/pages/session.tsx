@@ -392,6 +392,7 @@ export default function Page() {
       "Para este caso debes usar la tool unica llamada pdf.",
       "Usa como base estructural el starter HTML de la skill PDF y adaptalo al caso; no generes un diseño estatico ni una plantilla generica.",
       "Diseña el documento como HTML/CSS orientado a impresion A4, visualmente premium y editorialmente cuidado.",
+      "No fijes una sola paleta de colores. Elige una paleta elegante y variable usando principios de colorimetria, armonia y contraste controlado.",
       "No uses assets remotos, rutas externas, ni script tags. Si necesitas watermark, usa ACCOUNT_ID dentro del HTML o CSS.",
       "El resumen ejecutivo creado por IA debe ser diferente para cada persona y redactado en lenguaje natural con tono corporativo de alta gerencia.",
       "Debes generar un reporte global de esa persona que un humano pueda leer rapidamente, con jerarquia visual clara, buen espaciado y lectura escaneable.",

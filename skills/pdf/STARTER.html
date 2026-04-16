@@ -8,10 +8,11 @@
         --ink: #0f172a;
         --muted: #475569;
         --line: #d9e2ec;
-        --panel: #f8fafc;
-        --navy: #102a43;
+        --surface: #f8fafc;
+        --primary: #102a43;
         --accent: #1d4ed8;
-        --soft: #e8f0ff;
+        --accent-soft: #e8f0ff;
+        --watermark: rgba(15, 23, 42, 0.05);
       }
 
       body {
@@ -34,7 +35,7 @@
         font-size: 56pt;
         font-weight: 700;
         letter-spacing: 0.35em;
-        color: rgba(15, 23, 42, 0.05);
+        color: var(--watermark);
         text-transform: uppercase;
       }
 
@@ -58,7 +59,7 @@
 
       h1 {
         margin: 4mm 0 2mm;
-        color: var(--navy);
+        color: var(--primary);
         font-family: "Liberation Serif", "DejaVu Serif", serif;
         font-size: 25pt;
         line-height: 1.1;
@@ -73,8 +74,8 @@
       .summary {
         margin-top: 8mm;
         padding: 6mm 7mm;
-        background: linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
-        border: 1px solid #d7e3ff;
+        background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 68%, white 32%) 0%, var(--accent-soft) 100%);
+        border: 1px solid color-mix(in srgb, var(--accent) 18%, white 82%);
         border-radius: 4mm;
       }
 
@@ -111,14 +112,14 @@
 
       h2 {
         margin: 0 0 4mm;
-        color: var(--navy);
+        color: var(--primary);
         font-size: 13pt;
         font-weight: 700;
       }
 
       .band {
         padding: 5mm 6mm;
-        background: var(--panel);
+        background: var(--surface);
         border: 1px solid var(--line);
         border-radius: 3mm;
       }
