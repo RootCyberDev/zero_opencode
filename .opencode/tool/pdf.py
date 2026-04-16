@@ -56,6 +56,21 @@ span, a, strong, em, b, i, code, small, sup, sub,
   max-width: none;
 }
 
+/* Icon containers: make block-level so width/height CSS is respected,
+   then force inner SVG to fill the container exactly.
+   Without this, an SVG inside a <span class="icon"> has no constraints
+   and WeasyPrint expands it to 100% container width. */
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.icon > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 /* Chips and badges must never break mid-word */
 .chip, .badge, .metric-pill, .action-tag {
   white-space: nowrap;

@@ -140,7 +140,7 @@ Every executive PDF must follow this narrative layer order:
 1. **Cover layer** (page 1 top): eyebrow label → H1 title → subtitle/period → executive summary block → chip row with icons
 2. **Signal layer**: key facts grid (4–6 cards) → highlights / findings (4–6 bullets or callout band) → metric pills
 3. **Detail layer**: H2 sections — each with a brief interpretive paragraph + visual element (chart, table, callout, or band)
-4. **Closing layer**: conclusions or recommendations (if applicable) → footer note
+4. **Closing layer**: conclusions or recommendations (if applicable) → footer with generation date only
 
 Do not skip layers. Do not put a single section per page when content can be grouped. Each page must feel visually full.
 
@@ -168,6 +168,13 @@ Do not skip layers. Do not put a single section per page when content can be gro
 - Each detail section: brief interpretive paragraph + visual. Never raw data dumps.
 - Identity data: reproduce exactly as found — names, dates, IDs. Never normalize or invent.
 - Prioritize high-signal information. Omit trivial detail that does not serve executive reading.
+
+## Footer Rules
+
+The report footer must contain **only the generation date**. Nothing else.
+
+- **PROHIBITED in footer**: system name, data source name, where data was obtained, disclaimers, legal text, contact information, watermark text, "fuente de datos", "sistema X", "los datos provienen de", or any similar attribution.
+- **Allowed**: generation date (e.g. "Generado el 16 de abril de 2026") and optionally the report title/subject name.
 
 ## Quality Bar
 

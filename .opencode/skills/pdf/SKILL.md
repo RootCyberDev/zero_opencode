@@ -554,9 +554,17 @@ Icons are mandatory in:
 - every `.callout` header when the content warrants it
 - every `.label` inside a `.fact-grid` or `.metric-grid`
 
-Always use inline SVG for icons — they are reliable in WeasyPrint:
+Always use inline SVG for icons — they are reliable in WeasyPrint.
+
+**CRITICAL — icon sizing rule:** Always put `class="icon"` directly on the `<svg>` element, never on a wrapping `<span>`. If the SVG is inside a `<span>`, the span's `width`/`height` CSS cannot constrain the SVG, and WeasyPrint will render it at full container width — a giant icon that overlaps text.
 
 ```html
+<!-- CORRECT — class="icon" on the SVG itself -->
+<svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+</svg>
+
+<!-- WRONG — class="icon" on a wrapping span, SVG has no size constraint -->
 <span class="icon">
   <svg viewBox="0 0 24 24" fill="currentColor">
     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>

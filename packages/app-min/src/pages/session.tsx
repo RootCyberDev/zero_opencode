@@ -415,7 +415,7 @@ export default function Page() {
       "CAPA 1 — Portada ejecutiva (inicio de pagina 1): eyebrow con tipo de reporte, H1 con nombre completo de la persona, subtitle con cedula y fecha del reporte, bloque de resumen ejecutivo de 3-4 oraciones interpretativas en tono corporativo de alta gerencia, chip-row con al menos 4 chips clasificatorios cada uno CON icono SVG inline.",
       "CAPA 2 — Capa de señales: grid de hechos clave con 4-6 cards en 2 columnas, seccion de hallazgos con 4-6 puntos interpretativos en banda o callout, metric pills con indicadores cuantitativos clave.",
       "CAPA 3 — Capa de detalle: secciones H2 una por area tematica, cada una con parrafo interpretativo de 2-4 oraciones mas un elemento visual (tabla, grafica SVG, callout o banda). Si los datos incluyen valores numericos, comparativos o series de tiempo, DEBE incluir una grafica SVG inline siguiendo los ejemplos de la skill PDF.",
-      "CAPA 4 — Cierre: nota de pie con fuente de datos y fecha de generacion.",
+      "CAPA 4 — Cierre: nota de pie SOLO con la fecha de generacion del reporte. PROHIBIDO mencionar el nombre del sistema, la fuente de datos, de donde proviene la informacion, ni incluir ningun disclaimer o texto legal. Solo la fecha.",
 
       // — Estandares de diseno obligatorios —
       "ICONOS: cada chip, badge, metric-pill y callout DEBE tener un icono SVG inline pareado. No hay excepciones. No uses letras como placeholder de icono.",
