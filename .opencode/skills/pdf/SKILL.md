@@ -539,7 +539,15 @@ For reliable page planning, prefer this mental model:
 </main>
 ```
 
-This is the safest way to make the HTML correspond to real A4 pages.
+**CRITICAL — `.sheet` is a page-break signal, NOT a page-size container.**
+
+- `.sheet` tells WeasyPrint: *"force a page break after this block"*
+- `.sheet` does **NOT** have a fixed or minimum height — WeasyPrint controls the A4 dimensions via `@page`
+- Never try to "fill" a sheet to exactly 251mm. If your content is 180mm, the page ends at 180mm with white space — that is correct PDF behavior
+- If a sheet's content overflows 251mm, WeasyPrint will naturally create a second physical page for the overflow, which is also correct
+- **Do NOT add `min-height`, `height`, or any fixed dimension to `.sheet`** — this causes cumulative page drift: a 2mm overflow per sheet becomes a 28mm misalignment by page 14
+
+The renderer decides where A4 pages end. Your job is only to group content logically and mark section boundaries with `.sheet`.
 
 ## CSS Rules
 
@@ -666,7 +674,8 @@ Do not:
 - build ugly spreadsheet-style layouts
 - overload the PDF with thick borders, excessive bold, or giant color slabs
 - add `background`, `background-color`, or `background-image` to `.sheet`, `.doc`, `html`, or `body` — the renderer controls the page background; never override it
-- set `height` (fixed) on `html`, `body`, `.doc`, or `.sheet` — **this is the #1 cause of 1-page PDFs**. `height: 297mm` on `body` clips all content to one page in WeasyPrint. Always use `min-height` on `.sheet` only; never set `height` or `max-height` on root elements
+- set `height` (fixed) on `html`, `body`, `.doc`, or `.sheet` — **this is the #1 cause of 1-page PDFs**. `height: 297mm` on `body` clips all content to one page in WeasyPrint. Never set `height` or `max-height` on root elements
+- set `min-height` on `.sheet` — **this causes cumulative page drift**. A 2mm content overflow per sheet = 28mm misalignment by page 14. `.sheet` must have no height constraints at all; WeasyPrint handles A4 sizing via `@page`
 - set `overflow: hidden` on `html`, `body`, `.doc`, or `.sheet` — this discards content beyond the first page
 - use `break-inside: avoid-page` or `break-inside: avoid` on `.sheet` — this prevents WeasyPrint from paginating the sheet and causes content loss. Only apply `break-inside: avoid-page` to small bounded components (cards, callouts, table-wrap, chips)
 - create one `.sheet` per small section — always group sections so each sheet page feels visually dense
@@ -676,6 +685,11 @@ Do not:
 - place a `<table>` inside a `.grid`, `.fact-grid`, `.metric-grid`, or any multi-column container — tables are always full-width standalone blocks inside `.table-wrap`
 - use `conic-gradient` or `radial-gradient` for pie/donut charts — WeasyPrint does not support `conic-gradient`; always use SVG `<circle>` with `stroke-dasharray` as shown in the donut example
 - use CSS div-based bars, progress bars, or width-percentage fills as data charts — for example, do NOT use `<div class="timeline-fill" style="width: 100%;">` or any CSS bar to represent salary, count, or comparison data; ALL charts must use SVG `<rect>` bars computed from the proportional formula
+- use SVG `<line>` elements as chart bars — a vertical `<line>` drawn from a baseline to a data point is NOT a bar chart; use `<rect>` with computed `height` and `y` only
+- omit data points from a chart — if salary history has 4 entries [$567, $850, $1,200, $2,500], the chart must have exactly 4 bars; omitting the most recent (highest) salary bar is a chart failure
+- generate Cloudflare `__cf_email__` protection anchors in report HTML — emails must be plain text, never `<a class="__cf_email__" data-cfemail="...">...</a>`; that encoding renders the email invisible to the reader
+- use session context variables (`userEmail`, logged-in operator email) as subject data — if an email you are about to write into the report matches the session's user email, it is contaminated; omit it and note it as unavailable
+- calculate age from OSINT or LinkedIn self-reported data — age must be computed from the MCP birth date record using the formula: `age = report_year − birth_year`, minus 1 if the birthday is still ahead of the report date; a person born 23/04/2000 has age 25 on 16/04/2026, not 26 and not 34
 - copy chart SVG examples verbatim — always recompute every bar `x`, `y`, `height` and every label from real data using the proportional formula
 - render more bars than data points, or fewer bars than data points — bar count must equal data point count exactly
 - produce a chart where a lower value has a taller bar than a higher value — this means the math is wrong; stop and recalculate

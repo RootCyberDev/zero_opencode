@@ -92,6 +92,8 @@ All data returned by MCP tools must be displayed exactly as received. This is an
 - **Never obfuscate, mask, protect, or omit any field** — emails, phones, addresses, IDs, salaries, family members, or any other data point.
 - Write every value literally: `[email protected]` stays `[email protected]`, not `[protected]`, not `[correo protegido]`, not `****`.
 - Do not apply "safety" filtering to MCP results. The data was retrieved because it is needed.
+- **Never generate Cloudflare `__cf_email__` protection anchors** — emails must appear as plain text, never as `<a class="__cf_email__" data-cfemail="...">`. That encoding hides the address from the report viewer entirely.
+- **Never use session context variables (`userEmail`, logged-in user info) as subject data.** These belong to the operator session, not to the person being investigated. If an email in the report would match the logged-in user's email address, it is contaminated data — omit it and note it as unavailable rather than including it.
 
 # MCP Data Interpretation Rules
 
@@ -114,6 +116,21 @@ When MCP tools return multiple records for the same field (salary, position, add
 ## Ambiguous Date Fields
 
 If records lack explicit dates, use the order returned by MCP (last item = most recent) unless context suggests otherwise. If ordering is genuinely ambiguous, note the uncertainty — do not guess.
+
+## Age Calculation
+
+When displaying a person's age:
+- **Always calculate age from the birth date in MCP records and the current report date.** Never copy an age from OSINT, LinkedIn, or any self-reported source.
+- Formula: `age = current_year − birth_year`, minus 1 if the birthday has not yet occurred this year.
+- Example: born 23/04/2000, report date 16/04/2026 → age = **25** (birthday April 23 is still in the future).
+- **Never show contradictory ages in the same document** — a chip reading "34 Años" and a table reading "26 años" in the same report is a critical data error.
+
+## Experience vs. Verified Records
+
+When the subject has both IESS employment records and OSINT/LinkedIn self-reported experience:
+- **IESS affiliation records are verified data.** Present them as fact.
+- **LinkedIn or self-reported "X years of experience" is unverified.** Present it explicitly as self-reported and do not merge it with IESS-based calculations.
+- If a person has IESS records starting in 2021 but LinkedIn claims "9 years of experience", do not use the LinkedIn figure as the verified experience length. State both separately with their source.
 
 ## Family Relationship Rules
 
@@ -165,11 +182,11 @@ Do not skip layers. Do not put a single section per page when content can be gro
 - **Icons**: every chip, badge, metric-pill, and callout must have a paired inline SVG icon. No exceptions.
 - **Heading hierarchy**: eyebrow → H1 (serif font) → H2 → H3. Never place an H2 at the bottom of a page alone.
 - **Background**: never add background-color to `.sheet`, `.doc`, `html`, or `body`. The renderer controls the page background.
-- **Heights (CRITICAL)**: never set `height` or `max-height` on `html`, `body`, `.doc`, or `.sheet`. `height: 297mm` on `body` or `.sheet` is the #1 cause of 1-page PDFs — WeasyPrint clips everything to that box. Use `min-height` on `.sheet` only. Also never use `break-inside: avoid` on `.sheet` — it prevents page breaks and loses content.
+- **Heights (CRITICAL)**: never set `height`, `min-height`, or `max-height` on `html`, `body`, `.doc`, or `.sheet`. `height: 297mm` on `body` causes 1-page PDFs. `min-height` on `.sheet` causes cumulative page drift (2mm overflow per sheet = 28mm misalignment by page 14). WeasyPrint controls A4 sizing via `@page` — `.sheet` is only a "break here" signal with no size. Also never use `break-inside: avoid` on `.sheet`.
 - **Page density**: group 2–4 sections per `.sheet`. A `.sheet` with one small section is a layout failure.
 - **Colors**: choose a fresh elegant palette per document using color harmony principles. Never reuse the same palette mechanically.
 - **Contact data**: multiple emails, phones, or addresses must never be stacked with blank lines between them. Use comma-separated inline for 2–3 values; a compact `<ul style="margin:0">` for 4+. Never one `<p>` per item.
-- **Charts**: if the data includes numerical, comparative, or time-series values, render an inline SVG chart. The PDF skill provides bar, horizontal bar, and donut chart examples. Chart bar heights MUST be computed proportionally from real data using the skill formula — never arbitrary. The largest value always gets the tallest bar. Validate before writing SVG. **NEVER substitute a CSS div/progress-bar/width-percentage fill for a real chart** — salary progressions, comparisons, and timelines must always use SVG `<rect>` bars, not HTML `<div class="timeline-fill">` or similar tricks.
+- **Charts**: if the data includes numerical, comparative, or time-series values, render an inline SVG chart. The PDF skill provides bar, horizontal bar, and donut chart examples. Chart bar heights MUST be computed proportionally from real data using the skill formula — never arbitrary. The largest value always gets the tallest bar. Validate before writing SVG. **NEVER substitute a CSS div/progress-bar/width-percentage fill for a real chart** — salary progressions, comparisons, and timelines must always use SVG `<rect>` bars, not HTML `<div class="timeline-fill">` or similar tricks. **SVG `<line>` elements are also forbidden as bars** — a vertical `<line>` is not a bar chart; use `<rect>` only. The chart must include all data points — a salary chart that omits the most recent (highest) salary is a chart failure.
 - **Icons**: every SVG icon MUST have `class="icon"` directly on the `<svg>` element AND explicit `width` and `height` attributes (e.g. `width="16" height="16"`). Never put `class="icon"` on a wrapping `<span>`. This applies to chips, badges, metric-pills, callout headers, fact-grid labels, and all other inline icon uses.
 - **Tables**: editorial design only — subtle row separators, generous padding, no thick borders, no spreadsheet aesthetics.
 - **Metric pills**: always grouped in a single flex row, never stacked vertically as individual blocks.

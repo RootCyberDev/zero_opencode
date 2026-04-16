@@ -220,11 +220,12 @@ pre, code {
 
 .sheet {
   width: var(--page-width);
-  min-height: var(--page-height);
-  /* CRITICAL: use min-height, never height — fixed height clips content */
+  /* NO min-height — min-height causes cumulative drift when content doesn't fit
+     exactly: each overflow creates a small orphan that shifts every subsequent page.
+     WeasyPrint handles A4 pagination naturally; .sheet is only a "break here" signal. */
   height: auto !important;
+  min-height: 0 !important;
   max-height: none !important;
-  /* CRITICAL: break-inside must be auto on .sheet — avoid-page prevents pagination */
   overflow: visible !important;
   break-inside: auto !important;
   page-break-inside: auto !important;
