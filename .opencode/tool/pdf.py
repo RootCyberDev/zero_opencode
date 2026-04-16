@@ -31,7 +31,7 @@ html {
 
 body {
   margin: 0;
-  background: white;
+  background: white !important;
 }
 
 .doc {
@@ -105,6 +105,7 @@ img, svg {
   min-height: var(--page-height);
   break-after: page;
   page-break-after: always;
+  background: transparent;
 }
 
 .sheet:last-child {

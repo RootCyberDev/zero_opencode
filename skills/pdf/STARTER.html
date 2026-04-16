@@ -18,13 +18,6 @@
         font-style: normal;
       }
 
-      @font-face {
-        font-family: "PdfIcons";
-        src: url("./.opencode/assets/fonts/PdfIcons-Outlined.woff2") format("woff2");
-        font-weight: 400;
-        font-style: normal;
-      }
-
       :root {
         --ink: #0f172a;
         --muted: #475569;
@@ -176,6 +169,10 @@
         padding-left: 5mm;
       }
 
+      ul.clean li {
+        margin-bottom: 2mm;
+      }
+
       .footer-note {
         margin-top: 9mm;
         color: var(--muted);
@@ -217,19 +214,13 @@
         color: white;
       }
 
-      .icon,
-      .icon-font {
+      .icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         width: 4.5mm;
         height: 4.5mm;
         flex: 0 0 auto;
-      }
-
-      .icon-font {
-        font-family: "PdfIcons", "PdfSans", sans-serif;
-        font-size: 9pt;
       }
 
       .icon svg {
@@ -256,68 +247,269 @@
         margin-top: 4mm;
         break-inside: avoid-page;
       }
+
+      .metric-value {
+        display: block;
+        margin-top: 1.5mm;
+        font-size: 15pt;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .label-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 1.5mm;
+        vertical-align: middle;
+      }
+
+      .label-icon svg {
+        width: 3.5mm;
+        height: 3.5mm;
+        flex: 0 0 auto;
+      }
     </style>
   </head>
   <body>
     <div class="watermark"><span>${ACCOUNT_ID}</span></div>
     <main class="doc">
+
+      <!-- ═══════════════════════════════════════════
+           HOJA 1 — Hero · Hechos clave · Hallazgos
+           Mantener siempre la secuencia completa:
+           eyebrow → h1 → subtitle → summary → chip-row
+           ═══════════════════════════════════════════ -->
       <section class="sheet">
         <header class="hero">
           <div class="eyebrow">Executive Report</div>
           <h1>Título del documento</h1>
-          <p class="subtitle">Subtítulo o contexto ejecutivo</p>
+          <p class="subtitle">Subtítulo o contexto ejecutivo — período o alcance</p>
           <div class="summary">
             <strong>Resumen ejecutivo.</strong> Introducción breve, clara y editorialmente cuidada.
+            Este párrafo interpreta los hallazgos, no los enumera. Debe invitar al lector a continuar.
           </div>
+          <!-- CHIPS: siempre con iconos SVG inline — no usar letras como placeholder -->
           <div class="chip-row">
-            <span class="chip"><span class="icon-font">A</span><span>Chip editorial</span></span>
-            <span class="badge"><span class="icon-font">B</span><span>Badge sobrio</span></span>
-            <span class="metric-pill"><span class="icon-font">C</span><span>Métrica</span></span>
-            <span class="action-tag"><span class="icon-font">D</span><span>Etiqueta visual</span></span>
+            <span class="chip">
+              <span class="icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </span>
+              <span>Chip editorial</span>
+            </span>
+            <span class="badge">
+              <span class="icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+              </span>
+              <span>Badge sobrio</span>
+            </span>
+            <span class="metric-pill">
+              <span class="icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                </svg>
+              </span>
+              <span>Métrica clave</span>
+            </span>
+            <span class="action-tag">
+              <span class="icon" style="color: white;">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </span>
+              <span>Etiqueta visual</span>
+            </span>
           </div>
         </header>
 
+        <!-- Hechos clave: 4 cards en 2×2 para llenar el espacio -->
         <section>
           <h2>Hechos clave</h2>
           <div class="grid">
-            <div class="card"><span class="label">Campo</span><span class="value">Valor</span></div>
-            <div class="card"><span class="label">Campo</span><span class="value">Valor</span></div>
+            <div class="card">
+              <span class="label">Campo A</span>
+              <span class="value">Valor descriptivo completo</span>
+            </div>
+            <div class="card">
+              <span class="label">Campo B</span>
+              <span class="value">Valor descriptivo completo</span>
+            </div>
+            <div class="card">
+              <span class="label">Campo C</span>
+              <span class="value">Valor descriptivo completo</span>
+            </div>
+            <div class="card">
+              <span class="label">Campo D</span>
+              <span class="value">Valor descriptivo completo</span>
+            </div>
           </div>
         </section>
 
+        <!-- Hallazgos: mínimo 4–5 puntos para que la sección tenga peso visual -->
         <section>
-          <h2>Hallazgos</h2>
+          <h2>Hallazgos principales</h2>
           <div class="band">
             <ul class="clean">
-              <li>Punto de alto valor</li>
-              <li>Punto de alto valor</li>
-              <li>Punto de alto valor</li>
+              <li>Punto de alto valor editorial — interpretación, no datos crudos</li>
+              <li>Segundo hallazgo relevante con contexto analítico claro</li>
+              <li>Tercer punto con señal fuerte y perspectiva ejecutiva</li>
+              <li>Cuarto hallazgo con implicación directa para el negocio</li>
+              <li>Quinto punto de cierre con orientación de acción</li>
             </ul>
           </div>
         </section>
       </section>
 
+      <!-- ═══════════════════════════════════════════
+           HOJA 2 — Análisis · Métricas · Tabla · Cierre
+           Esta hoja debe estar tan cargada como la primera.
+           No crear .sheet con una sola sección pequeña.
+           ═══════════════════════════════════════════ -->
       <section class="sheet">
+
+        <!-- Callout destacado -->
         <section>
-          <h2>Tabla editorial</h2>
-          <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Campo</th>
-                <th>Detalle</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Campo</td>
-                <td>Valor detallado con buen wrapping.</td>
-              </tr>
-            </tbody>
-          </table>
+          <h2>Análisis detallado</h2>
+          <div class="callout">
+            <strong>Punto de atención.</strong> Este bloque destaca un hallazgo o contexto
+            relevante que merece énfasis visual. Úsalo para hechos que no deben perderse en
+            la lectura diagonal del ejecutivo.
           </div>
         </section>
+
+        <!-- Métricas con iconos en el label — siempre usar SVG, nunca solo texto -->
+        <section>
+          <h2>Métricas del período</h2>
+          <div class="fact-grid">
+            <div class="card">
+              <span class="label">
+                <span class="label-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                  </svg>
+                  Métrica principal
+                </span>
+              </span>
+              <span class="metric-value">$0.00</span>
+            </div>
+            <div class="card">
+              <span class="label">
+                <span class="label-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                  </svg>
+                  Métrica secundaria
+                </span>
+              </span>
+              <span class="metric-value">00%</span>
+            </div>
+            <div class="card">
+              <span class="label">
+                <span class="label-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                  Tercer indicador
+                </span>
+              </span>
+              <span class="metric-value">—</span>
+            </div>
+            <div class="card">
+              <span class="label">
+                <span class="label-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                  Cuarto indicador
+                </span>
+              </span>
+              <span class="metric-value">—</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tabla editorial con mínimo 4 filas y chips de estado con iconos -->
+        <section>
+          <h2>Detalle tabular</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Campo</th>
+                  <th>Descripción</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Fila 1</td>
+                  <td>Valor detallado con wrapping limpio si es necesario</td>
+                  <td>
+                    <span class="chip" style="font-size: 7.5pt;">
+                      <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                      </span>
+                      <span>Activo</span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Fila 2</td>
+                  <td>Valor detallado con wrapping limpio si es necesario</td>
+                  <td>
+                    <span class="chip" style="font-size: 7.5pt;">
+                      <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                      </span>
+                      <span>Pendiente</span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Fila 3</td>
+                  <td>Valor detallado con wrapping limpio si es necesario</td>
+                  <td>
+                    <span class="chip" style="font-size: 7.5pt;">
+                      <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                      </span>
+                      <span>Activo</span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Fila 4</td>
+                  <td>Valor detallado con wrapping limpio si es necesario</td>
+                  <td>
+                    <span class="chip" style="font-size: 7.5pt;">
+                      <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                      </span>
+                      <span>Activo</span>
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="footer-note">
+          Nota de cierre opcional. Fuente de los datos, período cubierto, o comentario editorial de contexto.
+        </div>
       </section>
+
     </main>
   </body>
 </html>

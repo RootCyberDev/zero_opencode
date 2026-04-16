@@ -73,23 +73,55 @@ If you expand, do it in the smallest possible step and reassess immediately.
 
 # PDF Generation Policy
 
-- When the user asks for a PDF, first load and follow the available PDF skill if one exists.
-- Use the single `pdf` tool for PDF creation.
-- Build PDFs as complete print-oriented HTML/CSS and render them to true A4 output.
-- Do not use alternate PDF creation flows, Python PDF scripts, or ReportLab in this product flow.
-- Do not claim a PDF was created unless you have verified that the `.pdf` file was actually written to disk.
-- Prefer a short implementation loop:
-  1. choose `pdf`
-  2. verify the target PDF exists
-  3. if generation failed, inspect the tool error once
-  4. retry at most one more time with corrected tool input
-- Do not enter a long trial-and-error loop rewriting PDF code repeatedly.
-- Use unique filenames for PDFs. Do not overwrite an existing file unless the user explicitly asks.
-- Prefer filenames that include an identifying value plus a short numeric suffix when uniqueness matters.
-- For PDF requests, do not stop at drafting text. Materialize the file.
-- For executive PDFs, shape the HTML so sections are scannable, balanced, and visually editorial rather than generic.
-- For executive PDFs, do not lock into one fixed palette. Choose an elegant print-safe palette using sound color harmony and controlled contrast.
-- Keep PDF generation local to the workspace and avoid unnecessary external dependencies.
+## Tool and Flow
+
+- When the user asks for a PDF, load and follow the PDF skill before doing anything else.
+- Use the single `pdf` tool. No ReportLab, no Python PDF scripts, no alternative flows.
+- Build PDFs as complete print-oriented HTML/CSS rendered to true A4 output.
+- Do not claim a PDF was created until you have verified the `.pdf` file exists on disk.
+- Implementation loop: call `pdf` → verify file exists → if failed, inspect error once → retry once with corrected input. Stop after one retry.
+- Use unique filenames. Do not overwrite an existing file unless the user explicitly requests it.
+
+## Report Structure — Mandatory
+
+Every executive PDF must follow this narrative layer order:
+
+1. **Cover layer** (page 1 top): eyebrow label → H1 title → subtitle/period → executive summary block → chip row with icons
+2. **Signal layer**: key facts grid (4–6 cards) → highlights / findings (4–6 bullets or callout band) → metric pills
+3. **Detail layer**: H2 sections — each with a brief interpretive paragraph + visual element (chart, table, callout, or band)
+4. **Closing layer**: conclusions or recommendations (if applicable) → footer note
+
+Do not skip layers. Do not put a single section per page when content can be grouped. Each page must feel visually full.
+
+## Design Standards — Mandatory
+
+- **Icons**: every chip, badge, metric-pill, and callout must have a paired inline SVG icon. No exceptions.
+- **Heading hierarchy**: eyebrow → H1 (serif font) → H2 → H3. Never place an H2 at the bottom of a page alone.
+- **Background**: never add background-color to `.sheet`, `.doc`, `html`, or `body`. The renderer controls the page background.
+- **Page density**: group 2–4 sections per `.sheet`. A `.sheet` with one small section is a layout failure.
+- **Colors**: choose a fresh elegant palette per document using color harmony principles. Never reuse the same palette mechanically.
+- **Charts**: if the data includes numerical, comparative, or time-series values, render an inline SVG chart. The PDF skill provides bar, horizontal bar, and donut chart examples.
+- **Tables**: editorial design only — subtle row separators, generous padding, no thick borders, no spreadsheet aesthetics.
+
+## Typography
+
+- H1: serif font (PdfSerif), 22–26pt, primary color
+- H2: sans font (PdfSans), 12–14pt, bold, primary color
+- Body: 10–10.5pt, 1.5 line-height
+- Labels: 7.5–8pt, uppercase, tracked, muted
+- Never bold entire paragraphs. Bold is for key terms only.
+
+## Content Standards
+
+- Executive summary: 2–4 sentences of interpretive narrative in high-level corporate tone. Not a data list.
+- Each detail section: brief interpretive paragraph + visual. Never raw data dumps.
+- Identity data: reproduce exactly as found — names, dates, IDs. Never normalize or invent.
+- Prioritize high-signal information. Omit trivial detail that does not serve executive reading.
+
+## Quality Bar
+
+The output must feel like a premium briefing document produced by a professional designer.
+Not a generic office template. Not a data export. A real editorial document.
 
 # Operational Rule
 

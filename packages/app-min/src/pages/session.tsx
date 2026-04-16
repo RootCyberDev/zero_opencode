@@ -388,29 +388,44 @@ export default function Page() {
   const report = (cedula: string) =>
     [
       `Crear un PDF ejecutivo premium de la persona con numero de cedula: ${cedula}.`,
-      "Primero carga y sigue la skill PDF activa.",
-      "Para este caso debes usar la tool unica llamada pdf.",
-      "Usa como base estructural el starter HTML de la skill PDF y adaptalo al caso; no generes un diseño estatico ni una plantilla generica.",
-      "Diseña el documento como HTML/CSS orientado a impresion A4, visualmente premium y editorialmente cuidado.",
-      "No fijes una sola paleta de colores. Elige una paleta elegante y variable usando principios de colorimetria, armonia y contraste controlado.",
-      "No uses assets remotos, rutas externas, ni script tags. Si accidentalmente los incluyes, eliminarlos antes de llamar a la tool. Si necesitas watermark, usa ACCOUNT_ID dentro del HTML o CSS.",
-      "El resumen ejecutivo creado por IA debe ser diferente para cada persona y redactado en lenguaje natural con tono corporativo de alta gerencia.",
-      "Debes generar un reporte global de esa persona que un humano pueda leer rapidamente, con jerarquia visual clara, buen espaciado y lectura escaneable.",
-      "Respeta exactamente la identidad de la persona: no cambies nombres, apellidos, fechas, cedula, lugares ni datos nucleares. Si algo es ambiguo, muestralo como ambiguo, no lo inventes.",
-      "Prioriza informacion relevante y de alto valor. No llenes el reporte con detalles pequenos o triviales si no aportan a la lectura ejecutiva.",
-      "Incluye portada breve si aplica, resumen ejecutivo, hechos clave, highlights, tablas limpias cuando ayuden, y timeline solo si aporta valor.",
-      "Puedes usar chips, badges, metric pills, callout cards, grids, bloques de hechos, secciones en dos columnas, tablas elegantes y botones decorativos tipo etiqueta si aportan claridad visual.",
-      "Tambien puedes usar iconografia sutil mediante SVG inline o iconos locales si mejora la claridad del reporte.",
-      "Ordena bien encabezados, subtitulos, parrafos, bloques de resumen y tablas para que el recorrido visual sea impecable.",
-      "Usa A4 real, evita cortes feos de titulos y tablas, protege los encabezados y pies de pagina para que nunca colisionen con el contenido, y mantén una composicion editorial moderna.",
-      "No entregues un PDF con datos crudos, tablas simples sin interpretacion, texto policiaco, o una estetica plana de oficina.",
-      "Construye HTML/CSS de alta calidad como si un humano lo hubiera maquetado con dedicacion.",
-      "Guarda el archivo final como PDF dentro del workspace.",
-      "El nombre del archivo debe ser unico y obligatorio con este patron: reporte-ejecutivo-<cedula>-<timestamp6>.pdf.",
-      `Usa exactamente la cedula ${cedula} y un sufijo temporal numerico de 6 digitos para evitar colisiones.`,
-      "No reutilices nombres anteriores ni sobrescribas un PDF existente.",
-      "No anuncies que el PDF se genero ni menciones el nombre del archivo hasta recibir la respuesta real de la tool.",
-      "Verifica que el PDF exista antes de responder y usa solo el nombre exacto que devuelva la tool.",
+
+      // — Flujo obligatorio —
+      "PASO 1: Carga y lee completamente la skill PDF activa antes de escribir una sola linea de HTML.",
+      "PASO 2: Busca y recopila todos los datos de la persona con esa cedula usando las tools MCP disponibles.",
+      "PASO 3: Construye el HTML/CSS siguiendo exactamente las reglas de la skill PDF.",
+      "PASO 4: Llama a la tool 'pdf' para renderizar. No uses ningun otro metodo de generacion de PDF.",
+      "PASO 5: Verifica que el archivo exista en el workspace. Solo entonces anuncia el resultado.",
+
+      // — Estructura obligatoria del reporte —
+      "El reporte debe seguir esta estructura de capas en orden estricto:",
+      "CAPA 1 — Portada ejecutiva (inicio de pagina 1): eyebrow con tipo de reporte, H1 con nombre completo de la persona, subtitle con cedula y fecha del reporte, bloque de resumen ejecutivo de 3-4 oraciones interpretativas en tono corporativo de alta gerencia, chip-row con al menos 4 chips clasificatorios cada uno CON icono SVG inline.",
+      "CAPA 2 — Capa de señales: grid de hechos clave con 4-6 cards en 2 columnas, seccion de hallazgos con 4-6 puntos interpretativos en banda o callout, metric pills con indicadores cuantitativos clave.",
+      "CAPA 3 — Capa de detalle: secciones H2 una por area tematica, cada una con parrafo interpretativo de 2-4 oraciones mas un elemento visual (tabla, grafica SVG, callout o banda). Si los datos incluyen valores numericos, comparativos o series de tiempo, DEBE incluir una grafica SVG inline siguiendo los ejemplos de la skill PDF.",
+      "CAPA 4 — Cierre: nota de pie con fuente de datos y fecha de generacion.",
+
+      // — Estandares de diseno obligatorios —
+      "ICONOS: cada chip, badge, metric-pill y callout DEBE tener un icono SVG inline pareado. No hay excepciones. No uses letras como placeholder de icono.",
+      "JERARQUIA TIPOGRAFICA: eyebrow (9pt uppercase tracking) → H1 en fuente serif 22-26pt → H2 sans 12-14pt → H3 sans 10-11pt → cuerpo 10pt. Nunca pongas un H2 al fondo de una pagina sin contenido debajo.",
+      "DENSIDAD DE PAGINA: cada .sheet debe contener 2-4 secciones sustanciales. Un .sheet con una sola seccion pequena es un error de layout. Las paginas deben verse visualmente llenas.",
+      "FONDO: nunca agregues background-color a .sheet, .doc, html o body. El renderer controla el fondo de pagina.",
+      "COLORES: elige una paleta fresca y elegante usando principios de armonia cromatica: un tono dominante, un tono de soporte, un acento controlado. Nunca uses una paleta generica ni la misma paleta en todos los reportes.",
+
+      // — Estandares de contenido —
+      "Respeta exactamente la identidad de la persona: nombres, apellidos, cedula, fechas, lugares. No normalices ni inventes. Si algo es ambiguo, declaralo ambiguo.",
+      "El resumen ejecutivo DEBE ser narrativo e interpretativo, no una lista de datos. Debe leer como si lo hubiera escrito un analista senior.",
+      "Prioriza informacion de alto valor ejecutivo. Omite detalles triviales que no aporten a la lectura.",
+      "Cada seccion de detalle debe tener un parrafo interpretativo, no solo datos crudos.",
+
+      // — Calidad visual —
+      "No uses assets remotos, CDN, rutas externas ni script tags. Si necesitas watermark, usa ${ACCOUNT_ID} en el HTML o CSS.",
+      "Usa A4 real. Evita cortes feos de titulos, tablas y graficas. Protege heading de quedar flotando al final de pagina.",
+      "El resultado debe sentirse como un documento de briefing premium producido por un disenador profesional, no como una plantilla de oficina.",
+
+      // — Nombre del archivo —
+      "El nombre del archivo debe seguir exactamente este patron: reporte-ejecutivo-<cedula>-<timestamp6>.pdf.",
+      `Usa la cedula ${cedula} y un sufijo numerico de 6 digitos basado en timestamp para evitar colisiones.`,
+      "No reutilices ni sobrescribas PDFs existentes.",
+      "No menciones el nombre del archivo hasta recibir la respuesta real de la tool pdf.",
     ].join(" ")
 
   const download = (file: string) => {
