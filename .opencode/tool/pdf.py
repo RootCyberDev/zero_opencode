@@ -218,11 +218,19 @@ pre, code {
   break-before: page;
 }
 
-.sheet {
+/* ── Page wrappers (.sheet and .page) ─────────────────────────────────────
+   Both class names are used interchangeably by AI-generated HTML.
+   Rules are identical: a page wrapper is ONLY a "force break after this"
+   signal — it has NO size of its own. WeasyPrint + @page control A4 sizing.
+
+   CRITICAL:
+   - NO min-height  → prevents cumulative page drift (2mm overflow = 28mm by p14)
+   - NO fixed height → prevents 1-page clip
+   - break-inside: auto → lets WeasyPrint split content across real A4 pages
+   All height overrides use !important to win over any AI-generated inline style. */
+.sheet,
+.page {
   width: var(--page-width);
-  /* NO min-height — min-height causes cumulative drift when content doesn't fit
-     exactly: each overflow creates a small orphan that shifts every subsequent page.
-     WeasyPrint handles A4 pagination naturally; .sheet is only a "break here" signal. */
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
@@ -234,7 +242,8 @@ pre, code {
   background: transparent;
 }
 
-.sheet:last-child {
+.sheet:last-child,
+.page:last-child {
   break-after: auto;
   page-break-after: auto;
 }

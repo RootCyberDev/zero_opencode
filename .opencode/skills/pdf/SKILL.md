@@ -539,6 +539,9 @@ For reliable page planning, prefer this mental model:
 </main>
 ```
 
+**CRITICAL — always use class `sheet` for page wrapper divs, not `page`.**
+The renderer's BASE_CSS targets both `.sheet` and `.page`, but `.sheet` is the canonical name. Do not invent other class names for page wrappers (`.section`, `.slide`, `.block`, etc.) — only `.sheet` and `.page` receive the correct CSS overrides.
+
 **CRITICAL — `.sheet` is a page-break signal, NOT a page-size container.**
 
 - `.sheet` tells WeasyPrint: *"force a page break after this block"*
@@ -664,6 +667,8 @@ Do NOT use letter placeholders (A, B, C, D) as icon stand-ins. Use real SVG path
 
 Do not:
 
+- write the HTML file to a subdirectory — always write to the project root (e.g. `reporte-cedula-date.html` not `reportes/reporte.html`)
+- use `.page`, `.slide`, `.section`, or any class other than `.sheet` as page wrapper divs — only `.sheet` (or `.page` as fallback) receives the WeasyPrint layout overrides; other class names will have unconstrained height and min-height, causing 1-page PDFs or cumulative page drift
 - use ReportLab
 - write Python scripts for PDF creation
 - create `generar_pdf.py`

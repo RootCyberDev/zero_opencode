@@ -17,7 +17,10 @@
     "prepare": "husky",
     "random": "echo 'Random script'",
     "hello": "echo 'Hello World!'",
-    "test": "echo 'do not run tests from root' && exit 1"
+    "test": "echo 'do not run tests from root' && exit 1",
+    "test:quality": "bun test --cwd test/report-quality validators.test.ts",
+    "quality": "bun run test/report-quality/runner.ts",
+    "quality:html": "bun run test/report-quality/runner.ts --html="
   },
   "workspaces": {
     "packages": [

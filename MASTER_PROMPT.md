@@ -159,6 +159,13 @@ MCP returns each family member with an explicit relationship type (padre, madre,
 2. Call the `pdf` tool with **only** `filename` and `html_file` — nothing else.
 3. Verify the PDF exists.
 
+### HTML File Location — Mandatory
+
+- **Always write the HTML file to the project root directory.** Never write to a subdirectory like `reportes/`, `output/`, `tmp/`, or any nested path.
+- Correct: `reporte-0950804518-20260416-xxxx.html`
+- Wrong: `reportes/reporte-0950804518.html`, `output/reporte.html`
+- The `/file/download` endpoint resolves paths relative to the project root. Files in subdirectories will not be found.
+
 **The pdf tool call is a file conversion step, not a content generation step.**
 - Do NOT pass the `html` inline parameter — ever, for reports.
 - Do NOT regenerate or rewrite the HTML when calling the tool.
@@ -208,6 +215,16 @@ Do not skip layers. Do not put a single section per page when content can be gro
 - Identity data: reproduce exactly as found — names, dates, IDs, email addresses, phone numbers. Never normalize, invent, or obfuscate.
 - **Contact data (emails, phones) must never be protected, masked, or replaced.** Write `[email protected]` exactly as returned by MCP — never as `[protected]`, `[email protected]`, `[correo protegido]`, or any other placeholder. The report is an internal executive document; obfuscation is wrong here.
 - Prioritize high-signal information. Omit trivial detail that does not serve executive reading.
+
+## Language and Orthography
+
+All report text must be written in **neutral formal Spanish** (español neutro formal).
+
+- Use standard Spanish orthography. The only valid special characters are: á é í ó ú ü ñ Á É Í Ó Ú Ü Ñ ¿ ¡ and standard punctuation.
+- **Never generate sequences like `íñ`, `áñ`, `éñ` in the middle of a word** — these are not valid Spanish combinations and indicate a character encoding error. `Señales` is correct; `Síñales` is wrong.
+- If you are unsure about a word's spelling or accent, use the simpler unaccented form rather than guessing incorrectly.
+- Page and section headings must be capitalized correctly: title case for H1, sentence case for H2/H3.
+- Do not mix English words into Spanish text unless they are proper nouns or established technical terms (e.g. "WhatsApp", "LinkedIn").
 
 ## Footer Rules
 
