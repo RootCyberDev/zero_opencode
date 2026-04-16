@@ -1974,12 +1974,22 @@ ToolRegistry.register({
     const path = createMemo(() => props.input.filePath || "")
     const filename = () => getFilename(props.input.filePath ?? "")
     const pending = () => props.status === "pending" || props.status === "running"
+    const downloadable = createMemo(() => /\.(pdf|html?)$/i.test(props.input.filePath ?? ""))
+    const download = (event?: MouseEvent) => {
+      event?.preventDefault()
+      event?.stopPropagation()
+      const p = path()
+      if (!p) return
+      window.dispatchEvent(new CustomEvent("opencode:file-action", { detail: { action: "download", path: p } }))
+    }
     return (
       <div data-component="write-tool">
         <BasicTool
           {...props}
           icon="code-lines"
           defer
+          clickable={!pending() && downloadable()}
+          onTriggerClick={downloadable() ? download : undefined}
           trigger={
             <div data-component="write-trigger">
               <div data-slot="message-part-title-area">
@@ -1997,7 +2007,11 @@ ToolRegistry.register({
                   </div>
                 </Show>
               </div>
-              <div data-slot="message-part-actions">{/* <DiffChanges diff={diff} /> */}</div>
+              <div data-slot="message-part-actions">
+                <Show when={!pending() && downloadable()}>
+                  <Icon name="download" size="small" />
+                </Show>
+              </div>
             </div>
           }
         >

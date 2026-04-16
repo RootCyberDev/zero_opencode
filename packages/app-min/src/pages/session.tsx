@@ -385,8 +385,17 @@ export default function Page() {
 
   const pdf = (file: string) => /\.(pdf|html?)$/i.test(file)
 
-  const report = (cedula: string) =>
-    [
+  const pdfFilename = (cedula: string) => {
+    const now = new Date()
+    const date = now.toISOString().slice(0, 10).replace(/-/g, "")           // YYYYMMDD
+    const time = now.toTimeString().slice(0, 8).replace(/:/g, "")           // HHMMSS
+    const uid = Math.random().toString(36).slice(2, 6).padEnd(4, "0")       // 4 chars aleatorios
+    return `reporte-${cedula}-${date}-${time}-${uid}.pdf`
+  }
+
+  const report = (cedula: string) => {
+    const filename = pdfFilename(cedula)
+    return [
       `Crear un PDF ejecutivo premium de la persona con numero de cedula: ${cedula}.`,
 
       // — Flujo obligatorio —
@@ -422,11 +431,10 @@ export default function Page() {
       "El resultado debe sentirse como un documento de briefing premium producido por un disenador profesional, no como una plantilla de oficina.",
 
       // — Nombre del archivo —
-      "El nombre del archivo debe seguir exactamente este patron: reporte-ejecutivo-<cedula>-<timestamp6>.pdf.",
-      `Usa la cedula ${cedula} y un sufijo numerico de 6 digitos basado en timestamp para evitar colisiones.`,
-      "No reutilices ni sobrescribas PDFs existentes.",
+      `El nombre del archivo ya esta definido: "${filename}". Usa ese nombre exacto como parametro filename al llamar la tool pdf. No lo cambies, no lo reformules, no inventes otro nombre.`,
       "No menciones el nombre del archivo hasta recibir la respuesta real de la tool pdf.",
     ].join(" ")
+  }
 
   const download = (file: string) => {
     const token = server.current?.http.token
