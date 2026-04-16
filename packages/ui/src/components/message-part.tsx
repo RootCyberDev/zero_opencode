@@ -2353,19 +2353,21 @@ function registerPdf(name: string) {
   ToolRegistry.register({
     name,
     render(props) {
-      const i18n = useI18n()
       const pending = createMemo(() => props.status === "pending" || props.status === "running")
+      // props.metadata.path comes from ctx.metadata({ metadata: { path, filename } }) in pdf.ts
       const file = createMemo(() => {
         const value = props.metadata.path
         if (typeof value === "string" && value) return value
         return ""
       })
-      const title = createMemo(() => {
-        const value = props.metadata.filename || props.input.filename
-        if (typeof value === "string" && value) return value
-        return i18n.t("ui.basicTool.called", { tool: name })
+      const subtitle = createMemo(() => {
+        const path = file()
+        if (path) return getFilename(path)
+        // fallback to the raw filename input argument while the tool is still running
+        const arg = props.input.filename
+        if (typeof arg === "string" && arg) return getFilename(arg)
+        return ""
       })
-      const filename = createMemo(() => getFilename(file() || (typeof props.input.filename === "string" ? props.input.filename : "")))
       const click = (event?: MouseEvent) => {
         event?.preventDefault()
         event?.stopPropagation()
@@ -2381,25 +2383,11 @@ function registerPdf(name: string) {
           hideDetails
           clickable={!pending() && !!file()}
           onTriggerClick={click}
-          trigger={
-            <div data-component="task-tool-card">
-              <div data-slot="basic-tool-tool-info-structured">
-                <div data-slot="basic-tool-tool-info-main">
-                  <span data-component="task-tool-title" style={{ color: "var(--text-strong)" }}>
-                    <TextShimmer text={pending() ? "Generando PDF" : title()} active={pending()} />
-                  </span>
-                  <Show when={!pending() && filename()}>
-                    <span data-slot="basic-tool-tool-subtitle">{filename()}</span>
-                  </Show>
-                </div>
-              </div>
-              <Show when={!pending() && file()}>
-                <div data-component="task-tool-action">
-                  <Icon name="download" size="small" />
-                </div>
-              </Show>
-            </div>
-          }
+          trigger={{
+            title: pending() ? "Generando PDF" : "Reporte PDF",
+            subtitle: subtitle(),
+            action: !pending() && !!file() ? <Icon name="download" size="small" /> : undefined,
+          }}
         />
       )
     },

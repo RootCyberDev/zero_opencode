@@ -27,19 +27,31 @@ html {
   line-height: 1.55;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
+  /* CRITICAL: never let AI-generated CSS lock the document to one page */
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 body {
   margin: 0;
   background: white !important;
+  /* CRITICAL: fixed body height is the #1 cause of 1-page PDFs in WeasyPrint */
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 /* ── Width control ─────────────────────────────────────────────
    Hard-clamp everything to the A4 content area.
-   Nothing may overflow to the right.                          */
+   Nothing may overflow to the right.
+   CRITICAL: height must be auto — fixed height clips multi-page content. */
 .doc {
   width: var(--page-width);
   max-width: var(--page-width);
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 * {
@@ -199,6 +211,13 @@ pre, code {
 .sheet {
   width: var(--page-width);
   min-height: var(--page-height);
+  /* CRITICAL: use min-height, never height — fixed height clips content */
+  height: auto !important;
+  max-height: none !important;
+  /* CRITICAL: break-inside must be auto on .sheet — avoid-page prevents pagination */
+  overflow: visible !important;
+  break-inside: auto !important;
+  page-break-inside: auto !important;
   break-after: page;
   page-break-after: always;
   background: transparent;

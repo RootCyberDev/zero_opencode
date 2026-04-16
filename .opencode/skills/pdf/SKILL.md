@@ -619,6 +619,9 @@ Do not:
 - build ugly spreadsheet-style layouts
 - overload the PDF with thick borders, excessive bold, or giant color slabs
 - add `background`, `background-color`, or `background-image` to `.sheet`, `.doc`, `html`, or `body` — the renderer controls the page background; never override it
+- set `height` (fixed) on `html`, `body`, `.doc`, or `.sheet` — **this is the #1 cause of 1-page PDFs**. `height: 297mm` on `body` clips all content to one page in WeasyPrint. Always use `min-height` on `.sheet` only; never set `height` or `max-height` on root elements
+- set `overflow: hidden` on `html`, `body`, `.doc`, or `.sheet` — this discards content beyond the first page
+- use `break-inside: avoid-page` or `break-inside: avoid` on `.sheet` — this prevents WeasyPrint from paginating the sheet and causes content loss. Only apply `break-inside: avoid-page` to small bounded components (cards, callouts, table-wrap, chips)
 - create one `.sheet` per small section — always group sections so each sheet page feels visually dense
 - generate chips, badges, metric pills, or callout elements without paired SVG icons
 - omit the mandatory page-1 heading sequence: eyebrow → h1 → subtitle → summary → chip-row
