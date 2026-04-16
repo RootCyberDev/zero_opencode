@@ -405,3 +405,113 @@ with open("encrypted.pdf", "wb") as output:
 ## OpenCode-Specific Reminder
 
 If the user asks for a PDF document, do not just provide content. Generate the file, verify it exists, and return the exact filename or path.
+
+## OpenZero Runtime Notes For `pdf_python`
+
+When generating a premium custom PDF through the `pdf_python` tool in OpenZero:
+
+1. Return a complete, syntactically valid Python script.
+2. Prefer plain Python code, not markdown fences.
+3. Always write the final PDF to `OUTPUT`.
+4. Prefer ReportLab Platypus patterns over ad-hoc canvas text when document quality matters.
+5. Start from a valid skeleton using:
+   - `SimpleDocTemplate`
+   - `Paragraph`
+   - `Spacer`
+   - `Table`
+   - `TableStyle`
+   - `HRFlowable`
+   - `ParagraphStyle`
+6. Keep imports minimal and safe. Safe imports include:
+   - `reportlab`
+   - `pypdf`
+   - `pdfplumber`
+   - `math`
+   - `time`
+   - `datetime`
+   - `textwrap`
+   - `re`
+   - `json`
+   - `decimal`
+   - `statistics`
+   - `itertools`
+   - `collections`
+   - `typing`
+   - `pathlib`
+7. Do not rely on shell access, subprocesses, filesystem deletion, network access, or arbitrary OS operations.
+8. If a PDF generation attempt fails, fix the script and retry once with a simpler valid script. Do not enter a long trial-and-error loop.
+
+Recommended minimal start:
+
+```python
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+
+doc = SimpleDocTemplate(
+    OUTPUT,
+    pagesize=A4,
+    leftMargin=0.7 * inch,
+    rightMargin=0.7 * inch,
+    topMargin=0.7 * inch,
+    bottomMargin=0.7 * inch,
+)
+```
+
+## Implementation Workflow For Premium PDFs
+
+When using `pdf_python`, do not improvise the architecture from scratch every time. Build the script in this order:
+
+1. Imports
+   - Import only what is necessary.
+   - Prefer Platypus-based imports first.
+2. Document setup
+   - Create `SimpleDocTemplate(OUTPUT, pagesize=A4, ...)`.
+   - Define safe margins first.
+3. Style system
+   - Create a small set of named `ParagraphStyle` values.
+   - Reuse them consistently.
+4. Reusable helpers
+   - Add small helper functions for:
+     - `rule(...)`
+     - `para(...)`
+     - `table(...)`
+     - `facts(...)`
+     - `footer(...)`
+   - Keep helpers simple and deterministic.
+5. Story assembly
+   - Build a `story` list.
+   - Append sections in order.
+   - Prefer `KeepTogether` for heading + first body block.
+6. Build
+   - Call `doc.build(...)`.
+   - Ensure the PDF is written to `OUTPUT`.
+
+Do not jump straight into dozens of raw drawing calls. Start from a stable document skeleton first, then layer the editorial structure.
+
+## Code Writing Rules For `pdf_python`
+
+When writing Python for a premium PDF:
+
+- Write complete code, not fragments.
+- Keep the script syntactically simple.
+- Prefer a few clear helper functions over one huge monolith.
+- Use named styles only. Do not create anonymous style objects inline repeatedly.
+- Keep section titles short enough to wrap cleanly.
+- Wrap long cell content with `Paragraph`, not plain strings.
+- Prefer subtle lines, spacing, and hierarchy over heavy filled blocks.
+- Avoid giant bold paragraphs.
+- Avoid outdated table grids with thick borders.
+- Avoid visual noise like showing raw IDs as hero content.
+- Do not use investigative or police-like wording in executive reports unless the user explicitly asks for that tone.
+- Never leave visible markdown, LaTeX fragments, or placeholder syntax in the PDF.
+- Never return a script that you know is incomplete or structurally broken.
+
+## Starter Asset
+
+For premium PDFs, use the starter architecture from `skills/pdf/STARTER.py` as the base composition pattern, then adapt the visual system and content to the specific prompt.
+
+The purpose of the starter is not to freeze the design. It is to avoid low-quality code structure while preserving layout freedom.

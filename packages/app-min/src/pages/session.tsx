@@ -387,17 +387,22 @@ export default function Page() {
 
   const report = (cedula: string) =>
     [
-      `Crear un PDF ejecutivo de la persona con numero de cedula: ${cedula}.`,
-      "El resumen ejecutivo creado por IA debe ser diferente para cada persona y redactado en lenguaje natural.",
-      "Debes generar un reporte global de esa persona que un humano pueda leer rapidamente.",
-      "El PDF debe tener colores, jerarquia visual clara y tono ejecutivo.",
-      "No entregues un PDF con datos crudos o tablas simples sin interpretacion.",
-      "El resultado debe ser un resumen detallado ejecutivo usando el LLM configurado en este chat.",
+      `Crear un PDF ejecutivo premium de la persona con numero de cedula: ${cedula}.`,
+      "Primero carga y sigue la skill PDF activa.",
+      "Para este caso debes preferir pdf_python, no pdf_create, salvo que pdf_python falle de forma irrecuperable.",
+      "Usa como base estructural el starter de la skill PDF y adaptalo al caso; no generes un diseño estatico ni una plantilla generica.",
+      "El resumen ejecutivo creado por IA debe ser diferente para cada persona y redactado en lenguaje natural con tono corporativo de alta gerencia.",
+      "Debes generar un reporte global de esa persona que un humano pueda leer rapidamente, con jerarquia visual clara, buen espaciado y lectura escaneable.",
+      "Incluye portada breve si aplica, resumen ejecutivo, hechos clave, highlights, tablas limpias cuando ayuden, y timeline solo si aporta valor.",
+      "Usa A4, footer con paginacion, watermark sutil con ACCOUNT_ID y una composicion editorial moderna.",
+      "No entregues un PDF con datos crudos, tablas simples sin interpretacion, texto policiaco, o una estetica plana de oficina.",
+      "Escribe codigo Python completo y valido usando ReportLab Platypus, con estilos nombrados, helpers simples y story bien compuesta.",
       "Guarda el archivo final como PDF dentro del workspace.",
       "El nombre del archivo debe ser unico y obligatorio con este patron: reporte-ejecutivo-<cedula>-<timestamp6>.pdf.",
       `Usa exactamente la cedula ${cedula} y un sufijo temporal numerico de 6 digitos para evitar colisiones.`,
       "No reutilices nombres anteriores ni sobrescribas un PDF existente.",
-      "Responde con el nombre exacto del archivo generado.",
+      "Verifica que el PDF exista antes de responder.",
+      "Responde solo con el nombre exacto del archivo generado.",
     ].join(" ")
 
   const download = (file: string) => {

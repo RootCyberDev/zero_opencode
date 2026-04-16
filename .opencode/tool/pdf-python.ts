@@ -48,6 +48,33 @@ Available globals inside the executed code:
 - WATERMARK: account watermark text
 - ACCOUNT_ID: same watermark/account identifier
 
+Code requirements:
+- return a complete, syntactically valid Python script
+- do not return markdown fences unless unavoidable; fences are stripped, but plain code is preferred
+- always write the final PDF to OUTPUT
+- prefer Platypus and Paragraph/Table based layout for premium documents
+- use the composition pattern from the PDF skill starter at .opencode/skills/pdf/STARTER.py as the structural baseline, then adapt it to the prompt
+- avoid unnecessary imports; safe imports include reportlab, pypdf, pdfplumber, math, time, datetime, textwrap, re, json, decimal, statistics, itertools, collections, typing, pathlib
+
+Recommended starter shape:
+\`\`\`python
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+
+doc = SimpleDocTemplate(
+    OUTPUT,
+    pagesize=A4,
+    leftMargin=0.7 * inch,
+    rightMargin=0.7 * inch,
+    topMargin=0.7 * inch,
+    bottomMargin=0.7 * inch,
+)
+\`\`\`
+
 Return value should not be relied on; the file written to OUTPUT is the contract.`,
   args: {
     filename: tool.schema.string().describe("Desired output filename. It will be sanitized and forced to end in .pdf"),

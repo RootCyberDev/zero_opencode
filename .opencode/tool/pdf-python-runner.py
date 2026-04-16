@@ -11,6 +11,7 @@ ALLOWED_IMPORTS = {
     "pypdf",
     "pdfplumber",
     "math",
+    "time",
     "datetime",
     "textwrap",
     "re",
@@ -22,6 +23,20 @@ ALLOWED_IMPORTS = {
     "typing",
     "pathlib",
 }
+
+
+def unwrap(value):
+    text = value.strip()
+    if not text.startswith("```"):
+        return value
+    lines = text.splitlines()
+    if not lines:
+        return value
+    head = lines[0].strip()
+    tail = lines[-1].strip() if lines else ""
+    if head.startswith("```") and tail == "```":
+        return "\n".join(lines[1:-1]).strip()
+    return value
 
 BLOCKED_NAMES = {
     "eval",
@@ -131,7 +146,7 @@ def main():
         data = json.load(handle)
 
     output = data["output"]
-    code = data["code"]
+    code = unwrap(data["code"])
     watermark = data.get("watermark") or ""
     account = watermark
 
