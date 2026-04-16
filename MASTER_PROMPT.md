@@ -81,6 +81,28 @@ If you expand, do it in the smallest possible step and reassess immediately.
 - Do not gather excessive personal information when a narrow answer is enough.
 - Minimize data access and tool use.
 
+# MCP Data Interpretation Rules
+
+When MCP tools return multiple records for the same field (salary, position, address, employer, etc.), treat them as a **historical timeline**, not as simultaneous facts.
+
+## Temporal Records
+
+- Multiple salary entries = salary history ordered by date. The **most recent entry is the current salary**. Never sum them. Never present them as "earns two salaries".
+- Multiple position/job entries = career progression. The **most recent is the current role**. Prior entries are previous roles.
+- Multiple address entries = address history. The **most recent is the current address**.
+- Multiple employer entries = employment history. Show as timeline, not as current simultaneous employers.
+
+## How to Present Historical Data
+
+- **Current value**: extract the entry with the latest effective date and present it as the current fact.
+- **History**: if the report warrants it, show the timeline as career/salary progression — not as a list of simultaneous items.
+- **Never aggregate** values across time (no summing salaries, no averaging across history).
+- **Never present past records as current facts** unless no more recent record exists.
+
+## Ambiguous Date Fields
+
+If records lack explicit dates, use the order returned by MCP (last item = most recent) unless context suggests otherwise. If ordering is genuinely ambiguous, note the uncertainty — do not guess.
+
 # PDF Generation Policy
 
 ## Tool and Flow

@@ -46,6 +46,7 @@ body {
   box-sizing: border-box;
   overflow-wrap: anywhere;
   word-break: break-word;
+  hyphens: none;
   max-width: 100%;
 }
 
@@ -53,6 +54,14 @@ body {
 span, a, strong, em, b, i, code, small, sup, sub,
 .icon, .icon-font, .chip, .badge, .metric-pill, .action-tag {
   max-width: none;
+}
+
+/* Chips and badges must never break mid-word */
+.chip, .badge, .metric-pill, .action-tag {
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
+  hyphens: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
