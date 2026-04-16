@@ -6,29 +6,22 @@
     <style>
       @font-face {
         font-family: "PdfSans";
-        src: url("./.opencode/assets/fonts/PdfSans-Regular.woff2") format("woff2");
-        font-weight: 400;
-        font-style: normal;
-      }
-
-      @font-face {
-        font-family: "PdfSans";
-        src: url("./.opencode/assets/fonts/PdfSans-Semibold.woff2") format("woff2");
-        font-weight: 600;
+        src: url("./.opencode/assets/fonts/PdfSans-Variable.ttf") format("truetype");
+        font-weight: 200 800;
         font-style: normal;
       }
 
       @font-face {
         font-family: "PdfSerif";
-        src: url("./.opencode/assets/fonts/PdfSerif-Regular.woff2") format("woff2");
-        font-weight: 400;
+        src: url("./.opencode/assets/fonts/PdfSerif-Variable.ttf") format("truetype");
+        font-weight: 200 900;
         font-style: normal;
       }
 
       @font-face {
-        font-family: "PdfSerif";
-        src: url("./.opencode/assets/fonts/PdfSerif-Semibold.woff2") format("woff2");
-        font-weight: 600;
+        font-family: "PdfIcons";
+        src: url("./.opencode/assets/fonts/PdfIcons-Outlined.woff2") format("woff2");
+        font-weight: 400;
         font-style: normal;
       }
 
@@ -75,6 +68,7 @@
       .hero {
         padding: 10mm 0 6mm;
         border-bottom: 1px solid var(--line);
+        break-inside: avoid-page;
       }
 
       .eyebrow {
@@ -105,6 +99,7 @@
         background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 68%, white 32%) 0%, var(--accent-soft) 100%);
         border: 1px solid color-mix(in srgb, var(--accent) 18%, white 82%);
         border-radius: 4mm;
+        break-inside: avoid-page;
       }
 
       .grid {
@@ -112,6 +107,7 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 4mm 7mm;
         margin: 8mm 0;
+        break-inside: avoid-page;
       }
 
       .card {
@@ -136,6 +132,7 @@
 
       section {
         margin-top: 9mm;
+        break-inside: avoid-page;
       }
 
       h2 {
@@ -143,6 +140,7 @@
         color: var(--primary);
         font-size: 13pt;
         font-weight: 700;
+        break-after: avoid-page;
       }
 
       .band {
@@ -183,55 +181,142 @@
         color: var(--muted);
         font-size: 8.5pt;
       }
+
+      .chip-row,
+      .badge-row,
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2.5mm;
+        margin-top: 4mm;
+      }
+
+      .chip,
+      .badge,
+      .metric-pill,
+      .action-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 2mm;
+        min-height: 8mm;
+        padding: 1.6mm 3.2mm;
+        border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--accent) 18%, white 82%);
+        background: color-mix(in srgb, var(--accent-soft) 72%, white 28%);
+        color: var(--primary);
+        font-size: 8.5pt;
+        line-height: 1;
+      }
+
+      .badge {
+        border-radius: 3mm;
+      }
+
+      .action-tag {
+        background: var(--primary);
+        color: white;
+      }
+
+      .icon,
+      .icon-font {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 4.5mm;
+        height: 4.5mm;
+        flex: 0 0 auto;
+      }
+
+      .icon-font {
+        font-family: "PdfIcons", "PdfSans", sans-serif;
+        font-size: 9pt;
+      }
+
+      .icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .fact-grid,
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4mm 7mm;
+      }
+
+      .callout {
+        margin-top: 5mm;
+        padding: 5mm 6mm;
+        border-left: 1.2mm solid var(--accent);
+        background: color-mix(in srgb, var(--accent-soft) 55%, white 45%);
+        border-radius: 0 3mm 3mm 0;
+      }
+
+      .table-wrap {
+        margin-top: 4mm;
+        break-inside: avoid-page;
+      }
     </style>
   </head>
   <body>
     <div class="watermark"><span>${ACCOUNT_ID}</span></div>
     <main class="doc">
-      <header class="hero">
-        <div class="eyebrow">Executive Report</div>
-        <h1>Título del documento</h1>
-        <p class="subtitle">Subtítulo o contexto ejecutivo</p>
-        <div class="summary">
-          <strong>Resumen ejecutivo.</strong> Introducción breve, clara y editorialmente cuidada.
-        </div>
-      </header>
+      <section class="sheet">
+        <header class="hero">
+          <div class="eyebrow">Executive Report</div>
+          <h1>Título del documento</h1>
+          <p class="subtitle">Subtítulo o contexto ejecutivo</p>
+          <div class="summary">
+            <strong>Resumen ejecutivo.</strong> Introducción breve, clara y editorialmente cuidada.
+          </div>
+          <div class="chip-row">
+            <span class="chip"><span class="icon-font">A</span><span>Chip editorial</span></span>
+            <span class="badge"><span class="icon-font">B</span><span>Badge sobrio</span></span>
+            <span class="metric-pill"><span class="icon-font">C</span><span>Métrica</span></span>
+            <span class="action-tag"><span class="icon-font">D</span><span>Etiqueta visual</span></span>
+          </div>
+        </header>
 
-      <section>
-        <h2>Hechos clave</h2>
-        <div class="grid">
-          <div class="card"><span class="label">Campo</span><span class="value">Valor</span></div>
-          <div class="card"><span class="label">Campo</span><span class="value">Valor</span></div>
-        </div>
+        <section>
+          <h2>Hechos clave</h2>
+          <div class="grid">
+            <div class="card"><span class="label">Campo</span><span class="value">Valor</span></div>
+            <div class="card"><span class="label">Campo</span><span class="value">Valor</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Hallazgos</h2>
+          <div class="band">
+            <ul class="clean">
+              <li>Punto de alto valor</li>
+              <li>Punto de alto valor</li>
+              <li>Punto de alto valor</li>
+            </ul>
+          </div>
+        </section>
       </section>
 
-      <section>
-        <h2>Hallazgos</h2>
-        <div class="band">
-          <ul class="clean">
-            <li>Punto de alto valor</li>
-            <li>Punto de alto valor</li>
-            <li>Punto de alto valor</li>
-          </ul>
-        </div>
-      </section>
-
-      <section>
-        <h2>Tabla editorial</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Campo</th>
-              <th>Detalle</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Campo</td>
-              <td>Valor detallado con buen wrapping.</td>
-            </tr>
-          </tbody>
-        </table>
+      <section class="sheet">
+        <section>
+          <h2>Tabla editorial</h2>
+          <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Campo</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Campo</td>
+                <td>Valor detallado con buen wrapping.</td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+        </section>
       </section>
     </main>
   </body>
