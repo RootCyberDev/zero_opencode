@@ -1,24 +1,3 @@
-@font-face {
-  font-family: "PdfSans";
-  src: url("./.opencode/assets/fonts/PdfSans-Variable.ttf") format("truetype");
-  font-weight: 200 800;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "PdfSerif";
-  src: url("./.opencode/assets/fonts/PdfSerif-Variable.ttf") format("truetype");
-  font-weight: 200 900;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "PdfIcons";
-  src: url("./.opencode/assets/fonts/PdfIcons-Outlined.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-}
-
 :root {
   --ink: #0f172a;
   --muted: #475569;
@@ -59,13 +38,9 @@ h6 {
 }
 
 .glyph {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1em;
-  height: 1em;
+  display: inline-block;
   max-width: none;
-  overflow: hidden;
+  overflow: visible;
   vertical-align: -0.125em;
   color: currentColor;
   font-family: "PdfIcons";
@@ -73,55 +48,69 @@ h6 {
   font-style: normal;
   font-weight: 400;
   line-height: 1;
-  font-variation-settings: "FILL" 0, "GRAD" 0, "opsz" 24, "wght" 400;
-  font-feature-settings: "liga" 1, "calt" 1;
-  font-variant-ligatures: common-ligatures;
   speak: none;
 }
 
 .glyph::before {
-  content: var(--glyph);
+  display: inline-block;
+  color: currentColor;
+  font-family: "PdfIcons";
+  font-size: 1em;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  speak: none;
 }
 
-.glyph-user { --glyph: "person"; }
-.glyph-users { --glyph: "groups"; }
-.glyph-id-card { --glyph: "badge"; }
-.glyph-shield { --glyph: "shield"; }
-.glyph-award { --glyph: "workspace_premium"; }
-.glyph-map-pin { --glyph: "pin_drop"; }
-.glyph-home { --glyph: "home"; }
-.glyph-globe { --glyph: "public"; }
-.glyph-briefcase { --glyph: "work"; }
-.glyph-building { --glyph: "apartment"; }
-.glyph-dollar-sign { --glyph: "payments"; }
-.glyph-trending-up { --glyph: "trending_up"; }
-.glyph-bar-chart { --glyph: "bar_chart"; }
-.glyph-alert-triangle { --glyph: "warning"; }
-.glyph-alert-circle { --glyph: "info"; }
-.glyph-check-circle { --glyph: "check_circle"; }
-.glyph-x-circle { --glyph: "close"; }
-.glyph-scale { --glyph: "balance"; }
-.glyph-graduation-cap { --glyph: "school"; }
-.glyph-book-open { --glyph: "menu_book"; }
-.glyph-file-text { --glyph: "description"; }
-.glyph-folder { --glyph: "folder"; }
-.glyph-phone { --glyph: "call"; }
-.glyph-mail { --glyph: "mail"; }
-.glyph-wifi { --glyph: "wifi"; }
-.glyph-calendar { --glyph: "calendar_month"; }
-.glyph-clock { --glyph: "schedule"; }
-.glyph-truck { --glyph: "local_shipping"; }
-.glyph-package { --glyph: "inventory_2"; }
-.glyph-activity { --glyph: "monitoring"; }
-.glyph-heart { --glyph: "favorite"; }
-.glyph-search { --glyph: "search"; }
-.glyph-info { --glyph: "info"; }
-.glyph-star { --glyph: "star"; }
-.glyph-settings { --glyph: "settings"; }
+.glyph-user::before { content: "\e7fd"; }
+.glyph-users::before { content: "\f233"; }
+.glyph-id-card::before { content: "\ea67"; }
+.glyph-shield::before { content: "\e9e0"; }
+.glyph-award::before { content: "\e7af"; }
+.glyph-map-pin::before { content: "\e55e"; }
+.glyph-home::before { content: "\e88a"; }
+.glyph-globe::before { content: "\e80b"; }
+.glyph-briefcase::before { content: "\e8f9"; }
+.glyph-building::before { content: "\xea40"; }
+.glyph-dollar-sign::before { content: "\xef63"; }
+.glyph-trending-up::before { content: "\e8e5"; }
+.glyph-bar-chart::before { content: "\e26b"; }
+.glyph-alert-triangle::before { content: "\e002"; }
+.glyph-alert-circle::before { content: "\e001"; }
+.glyph-check-circle::before { content: "\e86c"; }
+.glyph-x-circle::before { content: "\e14c"; }
+.glyph-scale::before { content: "\eaf6"; }
+.glyph-graduation-cap::before { content: "\e80c"; }
+.glyph-book-open::before { content: "\xea19"; }
+.glyph-file-text::before { content: "\e873"; }
+.glyph-folder::before { content: "\e2c7"; }
+.glyph-phone::before { content: "\e0b0"; }
+.glyph-mail::before { content: "\e0be"; }
+.glyph-wifi::before { content: "\e63e"; }
+.glyph-calendar::before { content: "\ebcc"; }
+.glyph-clock::before { content: "\e192"; }
+.glyph-truck::before { content: "\e558"; }
+.glyph-package::before { content: "\e1a1"; }
+.glyph-activity::before { content: "\f190"; }
+.glyph-heart::before { content: "\e87d"; }
+.glyph-search::before { content: "\e8b6"; }
+.glyph-info::before { content: "\e88e"; }
+.glyph-star::before { content: "\e838"; }
+.glyph-settings::before { content: "\e8b8"; }
 
 .chart {
   margin: 5mm 0;
   break-inside: avoid-page;
+}
+
+.chart__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.chart__svg text {
+  font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
 }
 
 .chart__title {

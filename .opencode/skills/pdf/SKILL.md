@@ -147,6 +147,7 @@ The document may use any of these visual devices when they improve clarity:
 ### Glyph Library
 
 The renderer loads `.opencode/skills/pdf/pdf-ui.css` automatically. Use the glyph classes from that library instead of embedding long SVG paths for routine icons.
+Those glyphs are backed by the local `PdfIcons` font with fixed codepoints, so the HTML stays compact while still rendering reliably in PDF.
 
 - Use `<span class="glyph glyph-user"></span>` or `<i class="glyph glyph-user"></i>`.
 - Use glyphs in chips, badges, metric pills, fact labels, callout headers, and section labels.
@@ -323,35 +324,29 @@ When the data includes numerical, time-based, or comparative values, render a ch
 
 ### Bar chart
 
-Use `chart--bar` when the category order matters. The library handles layout; you only provide `--bars`, `--max`, and one `--h` value per bar item.
+Use `chart--bar` when the category order matters. The library uses inline SVG bars; you provide a compact `svg` with one `rect` per data point and keep the math proportional.
 
 **Math:** `barHeight = round((value / maxValue) * 110)px`
 
 ```html
-<div class="chart chart--bar" style="--bars:4; --max:2500;">
+<div class="chart chart--bar">
   <div class="chart__title">Evolución Salarial IESS (USD)</div>
-  <div class="chart__bars">
-    <div class="chart__item">
-      <div class="chart__fill" style="--h:25px;"></div>
-      <div class="chart__value">$567</div>
-      <div class="chart__label">2021</div>
-    </div>
-    <div class="chart__item">
-      <div class="chart__fill" style="--h:37px;"></div>
-      <div class="chart__value">$850</div>
-      <div class="chart__label">2022</div>
-    </div>
-    <div class="chart__item">
-      <div class="chart__fill" style="--h:53px;"></div>
-      <div class="chart__value">$1,200</div>
-      <div class="chart__label">2023</div>
-    </div>
-    <div class="chart__item">
-      <div class="chart__fill" style="--h:110px;"></div>
-      <div class="chart__value">$2,500</div>
-      <div class="chart__label">2024</div>
-    </div>
-  </div>
+  <svg class="chart__svg" viewBox="0 0 420 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Evolución Salarial IESS">
+    <line x1="30" y1="18" x2="30" y2="150" stroke="#d9e2ec" stroke-width="1" />
+    <line x1="30" y1="150" x2="400" y2="150" stroke="#d9e2ec" stroke-width="1" />
+    <rect x="48" y="125" width="52" height="25" rx="3" fill="#1d4ed8" />
+    <rect x="138" y="113" width="52" height="37" rx="3" fill="#1d4ed8" />
+    <rect x="228" y="97" width="52" height="53" rx="3" fill="#1d4ed8" />
+    <rect x="318" y="40" width="52" height="110" rx="3" fill="#1d4ed8" />
+    <text x="74" y="118" text-anchor="middle" font-size="10" fill="#102a43" font-weight="700">$567</text>
+    <text x="164" y="106" text-anchor="middle" font-size="10" fill="#102a43" font-weight="700">$850</text>
+    <text x="254" y="90" text-anchor="middle" font-size="10" fill="#102a43" font-weight="700">$1,200</text>
+    <text x="344" y="33" text-anchor="middle" font-size="10" fill="#102a43" font-weight="700">$2,500</text>
+    <text x="74" y="168" text-anchor="middle" font-size="9" fill="#475569">2021</text>
+    <text x="164" y="168" text-anchor="middle" font-size="9" fill="#475569">2022</text>
+    <text x="254" y="168" text-anchor="middle" font-size="9" fill="#475569">2023</text>
+    <text x="344" y="168" text-anchor="middle" font-size="9" fill="#475569">2024</text>
+  </svg>
   <div class="chart__note">Fuente: registros de afiliación IESS — salario más reciente: $2,500</div>
 </div>
 ```
@@ -364,30 +359,29 @@ Validation:
 
 ### Horizontal bar chart
 
-Use `chart--hbar` when labels are long or when a ranked comparison reads better horizontally.
+Use `chart--hbar` when labels are long or when a ranked comparison reads better horizontally. Keep it as inline SVG so the bar lengths stay exact in PDF.
 
 **Math:** `width = round((value / maxValue) * 100)%`
 
 ```html
 <div class="chart chart--hbar">
   <div class="chart__title">Distribución de Resultados OSINT</div>
-  <div class="chart__rows">
-    <div class="chart__row">
-      <div class="chart__label">Documentos PDF</div>
-      <div class="chart__track"><div class="chart__fill" style="--w:26%;"></div></div>
-      <div class="chart__value">6</div>
-    </div>
-    <div class="chart__row">
-      <div class="chart__label">Redes Sociales</div>
-      <div class="chart__track"><div class="chart__fill" style="--w:100%;"></div></div>
-      <div class="chart__value">23</div>
-    </div>
-    <div class="chart__row">
-      <div class="chart__label">Otros</div>
-      <div class="chart__track"><div class="chart__fill" style="--w:65%;"></div></div>
-      <div class="chart__value">15</div>
-    </div>
-  </div>
+  <svg class="chart__svg" viewBox="0 0 420 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Distribución de resultados OSINT">
+    <text x="16" y="30" font-size="10" fill="#475569">Documentos PDF</text>
+    <rect x="128" y="20" width="244" height="12" rx="999" fill="#f8fafc" stroke="#d9e2ec" />
+    <rect x="128" y="20" width="57" height="12" rx="999" fill="#1d4ed8" />
+    <text x="382" y="30" font-size="10" fill="#102a43" font-weight="700">6</text>
+
+    <text x="16" y="64" font-size="10" fill="#475569">Redes Sociales</text>
+    <rect x="128" y="54" width="244" height="12" rx="999" fill="#f8fafc" stroke="#d9e2ec" />
+    <rect x="128" y="54" width="244" height="12" rx="999" fill="#1d4ed8" />
+    <text x="382" y="64" font-size="10" fill="#102a43" font-weight="700">23</text>
+
+    <text x="16" y="98" font-size="10" fill="#475569">Otros</text>
+    <rect x="128" y="88" width="244" height="12" rx="999" fill="#f8fafc" stroke="#d9e2ec" />
+    <rect x="128" y="88" width="159" height="12" rx="999" fill="#1d4ed8" />
+    <text x="382" y="98" font-size="10" fill="#102a43" font-weight="700">15</text>
+  </svg>
   <div class="chart__note">Fuente: búsqueda OSINT — 48 resultados totales</div>
 </div>
 ```

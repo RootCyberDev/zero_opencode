@@ -108,9 +108,6 @@ The filename returned by this tool is the only valid PDF path. Do not announce a
       cwd: ctx.directory,
       stderr: "pipe",
       stdout: "pipe",
-      env: {
-        PYTHONNOUSERSITE: "1",
-      },
     })
 
     // 120-second hard timeout — if WeasyPrint hangs (e.g. on unreachable resources),

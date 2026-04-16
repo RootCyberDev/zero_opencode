@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import base64
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -277,9 +279,61 @@ pre, code {
 """
 
 UI_CSS = Path(__file__).resolve().parents[1] / "skills/pdf/pdf-ui.css"
+ICONS = {
+    "glyph-user": 0xE7FD,
+    "glyph-users": 0xF233,
+    "glyph-id-card": 0xEA67,
+    "glyph-shield": 0xE9E0,
+    "glyph-award": 0xE7AF,
+    "glyph-map-pin": 0xE55E,
+    "glyph-home": 0xE88A,
+    "glyph-globe": 0xE80B,
+    "glyph-briefcase": 0xE8F9,
+    "glyph-building": 0xEA40,
+    "glyph-dollar-sign": 0xEF63,
+    "glyph-trending-up": 0xE8E5,
+    "glyph-bar-chart": 0xE26B,
+    "glyph-alert-triangle": 0xE002,
+    "glyph-alert-circle": 0xE001,
+    "glyph-check-circle": 0xE86C,
+    "glyph-x-circle": 0xE14C,
+    "glyph-scale": 0xEAF6,
+    "glyph-graduation-cap": 0xE80C,
+    "glyph-book-open": 0xEA19,
+    "glyph-file-text": 0xE873,
+    "glyph-folder": 0xE2C7,
+    "glyph-phone": 0xE0B0,
+    "glyph-mail": 0xE0BE,
+    "glyph-wifi": 0xE63E,
+    "glyph-calendar": 0xEBCC,
+    "glyph-clock": 0xE192,
+    "glyph-truck": 0xE558,
+    "glyph-package": 0xE1A1,
+    "glyph-activity": 0xF190,
+    "glyph-heart": 0xE87D,
+    "glyph-search": 0xE8B6,
+    "glyph-info": 0xE88E,
+    "glyph-star": 0xE838,
+    "glyph-settings": 0xE8B8,
+}
 
-if UI_CSS.exists():
-    BASE_CSS = BASE_CSS + "\n" + UI_CSS.read_text(encoding="utf-8")
+
+def fill_icons(html):
+    pattern = re.compile(
+        r'<(?P<tag>span|i)(?P<attrs>[^>]*?)class=(?P<quote>["\'])(?P<cls>[^"\']*)(?P=quote)(?P<tail>[^>]*)>\s*</(?P=tag)>',
+        re.IGNORECASE,
+    )
+
+    def repl(match):
+        cls = match.group("cls").split()
+        icon = next((item for item in cls if item in ICONS), None)
+        if not icon:
+            return match.group(0)
+        keep = [item for item in cls if item != icon]
+        attrs = f'{match.group("attrs")}class={match.group("quote")}{" ".join(keep)}{match.group("quote")}{match.group("tail")}'
+        return f'<{match.group("tag")}{attrs}>{chr(ICONS[icon])}</{match.group("tag")}>'
+
+    return pattern.sub(repl, html)
 
 
 def main():
@@ -293,13 +347,113 @@ def main():
     css = data.get("css") or ""
     output = data["output"]
     base = data["base"]
+    html = fill_icons(html)
+    root_path = Path(base).resolve()
+    root = root_path.as_uri()
+    font = root_path / ".opencode" / "assets" / "fonts"
+    sans = base64.b64encode((font / "PdfSans-Variable.ttf").read_bytes()).decode()
+    serif = base64.b64encode((font / "PdfSerif-Variable.ttf").read_bytes()).decode()
+    icons = base64.b64encode((font / "PdfIcons-Outlined.ttf").read_bytes()).decode()
+    faces = f"""
+@font-face {{
+  font-family: "PdfSans";
+  src: url("data:font/ttf;base64,{sans}") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}}
+
+@font-face {{
+  font-family: "PdfSerif";
+  src: url("data:font/ttf;base64,{serif}") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}}
+
+@font-face {{
+  font-family: "PdfIcons";
+  src: url("data:font/ttf;base64,{icons}") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}}
+"""
+    glyphs = """
+.glyph {
+  display: inline-block;
+  max-width: none;
+  overflow: visible;
+  vertical-align: -0.125em;
+  color: currentColor;
+  font-family: "PdfIcons" !important;
+  font-size: 1em;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  speak: none;
+}
+
+.glyph::before {
+  display: inline-block;
+  color: currentColor;
+  font-family: "PdfIcons" !important;
+  font-size: 1em;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  speak: none;
+}
+
+.glyph-user::before { content: "\\e7fd" !important; }
+.glyph-users::before { content: "\\f233" !important; }
+.glyph-id-card::before { content: "\\ea67" !important; }
+.glyph-shield::before { content: "\\e9e0" !important; }
+.glyph-award::before { content: "\\e7af" !important; }
+.glyph-map-pin::before { content: "\\e55e" !important; }
+.glyph-home::before { content: "\\e88a" !important; }
+.glyph-globe::before { content: "\\e80b" !important; }
+.glyph-briefcase::before { content: "\\e8f9" !important; }
+.glyph-building::before { content: "\\ea40" !important; }
+.glyph-dollar-sign::before { content: "\\ef63" !important; }
+.glyph-trending-up::before { content: "\\e8e5" !important; }
+.glyph-bar-chart::before { content: "\\e26b" !important; }
+.glyph-alert-triangle::before { content: "\\e002" !important; }
+.glyph-alert-circle::before { content: "\\e001" !important; }
+.glyph-check-circle::before { content: "\\e86c" !important; }
+.glyph-x-circle::before { content: "\\e14c" !important; }
+.glyph-scale::before { content: "\\eaf6" !important; }
+.glyph-graduation-cap::before { content: "\\e80c" !important; }
+.glyph-book-open::before { content: "\\ea19" !important; }
+.glyph-file-text::before { content: "\\e873" !important; }
+.glyph-folder::before { content: "\\e2c7" !important; }
+.glyph-phone::before { content: "\\e0b0" !important; }
+.glyph-mail::before { content: "\\e0be" !important; }
+.glyph-wifi::before { content: "\\e63e" !important; }
+.glyph-calendar::before { content: "\\ebcc" !important; }
+.glyph-clock::before { content: "\\e192" !important; }
+.glyph-truck::before { content: "\\e558" !important; }
+.glyph-package::before { content: "\\e1a1" !important; }
+.glyph-activity::before { content: "\\f190" !important; }
+.glyph-heart::before { content: "\\e87d" !important; }
+.glyph-search::before { content: "\\e8b6" !important; }
+.glyph-info::before { content: "\\e88e" !important; }
+.glyph-star::before { content: "\\e838" !important; }
+.glyph-settings::before { content: "\\e8b8" !important; }
+"""
+    block = f"<style>{faces}{glyphs}</style>"
+    if "</head>" in html:
+        html = html.replace("</head>", f"{block}</head>", 1)
+    elif "<head>" in html:
+        html = html.replace("<head>", f"<head>{block}", 1)
+    else:
+        html = f"{block}{html}"
+    ui = UI_CSS.read_text(encoding="utf-8")
 
     os.makedirs(os.path.dirname(output), exist_ok=True)
-    base_css = CSS(string=BASE_CSS, base_url=base)
-    extra_css = CSS(string=css, base_url=base) if css else None
-    HTML(string=html, base_url=base, url_fetcher=safe_url_fetcher).write_pdf(
+    base_css = CSS(string=BASE_CSS, base_url=root)
+    ui_css = CSS(string=ui, base_url=root) if UI_CSS.exists() else None
+    extra_css = CSS(string=css, base_url=root) if css else None
+    HTML(string=html, base_url=root, url_fetcher=safe_url_fetcher).write_pdf(
         output,
-        stylesheets=[base_css, extra_css] if extra_css else [base_css],
+        stylesheets=[sheet for sheet in [base_css, ui_css, extra_css] if sheet],
     )
 
     if not os.path.exists(output):
