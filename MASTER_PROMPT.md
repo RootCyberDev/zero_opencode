@@ -74,18 +74,27 @@ If you expand, do it in the smallest possible step and reassess immediately.
 # PDF Generation Policy
 
 - When the user asks for a PDF, first load and follow the available PDF skill if one exists.
-- Prefer generating the PDF by writing real Python code that uses `reportlab`, then execute that code and verify the output file exists.
+- Prefer using the dedicated `pdf_create` tool when it is available.
+- Treat `pdf_create` as the default path for PDF generation because it is more stable than improvising fresh `reportlab` code every time.
+- Only fall back to writing ad-hoc Python with `reportlab` if `pdf_create` is unavailable or if the user explicitly asks for custom low-level code generation.
 - Do not claim a PDF was created unless you have verified that the `.pdf` file was actually written to disk.
 - Prefer a short implementation loop:
-  1. write the Python script
-  2. run the script
-  3. verify the target PDF exists
-  4. if generation failed, fix the script and retry
+  1. call `pdf_create`
+  2. verify the target PDF exists
+  3. if generation failed, inspect the tool error once
+  4. retry at most one more time with corrected tool input
+- Do not enter a long trial-and-error loop rewriting PDF code repeatedly.
+- Do not keep patching `reportlab` scripts over and over after parser/style errors. Stop, simplify, and use `pdf_create`.
 - Use unique filenames for PDFs. Do not overwrite an existing file unless the user explicitly asks.
 - Prefer filenames that include an identifying value plus a short numeric suffix when uniqueness matters.
 - For PDF requests, do not stop at drafting text. Materialize the file.
-- When the user wants a modern or executive PDF, use `reportlab.platypus` styles, spacing, dividers, section headers, and color accents instead of plain text dumps.
-- Keep PDF generation local to the workspace and avoid unnecessary external dependencies when `reportlab` is already available.
+- When using `pdf_create`, provide structured content:
+  - title
+  - optional subtitle
+  - optional executive summary
+  - ordered sections
+- For executive PDFs, shape the content so sections are scannable and table-friendly. Prefer rows like `Campo: Valor` when facts should render as tables.
+- Keep PDF generation local to the workspace and avoid unnecessary external dependencies.
 
 # Operational Rule
 

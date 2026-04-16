@@ -1,6 +1,6 @@
 ---
 name: pdf
-description: Use this skill whenever the user wants to create, modify, merge, inspect, or export PDF files. In OpenCode, prefer writing real Python code with reportlab for PDF generation, executing it, and verifying that the final .pdf file exists before claiming success.
+description: Use this skill whenever the user wants to create, modify, merge, inspect, or export PDF files. In OpenCode, prefer the dedicated `pdf_create` tool for generation. Only fall back to custom Python with reportlab when the tool is unavailable or the user explicitly wants low-level custom code.
 ---
 
 # PDF Skill
@@ -8,13 +8,29 @@ description: Use this skill whenever the user wants to create, modify, merge, in
 ## OpenCode Rules
 
 - When the user asks for a PDF, create the actual file in the workspace.
-- Prefer Python with `reportlab` for PDF generation.
-- Write the script to disk, execute it, and verify the `.pdf` file exists.
-- If generation fails, inspect the error, fix the script, and retry.
+- Prefer the `pdf_create` tool for generation.
+- Pass structured content to `pdf_create` instead of generating raw HTML or long ad-hoc Python.
+- Verify that the `.pdf` file exists before claiming success.
+- If generation fails, inspect the error, correct the tool input once, and retry at most one more time.
+- Do not get stuck in repeated script rewrites for style/parser issues.
 - Use unique filenames and avoid overwriting an existing PDF unless explicitly requested.
-- For polished output, prefer `reportlab.platypus` components and custom styles over plain `canvas.drawString` output.
+- For polished output, shape the content for an executive layout:
+  - concise summary
+  - strong section headings
+  - table-friendly facts as `Campo: Valor`
+  - short readable paragraphs
 
 ## Preferred Workflow
+
+```text
+1. Call pdf_create with structured content
+2. Confirm target.pdf exists
+3. Return exact filename or path
+```
+
+## Fallback Workflow
+
+Only if `pdf_create` is unavailable or the user explicitly asks for custom code:
 
 ```text
 1. Write python script into workspace
@@ -33,56 +49,30 @@ description: Use this skill whenever the user wants to create, modify, merge, in
 
 When the user wants a modern, executive, or visually polished PDF:
 
-- use `SimpleDocTemplate`
-- use `Paragraph`, `Spacer`, `HRFlowable`, `Table`, `TableStyle`
-- define custom `ParagraphStyle` values
-- use accent colors, strong title hierarchy, whitespace, and section blocks
+- prefer `pdf_create`
+- provide structure that can render well in the built-in template
+- use compact executive prose, not long raw dumps
+- use rows like `Campo: Valor` when tabular rendering is appropriate
 - keep the document readable and scannable
 
-## ReportLab Example Pattern
+## Preferred Tool Input Pattern
 
-```python
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
-
-doc = SimpleDocTemplate(
-    "output.pdf",
-    pagesize=letter,
-    leftMargin=0.65 * inch,
-    rightMargin=0.65 * inch,
-    topMargin=0.5 * inch,
-    bottomMargin=0.5 * inch,
-)
-
-styles = getSampleStyleSheet()
-title_style = ParagraphStyle(
-    "Title",
-    fontSize=24,
-    fontName="Helvetica-Bold",
-    textColor=colors.HexColor("#0B1F3A"),
-    alignment=TA_CENTER,
-)
-body_style = ParagraphStyle(
-    "Body",
-    fontSize=10,
-    leading=14,
-    alignment=TA_JUSTIFY,
-    textColor=colors.HexColor("#1E293B"),
-)
-
-story = [
-    Paragraph("Executive Title", title_style),
-    Spacer(1, 12),
-    HRFlowable(width="100%", thickness=1.2, color=colors.HexColor("#1A73C8")),
-    Spacer(1, 12),
-    Paragraph("Structured content goes here.", body_style),
-]
-
-doc.build(story)
+```text
+filename: reporte-ejecutivo-cedula-123456.pdf
+title: Perfil Ejecutivo
+subtitle: Persona identificada por cedula 0999999999
+summary: Sintesis ejecutiva corta y clara
+sections:
+- heading: Identificacion
+  body: |
+    Cedula: 0999999999
+    Nombre: Nombre Apellido
+    Estado: Activo
+- heading: Hallazgos relevantes
+  body: |
+    Parrafo corto de contexto.
+    Riesgo principal: Bajo
+    Actividad relevante: ...
 ```
 
 ## Critical Reminder
