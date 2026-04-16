@@ -569,11 +569,17 @@ Icons are mandatory in:
 
 Always use inline SVG for icons — they are reliable in WeasyPrint.
 
-**CRITICAL — icon sizing rule:** Always put `class="icon"` directly on the `<svg>` element, never on a wrapping `<span>`. If the SVG is inside a `<span>`, the span's `width`/`height` CSS cannot constrain the SVG, and WeasyPrint will render it at full container width — a giant icon that overlaps text.
+**CRITICAL — icon sizing rule:** Always put `class="icon"` directly on the `<svg>` element AND always include explicit `width` and `height` attributes. Never put `class="icon"` on a wrapping `<span>`. If the SVG is inside a `<span>`, the span's `width`/`height` CSS cannot constrain the SVG, and WeasyPrint will render it at full container width — a giant icon that overlaps text.
+
+This rule applies everywhere an SVG is used as an icon:
+- chips, badges, metric-pills
+- callout headers and section labels
+- fact-grid and metric-grid labels
+- any inline icon next to text
 
 ```html
-<!-- CORRECT — class="icon" on the SVG itself -->
-<svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+<!-- CORRECT — class="icon" on the SVG itself, with explicit width/height -->
+<svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
 </svg>
 
@@ -583,6 +589,18 @@ Always use inline SVG for icons — they are reliable in WeasyPrint.
     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
   </svg>
 </span>
+
+<!-- WRONG — SVG in callout header without class="icon" or explicit dimensions -->
+<div class="callout-header">
+  <svg viewBox="0 0 24 24" fill="currentColor">...</svg>
+  <h3>Title</h3>
+</div>
+
+<!-- CORRECT — callout header icon -->
+<div class="callout-header">
+  <svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">...</svg>
+  <h3>Title</h3>
+</div>
 ```
 
 Do NOT use letter placeholders (A, B, C, D) as icon stand-ins. Use real SVG paths.
@@ -606,6 +624,7 @@ Do not:
 - omit the mandatory page-1 heading sequence: eyebrow → h1 → subtitle → summary → chip-row
 - produce a simpler document than the STARTER — the starter is the minimum richness level, not a ceiling
 - place a `<table>` inside a `.grid`, `.fact-grid`, `.metric-grid`, or any multi-column container — tables are always full-width standalone blocks inside `.table-wrap`
+- use CSS div-based bars, progress bars, or width-percentage fills as data charts — for example, do NOT use `<div class="timeline-fill" style="width: 100%;">` or any CSS bar to represent salary, count, or comparison data; ALL charts must use SVG `<rect>` bars computed from the proportional formula
 - copy chart SVG examples verbatim — always recompute every bar `x`, `y`, `height` and every label from real data using the proportional formula
 - render more bars than data points, or fewer bars than data points — bar count must equal data point count exactly
 - produce a chart where a lower value has a taller bar than a higher value — this means the math is wrong; stop and recalculate

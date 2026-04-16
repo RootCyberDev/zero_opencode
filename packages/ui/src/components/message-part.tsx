@@ -2361,7 +2361,7 @@ function registerPdf(name: string) {
         return ""
       })
       const title = createMemo(() => {
-        const value = props.input.title
+        const value = props.metadata.filename || props.input.filename
         if (typeof value === "string" && value) return value
         return i18n.t("ui.basicTool.called", { tool: name })
       })

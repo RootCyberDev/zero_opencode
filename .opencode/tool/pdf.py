@@ -64,11 +64,39 @@ span, a, strong, em, b, i, code, small, sup, sub,
   display: inline-block;
   flex-shrink: 0;
   overflow: hidden;
+  width: 16px;
+  height: 16px;
 }
 .icon > svg {
   display: block;
   width: 100%;
   height: 100%;
+}
+svg.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Defensive cap: SVGs used as inline icons that lack class="icon".
+   Applies inside chips, badges, callouts, cards, and similar components.
+   Does NOT apply inside .chart-wrap (where SVGs should be full-width). */
+.chip svg:not(.icon),
+.badge svg:not(.icon),
+.metric-pill svg:not(.icon),
+.action-tag svg:not(.icon),
+.callout svg:not(.icon),
+.callout-header svg:not(.icon),
+.card svg:not(.icon),
+.fact-grid svg:not(.icon),
+.metric-grid svg:not(.icon),
+.label svg:not(.icon),
+.section-label svg:not(.icon),
+.eyebrow svg:not(.icon) {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0;
+  display: inline-block;
 }
 
 /* Chips and badges must never break mid-word */
