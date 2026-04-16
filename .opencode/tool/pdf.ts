@@ -32,9 +32,12 @@ function file(value: string) {
 
 function guard(value: string) {
   const lower = value.toLowerCase()
-  if (/<script\b/.test(lower)) throw new Error("pdf blocks script tags")
   if (/https?:\/\//.test(lower)) throw new Error("pdf blocks remote asset URLs")
   if (/file:\/\//.test(lower)) throw new Error("pdf blocks file URLs")
+}
+
+function stripScripts(value: string) {
+  return value.replace(/<script\b[\s\S]*?<\/script>/gi, "")
 }
 
 export default tool({
@@ -61,7 +64,8 @@ The saved PDF path inside the workspace is the contract.`,
     css: tool.schema.string().optional().describe("Optional extra CSS layered on top of the base print CSS"),
   },
   async execute(args, ctx) {
-    guard(args.html)
+    const html = stripScripts(args.html)
+    guard(html)
     if (args.css) guard(args.css)
     const name = file(args.filename)
     const out = path.join(ctx.directory, name)
@@ -74,7 +78,7 @@ The saved PDF path inside the workspace is the contract.`,
       JSON.stringify({
         output: out,
         base: ctx.directory,
-        html: args.html.replaceAll("${ACCOUNT_ID}", watermark).replaceAll("${WATERMARK}", watermark),
+        html: html.replaceAll("${ACCOUNT_ID}", watermark).replaceAll("${WATERMARK}", watermark),
         css: args.css?.replaceAll("${ACCOUNT_ID}", watermark).replaceAll("${WATERMARK}", watermark),
       }),
     )

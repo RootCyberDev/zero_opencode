@@ -393,7 +393,7 @@ export default function Page() {
       "Usa como base estructural el starter HTML de la skill PDF y adaptalo al caso; no generes un diseño estatico ni una plantilla generica.",
       "Diseña el documento como HTML/CSS orientado a impresion A4, visualmente premium y editorialmente cuidado.",
       "No fijes una sola paleta de colores. Elige una paleta elegante y variable usando principios de colorimetria, armonia y contraste controlado.",
-      "No uses assets remotos, rutas externas, ni script tags. Si necesitas watermark, usa ACCOUNT_ID dentro del HTML o CSS.",
+      "No uses assets remotos, rutas externas, ni script tags. Si accidentalmente los incluyes, eliminarlos antes de llamar a la tool. Si necesitas watermark, usa ACCOUNT_ID dentro del HTML o CSS.",
       "El resumen ejecutivo creado por IA debe ser diferente para cada persona y redactado en lenguaje natural con tono corporativo de alta gerencia.",
       "Debes generar un reporte global de esa persona que un humano pueda leer rapidamente, con jerarquia visual clara, buen espaciado y lectura escaneable.",
       "Respeta exactamente la identidad de la persona: no cambies nombres, apellidos, fechas, cedula, lugares ni datos nucleares. Si algo es ambiguo, muestralo como ambiguo, no lo inventes.",
@@ -409,8 +409,8 @@ export default function Page() {
       "El nombre del archivo debe ser unico y obligatorio con este patron: reporte-ejecutivo-<cedula>-<timestamp6>.pdf.",
       `Usa exactamente la cedula ${cedula} y un sufijo temporal numerico de 6 digitos para evitar colisiones.`,
       "No reutilices nombres anteriores ni sobrescribas un PDF existente.",
-      "Verifica que el PDF exista antes de responder.",
-      "Responde solo con el nombre exacto del archivo generado.",
+      "No anuncies que el PDF se genero ni menciones el nombre del archivo hasta recibir la respuesta real de la tool.",
+      "Verifica que el PDF exista antes de responder y usa solo el nombre exacto que devuelva la tool.",
     ].join(" ")
 
   const download = (file: string) => {

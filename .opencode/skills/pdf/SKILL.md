@@ -226,6 +226,23 @@ The document may use any of these visual devices when they improve clarity:
 - If a section is better expressed as bullets, use bullets.
 - If a section is better expressed as cards or fact rows, use those.
 
+## Tool Use Preflight
+
+Before calling `pdf`, do this check:
+
+1. Draft the HTML/CSS.
+2. Remove any `<script>` tags.
+3. Remove or replace any remote URLs.
+4. Verify the document still reads cleanly as A4 print content.
+5. Only then call the tool.
+
+## File Name Rule
+
+- Do not invent or announce the output filename before the tool responds.
+- The only valid PDF filename is the exact filename returned by the `pdf` tool.
+- If the tool fails, do not pretend a file exists.
+- Retry only after fixing the HTML/CSS or filename input.
+
 ## HTML Starter
 
 Use `skills/pdf/STARTER.html` as the baseline when helpful.
