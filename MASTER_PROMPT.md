@@ -151,8 +151,11 @@ Do not skip layers. Do not put a single section per page when content can be gro
 - **Background**: never add background-color to `.sheet`, `.doc`, `html`, or `body`. The renderer controls the page background.
 - **Page density**: group 2–4 sections per `.sheet`. A `.sheet` with one small section is a layout failure.
 - **Colors**: choose a fresh elegant palette per document using color harmony principles. Never reuse the same palette mechanically.
-- **Charts**: if the data includes numerical, comparative, or time-series values, render an inline SVG chart. The PDF skill provides bar, horizontal bar, and donut chart examples.
+- **Charts**: if the data includes numerical, comparative, or time-series values, render an inline SVG chart. The PDF skill provides bar, horizontal bar, and donut chart examples. Chart bar heights MUST be computed proportionally from real data using the skill formula — never arbitrary. The largest value always gets the tallest bar. Validate before writing SVG.
 - **Tables**: editorial design only — subtle row separators, generous padding, no thick borders, no spreadsheet aesthetics.
+- **Metric pills**: always grouped in a single flex row, never stacked vertically as individual blocks.
+- **Eyebrow**: plain uppercase text with letter-spacing and a color — no background fill, no gradient, no pill shape.
+- **Section nesting**: never nest `.section-content` inside another `.section-content` — flat structure only.
 
 ## Typography
 

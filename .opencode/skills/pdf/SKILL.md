@@ -328,6 +328,19 @@ Example — values = [45, 120, 80, 200], N=4, maxValue=200:
 | 2 | 80    | 44        | 101  | 228  | 255    |
 | 3 | 200   | 110       | 35   | 318  | 345    |
 
+**Salary progression example** — values = [567, 850, 1200, 2500], N=4, maxValue=2500, slotWidth=floor(360/4)=90, barWidth=round(90×0.6)=54:
+
+| i | value | barHeight            | barY       | barX               | labelX |
+|---|-------|----------------------|------------|--------------------|--------|
+| 0 | 567   | round(567/2500×110)=**25** | 145−25=**120** | 30+0×90+18=**48**  | 48+27=**75**  |
+| 1 | 850   | round(850/2500×110)=**37** | 145−37=**108** | 30+1×90+18=**138** | 138+27=**165** |
+| 2 | 1200  | round(1200/2500×110)=**53** | 145−53=**92** | 30+2×90+18=**228** | 228+27=**255** |
+| 3 | 2500  | round(2500/2500×110)=**110** | 145−110=**35** | 30+3×90+18=**318** | 318+27=**345** |
+
+Notice: the $2,500 bar (height=110) is always the tallest. The $567 bar (height=25) is always the shortest. **If your smallest value has a taller bar than a larger value, you made an arithmetic error — stop and recalculate.**
+
+**Validation check before writing SVG:** sort your barHeight values and confirm they are in the same order as sorted values. If not, recompute.
+
 **Never copy the example SVG code verbatim** — always recompute every `x`, `y`, `height`, and label from real data using the formula above.
 
 ### Bar chart example
@@ -595,8 +608,17 @@ Do not:
 - place a `<table>` inside a `.grid`, `.fact-grid`, `.metric-grid`, or any multi-column container — tables are always full-width standalone blocks inside `.table-wrap`
 - copy chart SVG examples verbatim — always recompute every bar `x`, `y`, `height` and every label from real data using the proportional formula
 - render more bars than data points, or fewer bars than data points — bar count must equal data point count exactly
+- produce a chart where a lower value has a taller bar than a higher value — this means the math is wrong; stop and recalculate
+- write arbitrary bar heights that do not come from the proportional formula — if barHeight is not `round((value/maxValue)*110)`, it is wrong
+- put wrong Y-axis labels — if the data range is $500–$2500, the Y-axis must reflect that range, not "$0/$100/$200"
+- repeat the same year/label multiple times on the X-axis — each bar gets a unique label
+- allow the last bar or label to extend beyond the SVG viewBox right edge — verify `barX[last] + barWidth ≤ viewBox width - 10`
 - apply `break-inside: avoid-page` to `<section>` elements — large sections will be cut mid-content by WeasyPrint regardless; only apply this to small bounded components (cards, chips, callouts, table-wrap)
 - use fixed pixel or mm widths on tables or `.table-wrap` — tables always fill 100% of the content area
+- nest `.section-content` inside another `.section-content` — this creates ugly box-in-box double borders; use flat structure
+- stack metric-pills vertically as individual block elements — always group them in a flex row: `<div style="display:flex;flex-wrap:wrap;gap:4mm;">`
+- add background color or gradient to the `.eyebrow` element — eyebrow is plain uppercase text with a color, no background fill
+- add background color or gradient to `html`, `body`, `.doc`, or `.sheet` — the renderer controls the page background
 
 ## Completion Rule
 
