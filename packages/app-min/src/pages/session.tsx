@@ -383,7 +383,7 @@ export default function Page() {
     }
   }
 
-  const pdf = (file: string) => /\.pdf$/i.test(file)
+  const pdf = (file: string) => /\.(pdf|html?)$/i.test(file)
 
   const report = (cedula: string) =>
     [
@@ -1622,7 +1622,7 @@ export default function Page() {
   )
 
   const openPath = (value: string) => {
-    if (/\.pdf$/i.test(value)) {
+    if (/\.(pdf|html?)$/i.test(value)) {
       void download(value).catch((err) => {
         showToast({
           variant: "error",
