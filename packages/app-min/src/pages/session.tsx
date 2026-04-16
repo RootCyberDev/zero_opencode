@@ -395,15 +395,20 @@ export default function Page() {
 
   const report = (cedula: string) => {
     const filename = pdfFilename(cedula)
+    const htmlFilename = filename.replace(/\.pdf$/i, ".html")
     return [
       `Crear un PDF ejecutivo premium de la persona con numero de cedula: ${cedula}.`,
 
       // — Flujo obligatorio —
       "PASO 1: Carga y lee completamente la skill PDF activa antes de escribir una sola linea de HTML.",
-      `PASO 2 — OBLIGATORIO: Usa las tools MCP disponibles para buscar y recuperar TODOS los datos de la persona con cedula ${cedula}. Las tools MCP son la UNICA fuente valida de datos sobre personas. PROHIBIDO leer archivos locales del workspace, PROHIBIDO usar contexto previo de la sesion, PROHIBIDO inventar o inferir datos. Si el MCP no retorna resultados, indicalo en el reporte en lugar de buscar datos en otro lugar.`,
-      "PASO 3: Compone el HTML/CSS completo como string en memoria siguiendo las reglas de la skill PDF. NO uses Write, Edit ni ningun file tool para crear archivos HTML intermedios.",
-      "PASO 4: Llama directamente a la tool 'pdf' pasando ese HTML como el parametro 'html'. El HTML va como valor del parametro, no como archivo. Esta es la unica forma valida de generar el PDF.",
-      "PASO 5: Verifica que el archivo exista en el workspace. Solo entonces anuncia el resultado.",
+
+      `PASO 2 — RECOPILACION COMPLETA DE DATOS (OBLIGATORIO): Llama a TODAS las tools MCP disponibles que puedan retornar informacion sobre la persona con cedula ${cedula}. Esto incluye pero no se limita a: identidad, empleo actual e historial laboral, historial de salarios, direcciones, informacion tributaria, vehiculos, actividad comercial, historial judicial, afiliaciones, y cualquier otra categoria disponible. Las tools MCP son la UNICA fuente valida. PROHIBIDO leer archivos locales, PROHIBIDO usar contexto previo de sesion, PROHIBIDO inventar datos. Ejecuta TODAS las busquedas relevantes antes de pasar al siguiente paso. No te detengas tras la primera busqueda. Si una categoria no tiene datos, anota su ausencia en el reporte.`,
+
+      "PASO 3 — ESCRIBIR EL HTML: Con todos los datos recopilados, compone el HTML completo siguiendo la skill PDF y escribe el archivo usando la tool Write. El HTML debe cubrir TODOS los datos obtenidos del MCP, organizados en las capas del reporte. Un reporte completo ocupa 4-8 paginas o mas. No resumas ni descartes datos.",
+      `El nombre del archivo HTML ya esta definido: "${htmlFilename}". Escribe el HTML en ese archivo exacto.`,
+
+      "PASO 4: Llama a la tool 'pdf' usando el parametro 'html_file' apuntando al archivo HTML que acabas de escribir. No uses el parametro 'html' inline — usa 'html_file'. La tool leera el HTML, generara el PDF, y borrara el archivo HTML automaticamente.",
+      "PASO 5: Verifica que el archivo PDF exista en el workspace. Solo entonces anuncia el resultado.",
 
       // — Estructura obligatoria del reporte —
       "El reporte debe seguir esta estructura de capas en orden estricto:",
@@ -430,9 +435,9 @@ export default function Page() {
       "Usa A4 real. Evita cortes feos de titulos, tablas y graficas. Protege heading de quedar flotando al final de pagina.",
       "El resultado debe sentirse como un documento de briefing premium producido por un disenador profesional, no como una plantilla de oficina.",
 
-      // — Nombre del archivo —
-      `El nombre del archivo ya esta definido: "${filename}". Usa ese nombre exacto como parametro filename al llamar la tool pdf. No lo cambies, no lo reformules, no inventes otro nombre.`,
-      "No menciones el nombre del archivo hasta recibir la respuesta real de la tool pdf.",
+      // — Nombres de archivo —
+      `Los nombres ya estan definidos: HTML temporal: "${htmlFilename}", PDF final: "${filename}". Usa estos nombres exactos. No los cambies, no los reformules, no inventes otros nombres.`,
+      "No menciones el nombre del PDF hasta recibir la respuesta real de la tool pdf.",
     ].join(" ")
   }
 

@@ -52,27 +52,47 @@ function stripScripts(value: string) {
 }
 
 export default tool({
-  description: `Render a premium A4 PDF from HTML and optional CSS passed directly as parameters.
+  description: `Render a premium A4 PDF from HTML content.
 
-IMPORTANT: Pass the complete HTML string as the \`html\` parameter. Do NOT write an HTML file to disk first. The HTML lives only as a parameter value — this tool handles rendering internally.
+## Two valid input modes — choose based on report size:
 
-Use this tool as the single and final step to produce the PDF. Do not use Write, Edit, or any file tool to create intermediate HTML files.
+### Mode A — HTML file (recommended for comprehensive reports)
+Write the complete HTML to a \`.html\` file first using the Write tool, then call this tool with \`html_file\` pointing to that path.
+- Use this when the report is large (multiple pages, rich data).
+- The HTML file is automatically deleted after the PDF is rendered.
+- No size limits — write as much HTML as needed.
 
-Requirements:
-- compose the full HTML in-memory and pass it here as the \`html\` parameter
-- design for A4 print, not browser viewport behavior
-- use the PDF skill HTML starter as the structural baseline
-- remote URLs, CDN links, and script tags are auto-stripped — use only local or inline assets
-- if you need a watermark, embed ${"${ACCOUNT_ID}"} or ${"${WATERMARK}"} anywhere in the HTML or CSS
+### Mode B — Inline HTML (for short or simple documents)
+Pass the complete HTML string directly as the \`html\` parameter.
+- Use only when the HTML is small enough to fit comfortably in a parameter value.
+
+## Requirements (both modes)
+- Design for A4 print, not browser viewport behavior.
+- Use the PDF skill HTML starter as the structural baseline.
+- Remote URLs, CDN links, and script tags are auto-stripped — use only local or inline assets.
+- If you need a watermark, embed ${"${ACCOUNT_ID}"} or ${"${WATERMARK}"} anywhere in the HTML or CSS.
 
 The filename returned by this tool is the only valid PDF path. Do not announce a filename before calling this tool.`,
   args: {
     filename: tool.schema.string().describe("Desired output filename. It will be sanitized and forced to end in .pdf"),
-    html: tool.schema.string().describe("Complete HTML markup for the PDF document"),
+    html_file: tool.schema.string().optional().describe("Absolute path to a .html file to render. The file will be read and deleted after rendering. Use this for large or comprehensive reports."),
+    html: tool.schema.string().optional().describe("Complete HTML markup for the PDF document. Use only for short/simple documents. For comprehensive reports prefer html_file."),
     css: tool.schema.string().optional().describe("Optional extra CSS layered on top of the base print CSS"),
   },
   async execute(args, ctx) {
-    const html = stripRemoteAssets(stripScripts(args.html))
+    let rawHtml: string
+    let htmlFilePath: string | undefined
+
+    if (args.html_file) {
+      htmlFilePath = args.html_file
+      rawHtml = await fs.readFile(htmlFilePath, "utf-8")
+    } else if (args.html) {
+      rawHtml = args.html
+    } else {
+      throw new Error("Either html or html_file must be provided")
+    }
+
+    const html = stripRemoteAssets(stripScripts(rawHtml))
     const css = args.css ? stripRemoteAssets(args.css) : undefined
     const name = file(args.filename)
     const out = path.join(ctx.directory, name)
@@ -111,6 +131,11 @@ The filename returned by this tool is the only valid PDF path. Do not announce a
     ])
 
     await fs.unlink(input).catch(() => {})
+
+    // Delete the source HTML file if it was provided via html_file
+    if (htmlFilePath) {
+      await fs.unlink(htmlFilePath).catch(() => {})
+    }
 
     if (code !== 0) {
       const msg = stderr.trim() || stdout.trim() || "Unknown PDF render error"

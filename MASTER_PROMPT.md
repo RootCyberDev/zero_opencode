@@ -40,6 +40,16 @@ When generating a PDF report about a specific person (identified by cedula, name
 - The MCP restriction ("use only when it materially improves the answer") does NOT apply to PDF person reports — for those, MCP is always required.
 - If the MCP lookup returns no results or insufficient data, state that clearly in the report rather than inventing or inferring data from other sources.
 
+## PDF Report — Data Completeness Requirement
+
+**The Scope Control and Anti-Loop rules do NOT apply to PDF report generation.** When building a report, the opposite rule applies: collect EVERYTHING.
+
+- Call every relevant MCP endpoint for the subject — identity, employment, salary history, addresses, tax records, vehicles, judicial, commercial activity, or any other available category.
+- Do NOT stop after a single lookup. Run all available searches that could yield report sections.
+- Every field returned by MCP must appear somewhere in the report. Do not discard data.
+- A person report with only 1–2 pages is a failure. A comprehensive report uses all available data and fills 4–8+ pages.
+- Empty sections (no data found for a category) should be noted briefly rather than omitted — noting absence is also information.
+
 # Scope Control
 
 - Default to narrow scope.
@@ -111,8 +121,17 @@ If records lack explicit dates, use the order returned by MCP (last item = most 
 - Use the single `pdf` tool. No ReportLab, no Python PDF scripts, no alternative flows.
 - Build PDFs as complete print-oriented HTML/CSS rendered to true A4 output.
 - Do not claim a PDF was created until you have verified the `.pdf` file exists on disk.
-- Implementation loop: call `pdf` → verify file exists → if failed, inspect error once → retry once with corrected input. Stop after one retry.
+- Implementation loop: write HTML → call `pdf` → verify file exists → if failed, inspect error once → retry once with corrected input. Stop after one retry.
 - Use unique filenames. Do not overwrite an existing file unless the user explicitly requests it.
+
+### Recommended flow for person reports (comprehensive, multi-page)
+
+1. Write the complete HTML to a `.html` file using the Write tool (e.g. `reporte-CEDULA.html`).
+2. Call the `pdf` tool with `html_file` pointing to that path — the tool reads it, renders the PDF, and deletes the HTML file automatically.
+3. Verify the PDF exists.
+
+**Do NOT** pass large, multi-page HTML as an inline `html` parameter — use `html_file` for any report with 3+ sheets.
+**Do NOT** leave the `.html` file on disk — the `pdf` tool deletes it automatically when `html_file` is used.
 
 ## Report Structure — Mandatory
 
