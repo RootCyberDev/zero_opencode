@@ -397,6 +397,8 @@ export default function Page() {
       "El resumen ejecutivo creado por IA debe ser diferente para cada persona y redactado en lenguaje natural con tono corporativo de alta gerencia.",
       "Debes generar un reporte global de esa persona que un humano pueda leer rapidamente, con jerarquia visual clara, buen espaciado y lectura escaneable.",
       "Incluye portada breve si aplica, resumen ejecutivo, hechos clave, highlights, tablas limpias cuando ayuden, y timeline solo si aporta valor.",
+      "Puedes usar chips, badges, metric pills, callout cards, grids, bloques de hechos, secciones en dos columnas, tablas elegantes y botones decorativos tipo etiqueta si aportan claridad visual.",
+      "Ordena bien encabezados, subtitulos, parrafos, bloques de resumen y tablas para que el recorrido visual sea impecable.",
       "Usa A4 real, footer con paginacion, watermark sutil con ACCOUNT_ID y una composicion editorial moderna.",
       "No entregues un PDF con datos crudos, tablas simples sin interpretacion, texto policiaco, o una estetica plana de oficina.",
       "Construye HTML/CSS de alta calidad como si un humano lo hubiera maquetado con dedicacion.",

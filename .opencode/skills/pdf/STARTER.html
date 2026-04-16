@@ -4,6 +4,34 @@
     <meta charset="utf-8" />
     <title>Executive PDF</title>
     <style>
+      @font-face {
+        font-family: "PdfSans";
+        src: url("./.opencode/assets/fonts/PdfSans-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: "PdfSans";
+        src: url("./.opencode/assets/fonts/PdfSans-Semibold.woff2") format("woff2");
+        font-weight: 600;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: "PdfSerif";
+        src: url("./.opencode/assets/fonts/PdfSerif-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: "PdfSerif";
+        src: url("./.opencode/assets/fonts/PdfSerif-Semibold.woff2") format("woff2");
+        font-weight: 600;
+        font-style: normal;
+      }
+
       :root {
         --ink: #0f172a;
         --muted: #475569;
@@ -17,7 +45,7 @@
 
       body {
         color: var(--ink);
-        font-family: "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
       }
 
       .watermark {
@@ -60,7 +88,7 @@
       h1 {
         margin: 4mm 0 2mm;
         color: var(--primary);
-        font-family: "Liberation Serif", "DejaVu Serif", serif;
+        font-family: "PdfSerif", "Liberation Serif", "DejaVu Serif", serif;
         font-size: 25pt;
         line-height: 1.1;
       }

@@ -23,9 +23,11 @@ function slug(value: string) {
 }
 
 function file(value: string) {
-  const next = slug(value)
-  if (next.endsWith(".pdf")) return next
-  return `${next}.pdf`
+  const input = value.trim()
+  const parsed = path.parse(input)
+  const stem = slug(parsed.name || input.replace(/\.pdf$/i, ""))
+  if (parsed.ext.toLowerCase() === ".pdf") return `${stem}.pdf`
+  return `${stem}.pdf`
 }
 
 function guard(value: string) {

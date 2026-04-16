@@ -100,6 +100,95 @@ The document should feel like it was intentionally laid out by a human.
 - Watermarks must be subtle.
 - Footers must be quiet and professional.
 
+## Visual Composition Prompt
+
+When composing an executive PDF, think like an editorial designer, not like a data exporter.
+
+The document may use any of these visual devices when they improve clarity:
+
+- eyebrow labels
+- section dividers
+- chips
+- badges
+- metric pills
+- callout cards
+- highlight panels
+- quote blocks
+- fact grids
+- two-column sections
+- timeline rows
+- comparison tables
+- summary ribbons
+- footer notes
+- small CTA-like buttons used as decorative labels only
+
+### Chips, Badges, and Small UI Elements
+
+- Chips and badges should look editorial, not like a web app screenshot.
+- Use them to classify status, categories, confidence, level, area, or business relevance.
+- Keep them small, well-spaced, and visually restrained.
+- Prefer rounded pills, soft fills, and concise text.
+- Avoid loud colors or excessive contrast.
+- Decorative button-like elements may be used as labels or emphasis blocks, but they should never dominate the page.
+
+### Headers and Section Order
+
+- Headings must create a strong reading path.
+- The title, subtitle, and executive summary must feel intentionally grouped.
+- Section headers must be clearly separated from body text.
+- Use consistent vertical rhythm between sections.
+- Do not let headers float awkwardly near page breaks.
+- Keep the first page especially disciplined: title, context, summary, and immediate value.
+
+### Paragraphs and Narrative Flow
+
+- Use short to medium paragraphs.
+- Prefer scannable blocks over dense walls of text.
+- Vary paragraph length to create rhythm.
+- Use bold sparingly and only for real emphasis.
+- Narrative sections should interpret the facts, not merely repeat them.
+
+### Tables
+
+- Tables should be elegant and quiet.
+- Use them only when tabular comparison improves clarity.
+- Prefer subtle separators, soft row rhythm, and generous padding.
+- Header rows should feel distinct but not heavy.
+- Long values must wrap cleanly.
+- Avoid spreadsheet aesthetics.
+
+### Facts, Cards, and Grids
+
+- Key facts can be shown as:
+  - cards
+  - fact rows
+  - metric chips
+  - compact two-column grids
+- Use cards when the data benefits from visual emphasis.
+- Use fact rows when clarity and density matter more than drama.
+- Use grid layouts only if they remain balanced on A4.
+
+### Colorimetry
+
+- The palette can vary per document.
+- Pick colors intentionally based on mood, subject, and tone.
+- Good palette logic includes:
+  - one anchor color
+  - one supporting neutral family
+  - one accent color
+  - soft surfaces and separator tones
+- If the report should feel analytical, choose cooler controlled tones.
+- If it should feel premium and human, warmer or richer tones may be used.
+- If using stronger colors, keep the body content calmer so the page remains elegant.
+
+### Layout Taste
+
+- The result should feel like a premium briefing document.
+- It may borrow the language of dashboards or product UI in a subtle way, but it must still read like a report.
+- Use modern spacing, alignment, and compositional discipline.
+- Every visual element must earn its place.
+- Avoid clutter, repetition, and over-decoration.
+
 ## Content Rules
 
 - The summary must interpret, not dump data.
@@ -127,9 +216,39 @@ Adapt it to the case. Do not copy it mechanically.
 
 - Keep CSS print-oriented.
 - Prefer local styles in the document or the optional `css` field.
+- Use local font files from the project whenever you need a custom family.
+- Prefer `@font-face` with local `.woff2`, `.woff`, or `.ttf` files stored in `.opencode/assets/fonts/`.
 - Do not use remote CSS or remote font URLs.
 - Do not use script tags.
 - Do not rely on browser-only interaction behavior.
+
+## Fonts
+
+For premium PDFs, custom fonts should be served from local assets, not Google Fonts.
+
+Recommended font asset location:
+
+- `.opencode/assets/fonts/`
+
+Recommended approach:
+
+```css
+@font-face {
+  font-family: "Brand Sans";
+  src: url("./.opencode/assets/fonts/BrandSans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Brand Sans";
+  src: url("./.opencode/assets/fonts/BrandSans-Semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+}
+```
+
+Then use the family normally in the document.
 
 ## Watermark
 
