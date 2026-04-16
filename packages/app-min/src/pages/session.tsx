@@ -405,9 +405,9 @@ export default function Page() {
       `PASO 2 — RECOPILACION COMPLETA DE DATOS (OBLIGATORIO): Llama a TODAS las tools MCP disponibles que puedan retornar informacion sobre la persona con cedula ${cedula}. Esto incluye pero no se limita a: identidad, empleo actual e historial laboral, historial de salarios, direcciones, informacion tributaria, vehiculos, actividad comercial, historial judicial, afiliaciones, y cualquier otra categoria disponible. Las tools MCP son la UNICA fuente valida. PROHIBIDO leer archivos locales, PROHIBIDO usar contexto previo de sesion, PROHIBIDO inventar datos. Ejecuta TODAS las busquedas relevantes antes de pasar al siguiente paso. No te detengas tras la primera busqueda. Si una categoria no tiene datos, anota su ausencia en el reporte.`,
 
       "PASO 3 — ESCRIBIR EL HTML: Con todos los datos recopilados, compone el HTML completo siguiendo la skill PDF y escribe el archivo usando la tool Write. El HTML debe cubrir TODOS los datos obtenidos del MCP, organizados en las capas del reporte. Un reporte completo ocupa 4-8 paginas o mas. No resumas ni descartes datos.",
-      `El nombre del archivo HTML ya esta definido: "${htmlFilename}". Escribe el HTML en ese archivo exacto.`,
+      `El nombre del archivo HTML ya esta definido: "${htmlFilename}". Escribe el HTML completo en ese archivo exacto.`,
 
-      "PASO 4: Llama a la tool 'pdf' usando el parametro 'html_file' apuntando al archivo HTML que acabas de escribir. No uses el parametro 'html' inline — usa 'html_file'. La tool leera el HTML, generara el PDF, y borrara el archivo HTML automaticamente.",
+      `PASO 4 — CONVERTIR A PDF (NO REESCRIBIR): Una vez escrito el archivo HTML, llama a la tool 'pdf' con EXACTAMENTE estos dos parametros: filename="${filename}" y html_file="<ruta absoluta del archivo ${htmlFilename}>". PROHIBIDO usar el parametro 'html' inline. PROHIBIDO regenerar o reescribir el HTML. PROHIBIDO producir ningún contenido HTML en este paso. El unico trabajo de este paso es pasar la ruta del archivo ya escrito. La tool lee el archivo del disco, genera el PDF, y borra el HTML automaticamente.`,
       "PASO 5: Verifica que el archivo PDF exista en el workspace. Solo entonces anuncia el resultado.",
 
       // — Estructura obligatoria del reporte —

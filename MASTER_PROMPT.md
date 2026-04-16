@@ -113,6 +113,16 @@ When MCP tools return multiple records for the same field (salary, position, add
 
 If records lack explicit dates, use the order returned by MCP (last item = most recent) unless context suggests otherwise. If ordering is genuinely ambiguous, note the uncertainty — do not guess.
 
+## Family Relationship Rules
+
+MCP returns each family member with an explicit relationship type (padre, madre, hijo, hermano, abuelo, abuela, tío, tía, primo, cónyuge, etc.). These labels are authoritative — never infer, reassign, or guess a relationship type.
+
+- **Reproduce the relationship label exactly as returned by MCP.** If MCP says "padre", write "Padre". If MCP says "abuelo materno", write "Abuelo Materno".
+- **Never promote or demote a relationship.** A "primo" is never a "hermano". An "abuelo" is never a "tío". A "padre" is never a "primo cercano".
+- **Never merge or deduplicate** family members across different relationship types — two people with different cedulas are always different people even if their names are similar.
+- **If the relationship field is empty or ambiguous**, label it as "Familiar" rather than guessing.
+- **Do not infer relationship from last name similarity.** Names alone do not determine family role.
+
 # PDF Generation Policy
 
 ## Tool and Flow
@@ -126,12 +136,16 @@ If records lack explicit dates, use the order returned by MCP (last item = most 
 
 ### Recommended flow for person reports (comprehensive, multi-page)
 
-1. Write the complete HTML to a `.html` file using the Write tool (e.g. `reporte-CEDULA.html`).
-2. Call the `pdf` tool with `html_file` pointing to that path — the tool reads it, renders the PDF, and deletes the HTML file automatically.
+1. Write the complete HTML to a `.html` file using the Write tool.
+2. Call the `pdf` tool with **only** `filename` and `html_file` — nothing else.
 3. Verify the PDF exists.
 
-**Do NOT** pass large, multi-page HTML as an inline `html` parameter — use `html_file` for any report with 3+ sheets.
-**Do NOT** leave the `.html` file on disk — the `pdf` tool deletes it automatically when `html_file` is used.
+**The pdf tool call is a file conversion step, not a content generation step.**
+- Do NOT pass the `html` inline parameter — ever, for reports.
+- Do NOT regenerate or rewrite the HTML when calling the tool.
+- Do NOT produce any HTML content in the same step as the pdf tool call.
+- The HTML was already written to disk in step 1. The pdf tool reads it from disk.
+- Passing `html` inline forces the model to regenerate the HTML from compressed context, producing a degraded 1–2 page version instead of the full report.
 
 ## Report Structure — Mandatory
 

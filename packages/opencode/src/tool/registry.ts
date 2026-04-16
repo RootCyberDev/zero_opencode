@@ -90,10 +90,17 @@ export namespace ToolRegistry {
               parameters: z.object(def.args),
               description: def.description,
               execute: async (args, toolCtx) => {
+                // Capture metadata set via ctx.metadata() during execution so it
+                // survives into the final completed part state.
+                let capturedMetadata: Record<string, any> = {}
                 const pluginCtx = {
                   ...toolCtx,
                   directory: ctx.directory,
                   worktree: ctx.worktree,
+                  metadata(input: { title?: string; metadata?: Record<string, any> }) {
+                    if (input.metadata) capturedMetadata = { ...capturedMetadata, ...input.metadata }
+                    return toolCtx.metadata(input)
+                  },
                 } as unknown as PluginToolContext
                 const result = await def.execute(args as any, pluginCtx)
                 const out = await Truncate.output(result, {}, await Agent.get(toolCtx.agent))
@@ -101,6 +108,7 @@ export namespace ToolRegistry {
                   title: "",
                   output: out.truncated ? out.content : result,
                   metadata: {
+                    ...capturedMetadata,
                     truncated: out.truncated,
                     outputPath: out.truncated ? out.outputPath : undefined,
                   },
