@@ -30,25 +30,26 @@ text += page.extract_text()
 When the user wants to generate a PDF in OpenCode:
 
 1. Prefer creating a real file in the workspace, not just describing the PDF.
-2. Prefer Python with `reportlab` for PDF creation when the environment supports it.
-3. Write the script to disk first, then execute it.
-4. Verify that the expected `.pdf` file exists before claiming success.
-5. If generation fails, inspect the error, fix the script, and retry.
-6. Use unique filenames and avoid overwriting an existing PDF unless the user explicitly asks.
-7. For visually polished output, prefer `SimpleDocTemplate`, `Paragraph`, `Spacer`, `Table`, `TableStyle`, `HRFlowable`, and custom `ParagraphStyle` values instead of low-level one-off `canvas.drawString` output.
-8. For modern executive layouts, use:
+2. In OpenZero, prefer `pdf_python` for premium custom PDFs and `pdf_create` for simpler structured PDFs.
+3. When using `pdf_python`, provide Python code directly to the tool. Do not create a separate `generar_pdf.py` or similar workspace script unless the user explicitly asks for a standalone script file.
+4. When using `pdf_python`, write the final document to `OUTPUT`, not to a hardcoded path.
+5. Verify that the expected `.pdf` file exists before claiming success.
+6. If generation fails, inspect the error, fix the code or tool input, and retry once with a simpler valid script.
+7. Use unique filenames and avoid overwriting an existing PDF unless the user explicitly asks.
+8. For visually polished output, prefer `SimpleDocTemplate`, `Paragraph`, `Spacer`, `Table`, `TableStyle`, `HRFlowable`, and custom `ParagraphStyle` values instead of low-level one-off `canvas.drawString` output.
+9. For modern executive layouts, use:
    - clear title/subtitle hierarchy
    - accent color
    - section blocks
    - whitespace and separators
    - concise, scannable paragraphs
-9. Do not stop after writing the script. Execute it and confirm the file.
+10. Do not stop after writing the script. Execute it and confirm the file.
 
 Recommended OpenCode workflow:
 
 ```text
-1. Write python script into workspace
-2. Execute python3 script.py
+1. For OpenZero premium PDFs, call pdf_python
+2. Provide complete Python code that writes to OUTPUT
 3. Confirm target.pdf exists
 4. Return exact path or filename
 ```

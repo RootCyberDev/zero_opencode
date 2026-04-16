@@ -391,6 +391,8 @@ export default function Page() {
       "Primero carga y sigue la skill PDF activa.",
       "Para este caso debes preferir pdf_python, no pdf_create, salvo que pdf_python falle de forma irrecuperable.",
       "Usa como base estructural el starter de la skill PDF y adaptalo al caso; no generes un diseño estatico ni una plantilla generica.",
+      "No escribas un script separado como generar_pdf.py ni otro archivo Python en el workspace; entrega el codigo directamente a pdf_python.",
+      "No importes os ni uses rutas hardcodeadas; el PDF debe escribirse al path OUTPUT provisto por la tool.",
       "El resumen ejecutivo creado por IA debe ser diferente para cada persona y redactado en lenguaje natural con tono corporativo de alta gerencia.",
       "Debes generar un reporte global de esa persona que un humano pueda leer rapidamente, con jerarquia visual clara, buen espaciado y lectura escaneable.",
       "Incluye portada breve si aplica, resumen ejecutivo, hechos clave, highlights, tablas limpias cuando ayuden, y timeline solo si aporta valor.",

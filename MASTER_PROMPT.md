@@ -77,6 +77,8 @@ If you expand, do it in the smallest possible step and reassess immediately.
 - Prefer `pdf_python` for high-quality custom PDFs when it is available.
 - Use `pdf_create` when a simpler structured PDF is enough.
 - Do not use unrestricted shell Python when a dedicated PDF tool is available.
+- When using `pdf_python`, provide code directly to the tool. Do not create a separate workspace script like `generar_pdf.py` unless the user explicitly asks for that file.
+- When using `pdf_python`, write the PDF to `OUTPUT`. Do not hardcode output paths.
 - Do not claim a PDF was created unless you have verified that the `.pdf` file was actually written to disk.
 - Prefer a short implementation loop:
   1. choose `pdf_python` for premium custom layout, otherwise `pdf_create`
