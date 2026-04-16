@@ -412,15 +412,15 @@ export default function Page() {
 
       // — Estructura obligatoria del reporte —
       "El reporte debe seguir esta estructura de capas en orden estricto:",
-      "CAPA 1 — Portada ejecutiva (inicio de pagina 1): eyebrow con tipo de reporte, H1 con nombre completo de la persona, subtitle con cedula y fecha del reporte, bloque de resumen ejecutivo de 3-4 oraciones interpretativas en tono corporativo de alta gerencia, chip-row con al menos 4 chips clasificatorios cada uno CON icono SVG inline.",
-      "CAPA 2 — Capa de señales: grid de hechos clave con 4-6 cards en 2 columnas, seccion de hallazgos con 4-6 puntos interpretativos en banda o callout, metric pills con indicadores cuantitativos clave.",
-      "CAPA 3 — Capa de detalle: secciones H2 una por area tematica, cada una con parrafo interpretativo de 2-4 oraciones mas un elemento visual (tabla, grafica SVG, callout o banda). Si los datos incluyen valores numericos, comparativos o series de tiempo, DEBE incluir una grafica SVG inline siguiendo los ejemplos de la skill PDF.",
+      "CAPA 1 — Portada ejecutiva (inicio de pagina 1): eyebrow con tipo de reporte, H1 con nombre completo de la persona, subtitle con cedula y fecha del reporte, bloque de resumen ejecutivo de 3-4 oraciones interpretativas en tono corporativo de alta gerencia, chip-row con al menos 4 chips clasificatorios usando la libreria de glyphs/iconos de la skill y espacio visual suficiente para respirar.",
+      "CAPA 2 — Capa de señales: grid de hechos clave con 4-6 cards en 2 columnas, seccion de hallazgos con 4-6 puntos interpretativos en banda o callout, metric pills con indicadores cuantitativos clave. Prioriza aire, ritmo y separacion limpia entre bloques.",
+      "CAPA 3 — Capa de detalle: secciones H2 una por area tematica, cada una con parrafo interpretativo de 2-4 oraciones mas un elemento visual (tabla, grafica, callout o banda). Si los datos incluyen valores numericos, comparativos o series de tiempo, DEBE incluir una grafica usando la libreria de charts de la skill; usa SVG manual solo como respaldo cuando la libreria no aplique.",
       "CAPA 4 — Cierre: nota de pie SOLO con la fecha de generacion del reporte. PROHIBIDO mencionar el nombre del sistema, la fuente de datos, de donde proviene la informacion, ni incluir ningun disclaimer o texto legal. Solo la fecha.",
 
       // — Estandares de diseno obligatorios —
-      "ICONOS: cada chip, badge, metric-pill y callout DEBE tener un icono SVG inline pareado. No hay excepciones. No uses letras como placeholder de icono.",
+      "ICONOS: cada chip, badge, metric-pill y callout DEBE tener un icono. Usa primero la libreria de glyphs/iconos de la skill; usa SVG inline solo como respaldo cuando no exista un glyph adecuado. No uses letras como placeholder de icono.",
       "JERARQUIA TIPOGRAFICA: eyebrow (9pt uppercase tracking) → H1 en fuente serif 22-26pt → H2 sans 12-14pt → H3 sans 10-11pt → cuerpo 10pt. Nunca pongas un H2 al fondo de una pagina sin contenido debajo.",
-      "DENSIDAD DE PAGINA: cada .sheet debe contener 2-4 secciones sustanciales. Un .sheet con una sola seccion pequena es un error de layout. Las paginas deben verse visualmente llenas.",
+      "DENSIDAD DE PAGINA: cada .sheet deberia contener 2-4 secciones sustanciales cuando el contenido lo permita. No fuerces densidad artificial si eso comprime demasiado el diseno. Las paginas deben verse equilibradas y con aire.",
       "FONDO: nunca agregues background-color a .sheet, .doc, html o body. El renderer controla el fondo de pagina.",
       "COLORES: elige una paleta fresca y elegante usando principios de armonia cromatica: un tono dominante, un tono de soporte, un acento controlado. Nunca uses una paleta generica ni la misma paleta en todos los reportes.",
 

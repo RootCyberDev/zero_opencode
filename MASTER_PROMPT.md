@@ -165,6 +165,7 @@ MCP returns each family member with an explicit relationship type (padre, madre,
 - Correct: `reporte-0950804518-20260416-xxxx.html`
 - Wrong: `reportes/reporte-0950804518.html`, `output/reporte.html`
 - The `/file/download` endpoint resolves paths relative to the project root. Files in subdirectories will not be found.
+- If the HTML filename is wrong or missing, fix it in the HTML-writing step. Do not narrate a rewrite or renaming step to the user. The PDF call is a conversion step only.
 
 **The pdf tool call is a file conversion step, not a content generation step.**
 - Do NOT pass the `html` inline parameter — ever, for reports.

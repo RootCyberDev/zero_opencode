@@ -22,7 +22,7 @@ Do not switch to ReportLab, Python PDF scripting, or alternative PDF generation 
 Use the `pdf` tool with:
 
 - `filename`
-- `html`
+- `html_file`
 - optional `css`
 
 The tool will:
@@ -32,7 +32,7 @@ The tool will:
 - add page numbering through the base stylesheet
 - return a real PDF file in the workspace
 
-**Critical usage rule:** Pass the complete HTML document as the `html` parameter value — a string inline in the tool call. Do NOT use the `Write` tool, `Edit` tool, or any file operation to create an intermediate `.html` file before calling `pdf`. There is no intermediate file step. The workflow is: compose HTML → call `pdf` tool with that HTML as parameter → done.
+**Critical usage rule:** Write the complete HTML document to a `.html` file in the project root first, then call `pdf` with the existing file path. Do NOT regenerate the HTML inline at conversion time. The workflow is: compose HTML → write file → call `pdf` on that file → done.
 
 ## Design Rules
 
@@ -75,9 +75,9 @@ The document should feel like it was intentionally laid out by a human.
 
 - Respect A4 proportions at all times.
 - The effective content area in this renderer is approximately:
-  - width: `178mm`
+  - width: `172mm`
   - height: `251mm`
-- Treat `178mm` as the hard safe width for any full-page block.
+- Treat `172mm` as the hard safe width for any full-page block.
 - Treat `251mm` as the hard safe height for the visible content stack on a page.
 - Do not design around infinite scroll assumptions.
 - Avoid sections that visually collapse into tiny islands on the page.
@@ -88,9 +88,7 @@ The document should feel like it was intentionally laid out by a human.
 - When you need strong page control, structure the HTML with explicit `.sheet` wrappers.
 - Treat each `.sheet` as one PDF page body.
 - If a section should start on a new page, start a new `.sheet` or use `.page-break`.
-- If a page should be visually full, use `.sheet sheet-fill`.
-- If a page should be allowed to stay shorter, use `.sheet sheet-tight`.
-- If unsure, keep the interior width narrower than `178mm` and let the renderer breathe. Margins are safer than edge-to-edge layouts.
+- If unsure, keep the interior width narrower than `172mm` and let the renderer breathe. Margins are safer than edge-to-edge layouts.
 - Never set `width`, `height`, or `min-height` on `html`, `body`, `.doc`, or `.sheet`.
 - Never use full-bleed backgrounds on page wrappers. Keep background color and gradients inside cards, bands, or callouts only.
 
@@ -220,7 +218,7 @@ Available glyph classes:
 - Long values must wrap cleanly.
 - Avoid spreadsheet aesthetics.
 - **NEVER place a `<table>` inside a `.grid`, `.fact-grid`, `.metric-grid`, or any multi-column container.** Tables must live inside a `.table-wrap` which is a full-width block. Placing a table in a 2-column grid compresses it to half width — this is always wrong.
-- Tables always use the full content-area width (178mm). Do not add `width` constraints on tables or `.table-wrap`.
+- Tables always use the full content-area width (172mm). Do not add `width` constraints on tables or `.table-wrap`.
 
 ### Facts, Cards, and Grids
 
@@ -408,16 +406,16 @@ Use `chart--donut` for proportional splits. The library uses SVG circles, but th
 ```html
 <div class="chart chart--donut">
   <svg class="chart__svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-    <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#1d4ed8; --dash:183.78; --offset:0;"></circle>
-    <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#7c3aed; --dash:56.55; --offset:-183.78;"></circle>
-    <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#94a3b8; --dash:42.41; --offset:-240.33;"></circle>
+    <circle class="chart__slice" cx="60" cy="60" r="45" style="stroke:#1d4ed8; --dash:183.78; --offset:0;"></circle>
+    <circle class="chart__slice" cx="60" cy="60" r="45" style="stroke:#7c3aed; --dash:56.55; --offset:-183.78;"></circle>
+    <circle class="chart__slice" cx="60" cy="60" r="45" style="stroke:#94a3b8; --dash:42.41; --offset:-240.33;"></circle>
     <text class="chart__center" x="60" y="55" font-size="16">65%</text>
     <text class="chart__center" x="60" y="67" font-size="7">Empleado</text>
   </svg>
   <div class="chart__legend">
-    <div class="chart__legend-row"><span class="chart__swatch" style="--color:#1d4ed8;"></span><strong>Empleado</strong> — 65%</div>
-    <div class="chart__legend-row"><span class="chart__swatch" style="--color:#7c3aed;"></span>Independiente — 20%</div>
-    <div class="chart__legend-row"><span class="chart__swatch" style="--color:#94a3b8;"></span>Sin actividad — 15%</div>
+    <div class="chart__legend-row"><span class="chart__swatch" style="background:#1d4ed8;"></span><strong>Empleado</strong> — 65%</div>
+    <div class="chart__legend-row"><span class="chart__swatch" style="background:#7c3aed;"></span>Independiente — 20%</div>
+    <div class="chart__legend-row"><span class="chart__swatch" style="background:#94a3b8;"></span>Sin actividad — 15%</div>
   </div>
 </div>
 ```
@@ -478,7 +476,8 @@ Before calling `pdf`, do this check:
 
 ## File Name Rule
 
-- Do not invent or announce the output filename before the tool responds.
+- Do not narrate a filename rewrite or rename step to the user.
+- If the HTML filename is wrong or missing, correct it in the HTML-writing step before conversion.
 - The only valid PDF filename is the exact filename returned by the `pdf` tool.
 - If the tool fails, do not pretend a file exists.
 - Retry only after fixing the HTML/CSS or filename input.
@@ -576,7 +575,7 @@ These rules prevent the most common layout failures:
 - Do NOT create one `.sheet` per small section. A `.sheet` with a single heading and 3 bullet points leaves the rest of the page blank.
 - If a section has very little content, combine it with the next section in the same `.sheet`.
 - A well-filled A4 page should not have more than ~25mm of trailing white space.
-- Do NOT use `.sheet-fill` on a sparse page — it only amplifies the blank space problem.
+- Optional helper classes like `.sheet-fill` should only be used when they improve pagination rather than forcing visual density.
 
 ## Mandatory Structure — Page 1
 
@@ -613,7 +612,7 @@ Do not:
 - create one `.sheet` per small section — always group sections so each sheet page feels visually dense
 - generate chips, badges, metric pills, or callout elements without paired glyphs or SVG icons
 - omit the mandatory page-1 heading sequence: eyebrow → h1 → subtitle → summary → chip-row
-- produce a simpler document than the STARTER — the starter is the minimum richness level, not a ceiling
+- treat the STARTER as a structural baseline only — do not copy its visual choices mechanically, and do not let it narrow the composition beyond the case at hand
 - place a `<table>` inside a `.grid`, `.fact-grid`, `.metric-grid`, or any multi-column container — tables are always full-width standalone blocks inside `.table-wrap`
 - use `conic-gradient` or `radial-gradient` for pie/donut charts — WeasyPrint does not support them; use the built-in `chart--donut` class instead
 - use chart markup outside the built-in chart component library when the library already fits the data

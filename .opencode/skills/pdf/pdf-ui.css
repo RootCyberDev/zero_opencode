@@ -143,36 +143,34 @@ h6 {
 }
 
 .chart--bar .chart__bars {
-  position: relative;
   display: grid;
   grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
   gap: var(--chart-gap);
   align-items: end;
-  min-height: calc(var(--chart-height) + 8mm);
+  min-height: 138px;
   padding-bottom: 5mm;
   border-bottom: 1px solid var(--line);
 }
 
 .chart--bar .chart__item {
-  position: relative;
-  min-height: calc(var(--chart-height) + 7mm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 138px;
 }
 
 .chart--bar .chart__fill {
-  position: absolute;
-  left: 18%;
-  right: 18%;
-  bottom: 0;
+  width: 64%;
   height: var(--h);
   border-radius: 3px 3px 0 0;
   background: linear-gradient(180deg, var(--secondary) 0%, var(--accent) 100%);
+  order: 2;
 }
 
 .chart--bar .chart__value {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(var(--h) + 4px);
+  order: 1;
+  margin-bottom: 1.5mm;
   font-size: 8pt;
   font-weight: 700;
   color: var(--primary);
@@ -180,10 +178,8 @@ h6 {
 }
 
 .chart--bar .chart__label {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: -4.5mm;
+  order: 3;
+  margin-top: 1.5mm;
   font-size: 8pt;
   color: var(--muted);
   white-space: nowrap;
@@ -242,7 +238,7 @@ h6 {
 
 .chart--donut .chart__slice {
   fill: none;
-  stroke: var(--color);
+  stroke: currentColor;
   stroke-width: 22;
   stroke-dasharray: var(--dash) 282.74;
   stroke-dashoffset: var(--offset);
@@ -274,6 +270,6 @@ h6 {
   width: 10px;
   height: 10px;
   border-radius: 2px;
-  background: var(--color);
+  background: currentColor;
   flex: 0 0 auto;
 }

@@ -34,7 +34,7 @@
       }
 
       .doc {
-        width: 178mm;
+        width: 172mm;
         margin: 0 auto;
       }
 
@@ -79,9 +79,9 @@
       .summary {
         margin-top: 8mm;
         padding: 6mm 7mm;
-        border: 1px solid color-mix(in srgb, var(--accent) 18%, white 82%);
+        border: 1px solid #d6e4ff;
         border-radius: 4mm;
-        background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 68%, white 32%) 0%, var(--accent-soft) 100%);
+        background: linear-gradient(135deg, #f8fafc 0%, #e8f0ff 100%);
       }
 
       .chip-row,
@@ -103,8 +103,8 @@
         min-height: 8mm;
         padding: 1.6mm 3.2mm;
         border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--accent) 18%, white 82%);
-        background: color-mix(in srgb, var(--accent-soft) 72%, white 28%);
+        border: 1px solid #d6e4ff;
+        background: #edf4ff;
         color: var(--primary);
         font-size: 8.5pt;
         line-height: 1;
@@ -206,7 +206,7 @@
         margin-top: 5mm;
         padding: 5mm 6mm;
         border-left: 1.2mm solid var(--accent);
-        background: color-mix(in srgb, var(--accent-soft) 55%, white 45%);
+        background: #f5f8ff;
         border-radius: 0 3mm 3mm 0;
       }
 
@@ -414,16 +414,16 @@
         <div class="band">
           <div class="chart chart--donut">
             <svg class="chart__svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-              <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#1d4ed8; --dash:183.78; --offset:0;"></circle>
-              <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#7c3aed; --dash:56.55; --offset:-183.78;"></circle>
-              <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#94a3b8; --dash:42.41; --offset:-240.33;"></circle>
+              <circle class="chart__slice" cx="60" cy="60" r="45" style="stroke:#1d4ed8; --dash:183.78; --offset:0;"></circle>
+              <circle class="chart__slice" cx="60" cy="60" r="45" style="stroke:#7c3aed; --dash:56.55; --offset:-183.78;"></circle>
+              <circle class="chart__slice" cx="60" cy="60" r="45" style="stroke:#94a3b8; --dash:42.41; --offset:-240.33;"></circle>
               <text class="chart__center" x="60" y="55" font-size="16">65%</text>
               <text class="chart__center" x="60" y="67" font-size="7">Empleado</text>
             </svg>
             <div class="chart__legend">
-              <div class="chart__legend-row"><span class="chart__swatch" style="--color:#1d4ed8;"></span><strong>Empleado</strong> — 65%</div>
-              <div class="chart__legend-row"><span class="chart__swatch" style="--color:#7c3aed;"></span>Independiente — 20%</div>
-              <div class="chart__legend-row"><span class="chart__swatch" style="--color:#94a3b8;"></span>Sin actividad — 15%</div>
+              <div class="chart__legend-row"><span class="chart__swatch" style="background:#1d4ed8;"></span><strong>Empleado</strong> — 65%</div>
+              <div class="chart__legend-row"><span class="chart__swatch" style="background:#7c3aed;"></span>Independiente — 20%</div>
+              <div class="chart__legend-row"><span class="chart__swatch" style="background:#94a3b8;"></span>Sin actividad — 15%</div>
             </div>
           </div>
         </div>

@@ -30,7 +30,7 @@ BASE_CSS = """
 }
 
 html {
-  --page-width: 178mm;
+  --page-width: 172mm;
   --page-height: 251mm;
   color: #0f172a;
   font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
@@ -60,6 +60,7 @@ body {
 .doc {
   width: var(--page-width);
   max-width: var(--page-width);
+  margin: 0 auto;
   height: auto !important;
   max-height: none !important;
   overflow: visible !important;
