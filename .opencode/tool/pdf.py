@@ -2,6 +2,7 @@
 import json
 import os
 import sys
+from pathlib import Path
 
 from weasyprint import CSS, HTML
 import weasyprint
@@ -22,7 +23,7 @@ BASE_CSS = """
   margin: 24mm 16mm 22mm 16mm;
   @bottom-right {
     content: counter(page) " / " counter(pages);
-    font-family: "Liberation Sans", "DejaVu Sans", sans-serif;
+    font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
     font-size: 9pt;
     color: #64748b;
   }
@@ -32,7 +33,7 @@ html {
   --page-width: 178mm;
   --page-height: 251mm;
   color: #0f172a;
-  font-family: "Liberation Sans", "DejaVu Sans", sans-serif;
+  font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
   font-size: 10.5pt;
   line-height: 1.55;
   -webkit-print-color-adjust: exact;
@@ -74,7 +75,7 @@ body {
 
 /* Inline elements must not inherit max-width: 100% — it breaks flex/inline layout */
 span, a, strong, em, b, i, code, small, sup, sub,
-.icon, .icon-font, .chip, .badge, .metric-pill, .action-tag {
+.icon, .glyph, .icon-font, .chip, .badge, .metric-pill, .action-tag {
   max-width: none;
 }
 
@@ -160,6 +161,7 @@ p, li, blockquote {
 .timeline-row,
 .table-wrap,
 .footer-note,
+.chart,
 .chart-wrap {
   break-inside: avoid-page;
   page-break-inside: avoid;
@@ -273,6 +275,11 @@ pre, code {
 }
 """
 
+UI_CSS = Path(__file__).resolve().parents[1] / "skills/pdf/pdf-ui.css"
+
+if UI_CSS.exists():
+    BASE_CSS = BASE_CSS + "\n" + UI_CSS.read_text(encoding="utf-8")
+
 
 def main():
     if len(sys.argv) != 2:
@@ -287,9 +294,11 @@ def main():
     base = data["base"]
 
     os.makedirs(os.path.dirname(output), exist_ok=True)
+    base_css = CSS(string=BASE_CSS, base_url=base)
+    extra_css = CSS(string=css, base_url=base) if css else None
     HTML(string=html, base_url=base, url_fetcher=safe_url_fetcher).write_pdf(
         output,
-        stylesheets=[CSS(string=BASE_CSS), CSS(string=css)] if css else [CSS(string=BASE_CSS)],
+        stylesheets=[base_css, extra_css] if extra_css else [base_css],
     )
 
     if not os.path.exists(output):

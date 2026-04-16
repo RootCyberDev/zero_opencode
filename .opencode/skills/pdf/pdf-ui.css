@@ -1,0 +1,279 @@
+@font-face {
+  font-family: "PdfSans";
+  src: url("./.opencode/assets/fonts/PdfSans-Variable.ttf") format("truetype");
+  font-weight: 200 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "PdfSerif";
+  src: url("./.opencode/assets/fonts/PdfSerif-Variable.ttf") format("truetype");
+  font-weight: 200 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "PdfIcons";
+  src: url("./.opencode/assets/fonts/PdfIcons-Outlined.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --line: #d9e2ec;
+  --surface: #f8fafc;
+  --primary: #102a43;
+  --secondary: #1d4ed8;
+  --accent: #2563eb;
+  --accent-soft: #e8f0ff;
+}
+
+body,
+p,
+li,
+td,
+th,
+caption,
+blockquote,
+label,
+input,
+textarea,
+button {
+  font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
+}
+
+h1 {
+  font-family: "PdfSerif", "Liberation Serif", "DejaVu Serif", serif;
+  color: var(--primary);
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
+  color: var(--primary);
+}
+
+.glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  max-width: none;
+  overflow: hidden;
+  vertical-align: -0.125em;
+  color: currentColor;
+  font-family: "PdfIcons";
+  font-size: 1em;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  font-variation-settings: "FILL" 0, "GRAD" 0, "opsz" 24, "wght" 400;
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: common-ligatures;
+  speak: none;
+}
+
+.glyph::before {
+  content: var(--glyph);
+}
+
+.glyph-user { --glyph: "person"; }
+.glyph-users { --glyph: "groups"; }
+.glyph-id-card { --glyph: "badge"; }
+.glyph-shield { --glyph: "shield"; }
+.glyph-award { --glyph: "workspace_premium"; }
+.glyph-map-pin { --glyph: "pin_drop"; }
+.glyph-home { --glyph: "home"; }
+.glyph-globe { --glyph: "public"; }
+.glyph-briefcase { --glyph: "work"; }
+.glyph-building { --glyph: "apartment"; }
+.glyph-dollar-sign { --glyph: "payments"; }
+.glyph-trending-up { --glyph: "trending_up"; }
+.glyph-bar-chart { --glyph: "bar_chart"; }
+.glyph-alert-triangle { --glyph: "warning"; }
+.glyph-alert-circle { --glyph: "info"; }
+.glyph-check-circle { --glyph: "check_circle"; }
+.glyph-x-circle { --glyph: "close"; }
+.glyph-scale { --glyph: "balance"; }
+.glyph-graduation-cap { --glyph: "school"; }
+.glyph-book-open { --glyph: "menu_book"; }
+.glyph-file-text { --glyph: "description"; }
+.glyph-folder { --glyph: "folder"; }
+.glyph-phone { --glyph: "call"; }
+.glyph-mail { --glyph: "mail"; }
+.glyph-wifi { --glyph: "wifi"; }
+.glyph-calendar { --glyph: "calendar_month"; }
+.glyph-clock { --glyph: "schedule"; }
+.glyph-truck { --glyph: "local_shipping"; }
+.glyph-package { --glyph: "inventory_2"; }
+.glyph-activity { --glyph: "monitoring"; }
+.glyph-heart { --glyph: "favorite"; }
+.glyph-search { --glyph: "search"; }
+.glyph-info { --glyph: "info"; }
+.glyph-star { --glyph: "star"; }
+.glyph-settings { --glyph: "settings"; }
+
+.chart {
+  margin: 5mm 0;
+  break-inside: avoid-page;
+}
+
+.chart__title {
+  margin: 0 0 2mm;
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.chart__note {
+  margin: 2mm 0 0;
+  font-size: 7.5pt;
+  color: var(--muted);
+}
+
+.chart--bar {
+  --chart-height: 110px;
+  --chart-gap: 4mm;
+}
+
+.chart--bar .chart__bars {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
+  gap: var(--chart-gap);
+  align-items: end;
+  min-height: calc(var(--chart-height) + 8mm);
+  padding-bottom: 5mm;
+  border-bottom: 1px solid var(--line);
+}
+
+.chart--bar .chart__item {
+  position: relative;
+  min-height: calc(var(--chart-height) + 7mm);
+}
+
+.chart--bar .chart__fill {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 0;
+  height: var(--h);
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, var(--secondary) 0%, var(--accent) 100%);
+}
+
+.chart--bar .chart__value {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--h) + 4px);
+  font-size: 8pt;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.chart--bar .chart__label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -4.5mm;
+  font-size: 8pt;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.chart--hbar .chart__rows {
+  display: grid;
+  gap: 2.8mm;
+}
+
+.chart--hbar .chart__row {
+  display: grid;
+  grid-template-columns: minmax(28mm, 1.2fr) 1fr auto;
+  gap: 3mm;
+  align-items: center;
+}
+
+.chart--hbar .chart__label {
+  font-size: 8.5pt;
+  color: var(--muted);
+}
+
+.chart--hbar .chart__track {
+  height: 5mm;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.chart--hbar .chart__fill {
+  height: 100%;
+  width: var(--w);
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--secondary) 0%, var(--accent) 100%);
+}
+
+.chart--hbar .chart__value {
+  font-size: 8pt;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.chart--donut {
+  display: flex;
+  align-items: center;
+  gap: 8mm;
+}
+
+.chart--donut .chart__svg {
+  width: 50mm;
+  height: 50mm;
+  flex: 0 0 auto;
+}
+
+.chart--donut .chart__slice {
+  fill: none;
+  stroke: var(--color);
+  stroke-width: 22;
+  stroke-dasharray: var(--dash) 282.74;
+  stroke-dashoffset: var(--offset);
+  transform: rotate(-90deg);
+  transform-origin: 60px 60px;
+}
+
+.chart--donut .chart__center {
+  font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
+  font-weight: 700;
+  fill: var(--primary);
+  text-anchor: middle;
+}
+
+.chart--donut .chart__legend {
+  display: grid;
+  gap: 2mm;
+  font-size: 8.5pt;
+  line-height: 1.6;
+}
+
+.chart--donut .chart__legend-row {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+}
+
+.chart--donut .chart__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--color);
+  flex: 0 0 auto;
+}

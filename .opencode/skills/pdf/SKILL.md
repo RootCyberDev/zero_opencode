@@ -77,6 +77,8 @@ The document should feel like it was intentionally laid out by a human.
 - The effective content area in this renderer is approximately:
   - width: `178mm`
   - height: `251mm`
+- Treat `178mm` as the hard safe width for any full-page block.
+- Treat `251mm` as the hard safe height for the visible content stack on a page.
 - Do not design around infinite scroll assumptions.
 - Avoid sections that visually collapse into tiny islands on the page.
 - Avoid giant hero blocks that waste paper.
@@ -88,6 +90,9 @@ The document should feel like it was intentionally laid out by a human.
 - If a section should start on a new page, start a new `.sheet` or use `.page-break`.
 - If a page should be visually full, use `.sheet sheet-fill`.
 - If a page should be allowed to stay shorter, use `.sheet sheet-tight`.
+- If unsure, keep the interior width narrower than `178mm` and let the renderer breathe. Margins are safer than edge-to-edge layouts.
+- Never set `width`, `height`, or `min-height` on `html`, `body`, `.doc`, or `.sheet`.
+- Never use full-bleed backgrounds on page wrappers. Keep background color and gradients inside cards, bands, or callouts only.
 
 ## Visual Rules
 
@@ -141,20 +146,53 @@ The document may use any of these visual devices when they improve clarity:
 - Avoid loud colors or excessive contrast.
 - Decorative button-like elements may be used as labels or emphasis blocks, but they should never dominate the page.
 
-### Icons and Iconometry
+### Glyph Library
 
-- Icons are allowed when they clarify structure or add elegant visual signaling.
-- Prefer inline SVG icons first.
-- A local icon font may also be used if stored in project assets, never from a remote CDN.
-- Icons should be small, aligned, and quiet.
-- Use them in:
-  - chips
-  - badges
-  - fact cards
-  - callout headers
-  - section labels
-- Do not turn the PDF into a UI mockup full of icons.
-- Iconography must support reading, not distract from it.
+The renderer loads `.opencode/skills/pdf/pdf-ui.css` automatically. Use the glyph classes from that library instead of embedding long SVG paths for routine icons.
+
+- Use `<span class="glyph glyph-user"></span>` or `<i class="glyph glyph-user"></i>`.
+- Use glyphs in chips, badges, metric pills, fact labels, callout headers, and section labels.
+- Keep glyphs small and quiet. They support reading; they do not decorate the page by themselves.
+- If no glyph fits a rare case, use a tiny inline SVG fallback, but prefer the glyph library first.
+- Do not invent new icon names in the HTML. Use the closest class that already exists in the library.
+
+Available glyph classes:
+
+- `.glyph-user` → persona
+- `.glyph-users` → group / contacts
+- `.glyph-id-card` → identification
+- `.glyph-shield` → legal status / protection
+- `.glyph-award` → achievement / qualification
+- `.glyph-map-pin` → residence / location
+- `.glyph-home` → home / domicile
+- `.glyph-globe` → country / national scope
+- `.glyph-briefcase` → work / employment
+- `.glyph-building` → company / institution
+- `.glyph-dollar-sign` → salary / money
+- `.glyph-trending-up` → progression / growth
+- `.glyph-bar-chart` → statistics / chart
+- `.glyph-alert-triangle` → warning / risk
+- `.glyph-alert-circle` → note / observation
+- `.glyph-check-circle` → confirmed / valid
+- `.glyph-x-circle` → negative / inactive
+- `.glyph-scale` → legal process
+- `.glyph-graduation-cap` → education / university
+- `.glyph-book-open` → study / knowledge
+- `.glyph-file-text` → report / dossier
+- `.glyph-folder` → archive / files
+- `.glyph-phone` → phone / contact
+- `.glyph-mail` → email / contact
+- `.glyph-wifi` → online / digital presence
+- `.glyph-calendar` → date / period
+- `.glyph-clock` → time / duration
+- `.glyph-truck` → vehicle / transport
+- `.glyph-package` → assets / property
+- `.glyph-activity` → activity / health
+- `.glyph-heart` → wellness / status
+- `.glyph-search` → OSINT / search
+- `.glyph-info` → information / context
+- `.glyph-star` → highlight / priority
+- `.glyph-settings` → settings / configuration
 
 ### Headers and Section Order
 
@@ -226,7 +264,7 @@ A professional executive report always follows a deliberate section order. Use t
 2. **H1** — full subject name or report title
 3. **Subtitle** — context, period, or scope
 4. **Executive summary block** — 2–4 sentences interpreting the overall conclusion, written in high-level corporate tone, not a data dump
-5. **Chip row** — 3–5 classifiers: status, type, confidence, area. Always with SVG icons.
+5. **Chip row** — 3–5 classifiers: status, type, confidence, area. Always with glyphs or tiny SVG fallback icons.
 6. **Key facts grid** — 4–6 factual fields in a 2-column card layout
 
 ### Page 1 continuation or Page 2 — Signal Layer
@@ -241,7 +279,7 @@ A professional executive report always follows a deliberate section order. Use t
    - An optional H3 for sub-topics
    - A brief interpretive paragraph (2–4 sentences)
    - A visual element: table, chart, callout, or band
-10. **Charts** — if numerical time-series or comparative data exists, render it as an SVG inline chart
+10. **Charts** — if numerical time-series or comparative data exists, render it with the built-in chart component library
 11. **Comparison or summary table** — only if tabular comparison adds real clarity
 
 ### Last page — Closing Layer
@@ -276,227 +314,119 @@ Rules:
 
 ## Charts and Data Visualization
 
-When the data includes numerical, time-based, or comparative values, render an inline SVG chart. Do not skip this step if the data supports it.
+When the data includes numerical, time-based, or comparative values, render a chart with the built-in `.chart` component library from `.opencode/skills/pdf/pdf-ui.css`. Do not invent one-off chart markup when the library fits.
 
 ### When to use charts
 
-- Use a **bar chart** for comparisons across categories or periods.
-- Use a **horizontal bar chart** when labels are long.
-- Use a **line or area chart** for time series trends.
-- Use a **donut chart** for single proportional splits (max 4–5 segments).
-- Do NOT use pie charts for more than 5 segments — use a table instead.
-- Do NOT use charts for data that is already well-expressed by a metrics grid.
+- Use `chart--bar` for comparisons across periods or categories.
+- Use `chart--hbar` when labels are long.
+- Use `chart--donut` for proportional splits with up to 4–5 segments.
+- Do not use a chart when the same signal is already better expressed as a metric grid or small table.
 
-### Chart design rules
+### Bar chart
 
-- Charts must be inline SVG — no external images, no canvas, no script-based charting libraries.
-- Always include: axis labels, value labels on bars or points, a baseline, and a title or caption.
-- Chart colors must match the document palette — use `fill` values consistent with `--accent`, `--primary`, or their tints.
-- Keep SVG charts at natural proportions: bar charts ~420×170 viewBox, line charts ~420×140, donuts ~200×200.
-- Always set `style="width:100%;height:auto;"` on the SVG so it scales to the content area.
-- Wrap each chart in a `<div class="chart-wrap">` for spacing.
+Use `chart--bar` when the category order matters. The library handles layout; you only provide `--bars`, `--max`, and one `--h` value per bar item.
 
-### Chart math — MANDATORY proportional calculation
-
-**The number of bars in the SVG MUST equal exactly the number of data points. Never more, never less.**
-
-Before writing any SVG, compute the bar geometry from the real data:
-
-```
-GIVEN: values = [v1, v2, v3, ...vN]   ← your actual data
-CONSTANTS:
-  maxBarH  = 110   ← tallest bar height in viewBox units
-  baseline = 145   ← y coordinate of the x-axis line
-  maxValue = max(values)
-
-FOR EACH value[i]:
-  barHeight[i] = round( (value[i] / maxValue) * maxBarH )
-  barY[i]      = baseline - barHeight[i]
-  labelY[i]    = barY[i] - 4            ← value label above bar
-  slotWidth    = floor(360 / N)         ← distribute bars evenly
-  barWidth     = round(slotWidth * 0.6) ← bar is 60% of slot
-  barX[i]      = 30 + i * slotWidth + round(slotWidth * 0.2)
-  labelX[i]    = barX[i] + round(barWidth / 2)  ← centered
-```
-
-Example — values = [45, 120, 80, 200], N=4, maxValue=200:
-
-| i | value | barHeight | barY | barX | labelX |
-|---|-------|-----------|------|------|--------|
-| 0 | 45    | 25        | 120  | 48   | 75     |
-| 1 | 120   | 66        | 79   | 138  | 165    |
-| 2 | 80    | 44        | 101  | 228  | 255    |
-| 3 | 200   | 110       | 35   | 318  | 345    |
-
-**Salary progression example** — values = [567, 850, 1200, 2500], N=4, maxValue=2500, slotWidth=floor(360/4)=90, barWidth=round(90×0.6)=54:
-
-| i | value | barHeight            | barY       | barX               | labelX |
-|---|-------|----------------------|------------|--------------------|--------|
-| 0 | 567   | round(567/2500×110)=**25** | 145−25=**120** | 30+0×90+18=**48**  | 48+27=**75**  |
-| 1 | 850   | round(850/2500×110)=**37** | 145−37=**108** | 30+1×90+18=**138** | 138+27=**165** |
-| 2 | 1200  | round(1200/2500×110)=**53** | 145−53=**92** | 30+2×90+18=**228** | 228+27=**255** |
-| 3 | 2500  | round(2500/2500×110)=**110** | 145−110=**35** | 30+3×90+18=**318** | 318+27=**345** |
-
-Notice: the $2,500 bar (height=110) is always the tallest. The $567 bar (height=25) is always the shortest. **If your smallest value has a taller bar than a larger value, you made an arithmetic error — stop and recalculate.**
-
-**Validation check before writing SVG:** sort your barHeight values and confirm they are in the same order as sorted values. If not, recompute.
-
-**Never copy the example SVG code verbatim** — always recompute every `x`, `y`, `height`, and label from real data using the formula above.
-
-### Bar chart — CONCRETE TEMPLATE (salary progression, 4 bars)
-
-**This is a fully-computed, ready-to-use template. Substitute your own values using the formula table above — do NOT invent x/y/height values.**
-
-Data used: values = [567, 850, 1200, 2500], labels = ["2021","2022","2023","2024"], title = "Evolución Salarial IESS (USD)"
-
-Pre-computed geometry (N=4, maxValue=2500, slotWidth=90, barWidth=54):
-
-| i | value  | barH | barY | barX | labelX | label |
-|---|--------|------|------|------|--------|-------|
-| 0 | 567    | 25   | 120  | 48   | 75     | $567  |
-| 1 | 850    | 37   | 108  | 138  | 165    | $850  |
-| 2 | 1,200  | 53   | 92   | 228  | 255    | $1,200|
-| 3 | 2,500  | 110  | 35   | 318  | 345    | $2,500|
+**Math:** `barHeight = round((value / maxValue) * 110)px`
 
 ```html
-<div class="chart-wrap" style="margin-top:5mm;">
-  <p style="font-size:8.5pt;font-weight:700;color:#1e293b;margin:0 0 2mm;">Evolución Salarial IESS (USD)</p>
-  <svg viewBox="0 0 420 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
-    <!-- Grid lines (optional, at 25%, 50%, 75%, 100% of maxBarH=110) -->
-    <line x1="30" y1="117" x2="400" y2="117" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <line x1="30" y1="90"  x2="400" y2="90"  stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <line x1="30" y1="62"  x2="400" y2="62"  stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <!-- Baseline -->
-    <line x1="30" y1="145" x2="400" y2="145" stroke="#94a3b8" stroke-width="1"/>
-    <!-- Bar 0: value=567, barH=25, barY=120, barX=48, width=54 -->
-    <rect x="48"  y="120" width="54" height="25" rx="3" fill="#3b82f6"/>
-    <!-- Bar 1: value=850, barH=37, barY=108, barX=138, width=54 -->
-    <rect x="138" y="108" width="54" height="37" rx="3" fill="#3b82f6"/>
-    <!-- Bar 2: value=1200, barH=53, barY=92, barX=228, width=54 -->
-    <rect x="228" y="92"  width="54" height="53" rx="3" fill="#2563eb"/>
-    <!-- Bar 3: value=2500, barH=110, barY=35, barX=318, width=54 -->
-    <rect x="318" y="35"  width="54" height="110" rx="3" fill="#1d4ed8"/>
-    <!-- Value labels (labelY = barY - 5) -->
-    <text x="75"  y="115" text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="8"   font-weight="700" fill="#2563eb">$567</text>
-    <text x="165" y="103" text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="8"   font-weight="700" fill="#2563eb">$850</text>
-    <text x="255" y="87"  text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="8"   font-weight="700" fill="#1d4ed8">$1,200</text>
-    <text x="345" y="30"  text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="8.5" font-weight="700" fill="#1d4ed8">$2,500</text>
-    <!-- Category labels (y=160, always below baseline at y=145) -->
-    <text x="75"  y="160" text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="8.5" fill="#64748b">2021</text>
-    <text x="165" y="160" text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="8.5" fill="#64748b">2022</text>
-    <text x="255" y="160" text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="8.5" fill="#64748b">2023</text>
-    <text x="345" y="160" text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="8.5" fill="#64748b">2024</text>
-  </svg>
-  <p style="font-size:7.5pt;color:#94a3b8;margin:1mm 0 0;">Fuente: registros de afiliación IESS — salario más reciente: $2,500</p>
+<div class="chart chart--bar" style="--bars:4; --max:2500;">
+  <div class="chart__title">Evolución Salarial IESS (USD)</div>
+  <div class="chart__bars">
+    <div class="chart__item">
+      <div class="chart__fill" style="--h:25px;"></div>
+      <div class="chart__value">$567</div>
+      <div class="chart__label">2021</div>
+    </div>
+    <div class="chart__item">
+      <div class="chart__fill" style="--h:37px;"></div>
+      <div class="chart__value">$850</div>
+      <div class="chart__label">2022</div>
+    </div>
+    <div class="chart__item">
+      <div class="chart__fill" style="--h:53px;"></div>
+      <div class="chart__value">$1,200</div>
+      <div class="chart__label">2023</div>
+    </div>
+    <div class="chart__item">
+      <div class="chart__fill" style="--h:110px;"></div>
+      <div class="chart__value">$2,500</div>
+      <div class="chart__label">2024</div>
+    </div>
+  </div>
+  <div class="chart__note">Fuente: registros de afiliación IESS — salario más reciente: $2,500</div>
 </div>
 ```
 
-**How to adapt this template to your data:**
-1. List your N values and labels.
-2. Run the formula table: compute barH, barY, barX, labelX for each point.
-3. Replace every `x=`, `y=`, `height=`, and label text in the SVG with your computed values.
-4. Do NOT change the structure — only substitute numbers and text.
-5. Verify: the largest value must produce the tallest bar (barH=110). If not, recompute.
+Validation:
 
-### Horizontal bar chart example (for ranked lists or comparisons)
+- The tallest bar must correspond to the largest value.
+- The number of `.chart__item` blocks must equal the number of data points.
+- If the data changes, recompute `--h` for every bar.
+
+### Horizontal bar chart
+
+Use `chart--hbar` when labels are long or when a ranked comparison reads better horizontally.
+
+**Math:** `width = round((value / maxValue) * 100)%`
 
 ```html
-<div class="chart-wrap" style="margin-top:5mm;">
-  <svg viewBox="0 0 420 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
-    <line x1="110" y1="10" x2="110" y2="120" stroke="#d9e2ec" stroke-width="1"/>
-    <!-- Bars -->
-    <rect x="112" y="12"  width="200" height="20" rx="2" fill="#1d4ed8" opacity="0.85"/>
-    <rect x="112" y="42"  width="140" height="20" rx="2" fill="#1d4ed8" opacity="0.70"/>
-    <rect x="112" y="72"  width="240" height="20" rx="2" fill="#1d4ed8" opacity="0.85"/>
-    <rect x="112" y="102" width="90"  height="20" rx="2" fill="#1d4ed8" opacity="0.55"/>
-    <!-- Labels left -->
-    <text x="105" y="27"  text-anchor="end" font-family="Liberation Sans,sans-serif" font-size="8.5" fill="#475569">Categoría A</text>
-    <text x="105" y="57"  text-anchor="end" font-family="Liberation Sans,sans-serif" font-size="8.5" fill="#475569">Categoría B</text>
-    <text x="105" y="87"  text-anchor="end" font-family="Liberation Sans,sans-serif" font-size="8.5" fill="#475569">Categoría C</text>
-    <text x="105" y="117" text-anchor="end" font-family="Liberation Sans,sans-serif" font-size="8.5" fill="#475569">Categoría D</text>
-    <!-- Values right -->
-    <text x="317" y="27"  font-family="Liberation Sans,sans-serif" font-size="8.5" font-weight="700" fill="#1d4ed8">200</text>
-    <text x="257" y="57"  font-family="Liberation Sans,sans-serif" font-size="8.5" font-weight="700" fill="#1d4ed8">140</text>
-    <text x="357" y="87"  font-family="Liberation Sans,sans-serif" font-size="8.5" font-weight="700" fill="#1d4ed8">240</text>
-    <text x="207" y="117" font-family="Liberation Sans,sans-serif" font-size="8.5" font-weight="700" fill="#1d4ed8">90</text>
-  </svg>
+<div class="chart chart--hbar">
+  <div class="chart__title">Distribución de Resultados OSINT</div>
+  <div class="chart__rows">
+    <div class="chart__row">
+      <div class="chart__label">Documentos PDF</div>
+      <div class="chart__track"><div class="chart__fill" style="--w:26%;"></div></div>
+      <div class="chart__value">6</div>
+    </div>
+    <div class="chart__row">
+      <div class="chart__label">Redes Sociales</div>
+      <div class="chart__track"><div class="chart__fill" style="--w:100%;"></div></div>
+      <div class="chart__value">23</div>
+    </div>
+    <div class="chart__row">
+      <div class="chart__label">Otros</div>
+      <div class="chart__track"><div class="chart__fill" style="--w:65%;"></div></div>
+      <div class="chart__value">15</div>
+    </div>
+  </div>
+  <div class="chart__note">Fuente: búsqueda OSINT — 48 resultados totales</div>
 </div>
 ```
 
-### Donut chart — CONCRETE TEMPLATE (employment status split, 3 segments)
+Validation:
 
-**CRITICAL — WeasyPrint does NOT support CSS `conic-gradient`.** Never use it for pie or donut charts. The only valid approach is SVG with `stroke-dasharray` on `<circle>` elements.
+- The longer bar must always represent the larger value.
+- Keep the ranking order visible and do not reorder the data unless the report explicitly asks for sorting.
 
-**Math for donut segments** (circumference = 2 × π × r = 2 × 3.14159 × 45 ≈ 282.74):
+### Donut chart
 
-```
-FOR EACH segment[i] with percent[i]:
-  dash[i]   = 282.74 × (percent[i] / 100)      ← arc length of this segment
-  gap[i]    = 282.74 - dash[i]                  ← remaining circumference (gap)
-  offset[i] = -(sum of dash[0] + dash[1] + ... + dash[i-1])  ← cumulative start offset (negative)
-```
+Use `chart--donut` for proportional splits. The library uses SVG circles, but the HTML only needs numeric variables and legend rows.
 
-**This is a fully-computed, ready-to-use template.** Data: Empleado 65%, Independiente 20%, Sin actividad 15%. Largest segment shown in center label.
-
-Pre-computed geometry (circumference = 282.74):
-
-| i | label           | %  | dash   | gap    | offset   | color   |
-|---|-----------------|----|--------|--------|----------|---------|
-| 0 | Empleado        | 65 | 183.78 | 98.96  | 0        | #1d4ed8 |
-| 1 | Independiente   | 20 | 56.55  | 226.19 | −183.78  | #7c3aed |
-| 2 | Sin actividad   | 15 | 42.41  | 240.33 | −240.33  | #94a3b8 |
-
-Validation: 183.78 + 56.55 + 42.41 = 282.74 ✓
-
-Use solid, distinct colors (no opacity — low opacity segments are nearly invisible in print):
+**Math:** `dash = 282.74 × percent / 100`, `offset = -(sum of previous dashes)`
 
 ```html
-<div class="chart-wrap" style="margin-top:5mm;display:flex;align-items:center;gap:8mm;">
-  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style="width:50mm;height:50mm;flex:0 0 auto;">
-    <!-- All circles share cx=60,cy=60,r=45,stroke-width=22,fill=none.
-         transform="rotate(-90 60 60)" places segment 0 at 12 o'clock. -->
-    <!-- Segment 0: Empleado 65% — dash=183.78, gap=98.96, offset=0 -->
-    <circle cx="60" cy="60" r="45" fill="none" stroke="#1d4ed8" stroke-width="22"
-      stroke-dasharray="183.78 98.96" stroke-dashoffset="0"
-      transform="rotate(-90 60 60)"/>
-    <!-- Segment 1: Independiente 20% — dash=56.55, gap=226.19, offset=-183.78 -->
-    <circle cx="60" cy="60" r="45" fill="none" stroke="#7c3aed" stroke-width="22"
-      stroke-dasharray="56.55 226.19" stroke-dashoffset="-183.78"
-      transform="rotate(-90 60 60)"/>
-    <!-- Segment 2: Sin actividad 15% — dash=42.41, gap=240.33, offset=-240.33 -->
-    <circle cx="60" cy="60" r="45" fill="none" stroke="#94a3b8" stroke-width="22"
-      stroke-dasharray="42.41 240.33" stroke-dashoffset="-240.33"
-      transform="rotate(-90 60 60)"/>
-    <!-- Center label: show the dominant segment % and its label -->
-    <text x="60" y="55" text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="16" font-weight="700" fill="#1e293b">65%</text>
-    <text x="60" y="67" text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="7"   fill="#64748b">Empleado</text>
+<div class="chart chart--donut">
+  <svg class="chart__svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#1d4ed8; --dash:183.78; --offset:0;"></circle>
+    <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#7c3aed; --dash:56.55; --offset:-183.78;"></circle>
+    <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#94a3b8; --dash:42.41; --offset:-240.33;"></circle>
+    <text class="chart__center" x="60" y="55" font-size="16">65%</text>
+    <text class="chart__center" x="60" y="67" font-size="7">Empleado</text>
   </svg>
-  <!-- Legend — colored squares only, NEVER conic-gradient backgrounds -->
-  <div style="font-family:Liberation Sans,sans-serif;font-size:8.5pt;line-height:2;">
-    <div><span style="display:inline-block;width:10px;height:10px;background:#1d4ed8;border-radius:2px;margin-right:5px;vertical-align:middle;"></span><strong>Empleado</strong> — 65%</div>
-    <div><span style="display:inline-block;width:10px;height:10px;background:#7c3aed;border-radius:2px;margin-right:5px;vertical-align:middle;"></span>Independiente — 20%</div>
-    <div><span style="display:inline-block;width:10px;height:10px;background:#94a3b8;border-radius:2px;margin-right:5px;vertical-align:middle;"></span>Sin actividad — 15%</div>
+  <div class="chart__legend">
+    <div class="chart__legend-row"><span class="chart__swatch" style="--color:#1d4ed8;"></span><strong>Empleado</strong> — 65%</div>
+    <div class="chart__legend-row"><span class="chart__swatch" style="--color:#7c3aed;"></span>Independiente — 20%</div>
+    <div class="chart__legend-row"><span class="chart__swatch" style="--color:#94a3b8;"></span>Sin actividad — 15%</div>
   </div>
 </div>
 ```
 
-**How to adapt this template to your data:**
-1. List your N segments as (label, percent) pairs. Verify they sum to 100%.
-2. Compute: `dash[i] = 282.74 × (percent[i] / 100)`, `gap[i] = 282.74 − dash[i]`.
-3. Compute offsets: `offset[0] = 0`, `offset[i] = -(dash[0] + ... + dash[i-1])`.
-4. Replace each circle's `stroke-dasharray` and `stroke-dashoffset` with your computed values.
-5. Update the center label to the largest segment's percent and name.
-6. Update the legend rows to match your segments.
-7. **Validation:** sum of all `dash` values must equal 282.74. If not, recompute.
+Validation:
 
-### Chart CSS to add
-
-```css
-.chart-wrap {
-  margin-top: 5mm;
-  break-inside: avoid-page;
-}
-```
+- The sum of the segment percentages must be 100%.
+- The sum of the `dash` values must equal the circle circumference.
+- Use solid colors and avoid opacity when the chart must print clearly.
 
 ## Content Rules
 
@@ -660,317 +590,6 @@ The first page must always open with all of these, in this order:
 
 Skipping any of these is a layout failure.
 
-## Icon Rules
-
-Icons are mandatory in:
-
-- every `.chip`, `.badge`, `.metric-pill`, and `.action-tag`
-- every `.callout` header when the content warrants it
-- every `.label` inside a `.fact-grid` or `.metric-grid`
-
-Always use inline SVG for icons — they are reliable in WeasyPrint.
-
-**CRITICAL — icon sizing rule:** Always put `class="icon"` directly on the `<svg>` element AND always include explicit `width` and `height` attributes. Never put `class="icon"` on a wrapping `<span>`. If the SVG is inside a `<span>`, the span's `width`/`height` CSS cannot constrain the SVG, and WeasyPrint will render it at full container width — a giant icon that overlaps text.
-
-This rule applies everywhere an SVG is used as an icon:
-- chips, badges, metric-pills
-- callout headers and section labels
-- fact-grid and metric-grid labels
-- any inline icon next to text
-
-```html
-<!-- CORRECT — class="icon" on the SVG itself, with explicit width/height -->
-<svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-</svg>
-
-<!-- WRONG — class="icon" on a wrapping span, SVG has no size constraint -->
-<span class="icon">
-  <svg viewBox="0 0 24 24" fill="currentColor">
-    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-  </svg>
-</span>
-
-<!-- WRONG — SVG in callout header without class="icon" or explicit dimensions -->
-<div class="callout-header">
-  <svg viewBox="0 0 24 24" fill="currentColor">...</svg>
-  <h3>Title</h3>
-</div>
-
-<!-- CORRECT — callout header icon -->
-<div class="callout-header">
-  <svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">...</svg>
-  <h3>Title</h3>
-</div>
-```
-
-Do NOT use letter placeholders (A, B, C, D) as icon stand-ins. Use real SVG paths.
-
-**CRITICAL — use ONLY icons from the library below. Do not invent SVG paths.**
-If no icon fits perfectly, pick the closest one. An imperfect icon from the library is always better than an invented path that may render incorrectly.
-
----
-
-## Icon Library
-
-All icons share the same wrapper. Copy the wrapper and paste the paths inside:
-
-```html
-<svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none"
-     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <!-- PASTE PATHS HERE -->
-</svg>
-```
-
-For larger icons (callout headers, section labels) use `width="20" height="20"` or `width="24" height="24"`.
-
-### Persona e Identidad
-
-**user** — persona, sujeto, perfil individual
-```
-<circle cx="12" cy="8" r="4"/>
-<path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
-```
-
-**users** — familia, grupo, red de contactos
-```
-<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-<circle cx="9" cy="7" r="4"/>
-<path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-<path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-```
-
-**id-card** — cédula, identificación, documento de identidad
-```
-<rect x="2" y="5" width="20" height="14" rx="2"/>
-<circle cx="8" cy="12" r="2"/>
-<path d="M14 9h4M14 13h4M14 17h4"/>
-```
-
-**shield** — estado legal limpio, seguridad, protección
-```
-<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-```
-
-**award** — calificación, logro, distinción
-```
-<circle cx="12" cy="8" r="6"/>
-<path d="M8.56 13.6 7 23l5-3 5 3-1.56-9.4"/>
-```
-
-### Ubicación
-
-**map-pin** — dirección, residencia, ubicación actual
-```
-<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-<circle cx="12" cy="10" r="3"/>
-```
-
-**home** — domicilio, residencia
-```
-<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-<polyline points="9 22 9 12 15 12 15 22"/>
-```
-
-**globe** — país, nacionalidad, alcance internacional
-```
-<circle cx="12" cy="12" r="10"/>
-<line x1="2" y1="12" x2="22" y2="12"/>
-<path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-```
-
-### Trabajo y Finanzas
-
-**briefcase** — empleo, empresa, trabajo
-```
-<rect x="2" y="7" width="20" height="14" rx="2"/>
-<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-```
-
-**building** — empresa, organización, institución
-```
-<rect x="4" y="2" width="16" height="20" rx="1"/>
-<path d="M9 22v-4h6v4"/>
-<path d="M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01M8 14h.01M16 14h.01M12 14h.01"/>
-```
-
-**dollar-sign** — salario, ingreso, dinero
-```
-<line x1="12" y1="1" x2="12" y2="23"/>
-<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-```
-
-**trending-up** — crecimiento salarial, progresión, aumento
-```
-<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-<polyline points="17 6 23 6 23 12"/>
-```
-
-**bar-chart** — estadísticas, gráfico, datos
-```
-<line x1="18" y1="20" x2="18" y2="10"/>
-<line x1="12" y1="20" x2="12" y2="4"/>
-<line x1="6" y1="20" x2="6" y2="16"/>
-```
-
-### Legal y Riesgo
-
-**alert-triangle** — riesgo, advertencia, irregularidad
-```
-<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-<line x1="12" y1="9" x2="12" y2="13"/>
-<line x1="12" y1="17" x2="12.01" y2="17"/>
-```
-
-**alert-circle** — alerta leve, observación
-```
-<circle cx="12" cy="12" r="10"/>
-<line x1="12" y1="8" x2="12" y2="12"/>
-<line x1="12" y1="16" x2="12.01" y2="16"/>
-```
-
-**check-circle** — estado positivo, sin antecedentes, validado
-```
-<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-<polyline points="22 4 12 14.01 9 11.01"/>
-```
-
-**x-circle** — negativo, rechazado, inactivo
-```
-<circle cx="12" cy="12" r="10"/>
-<line x1="15" y1="9" x2="9" y2="15"/>
-<line x1="9" y1="9" x2="15" y2="15"/>
-```
-
-**scale** — justicia, proceso legal, balanza
-```
-<path d="M12 2v20M2 12h20"/>
-<path d="M17 7l-5-5-5 5M7 17l5 5 5-5"/>
-```
-
-### Educación y Documentos
-
-**graduation-cap** — educación, título, universidad
-```
-<path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-<path d="M6 12v5c3 3 9 3 12 0v-5"/>
-```
-
-**book-open** — estudio, conocimiento, carrera académica
-```
-<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-```
-
-**file-text** — documento, reporte, expediente
-```
-<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-<polyline points="14 2 14 8 20 8"/>
-<line x1="16" y1="13" x2="8" y2="13"/>
-<line x1="16" y1="17" x2="8" y2="17"/>
-<polyline points="10 9 9 9 8 9"/>
-```
-
-**folder** — expediente, archivos, carpeta
-```
-<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-```
-
-### Contacto y Comunicación
-
-**phone** — teléfono, celular, número de contacto
-```
-<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-```
-
-**mail** — correo electrónico, email
-```
-<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-<polyline points="22,6 12,13 2,6"/>
-```
-
-**wifi** — conexión, señal, activo en línea
-```
-<path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-<path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-<path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-<line x1="12" y1="20" x2="12.01" y2="20"/>
-```
-
-### Tiempo y Fecha
-
-**calendar** — fecha de nacimiento, fecha de registro, período
-```
-<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-<line x1="16" y1="2" x2="16" y2="6"/>
-<line x1="8" y1="2" x2="8" y2="6"/>
-<line x1="3" y1="10" x2="21" y2="10"/>
-```
-
-**clock** — antigüedad, tiempo, duración
-```
-<circle cx="12" cy="12" r="10"/>
-<polyline points="12 6 12 12 16 14"/>
-```
-
-### Vehículo y Patrimonio
-
-**truck** — vehículo, automóvil, transporte
-```
-<rect x="1" y="3" width="15" height="13"/>
-<polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
-<circle cx="5.5" cy="18.5" r="2.5"/>
-<circle cx="18.5" cy="18.5" r="2.5"/>
-```
-
-**package** — bienes, activos, patrimonio
-```
-<line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
-<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-<polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-<line x1="12" y1="22.08" x2="12" y2="12"/>
-```
-
-### Salud
-
-**activity** — historial médico, salud, signos vitales
-```
-<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-```
-
-**heart** — salud, bienestar, estado físico
-```
-<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-```
-
-### General
-
-**search** — investigación, OSINT, búsqueda
-```
-<circle cx="11" cy="11" r="8"/>
-<line x1="21" y1="21" x2="16.65" y2="16.65"/>
-```
-
-**info** — información, nota, contexto adicional
-```
-<circle cx="12" cy="12" r="10"/>
-<line x1="12" y1="16" x2="12" y2="12"/>
-<line x1="12" y1="8" x2="12.01" y2="8"/>
-```
-
-**star** — relevancia, prioridad alta, destacado
-```
-<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-```
-
-**settings** — configuración, parámetros, sistema
-```
-<circle cx="12" cy="12" r="3"/>
-<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-```
-
----
-
 ## Anti-Patterns
 
 Do not:
@@ -992,25 +611,19 @@ Do not:
 - set `overflow: hidden` on `html`, `body`, `.doc`, or `.sheet` — this discards content beyond the first page
 - use `break-inside: avoid-page` or `break-inside: avoid` on `.sheet` — this prevents WeasyPrint from paginating the sheet and causes content loss. Only apply `break-inside: avoid-page` to small bounded components (cards, callouts, table-wrap, chips)
 - create one `.sheet` per small section — always group sections so each sheet page feels visually dense
-- generate chips, badges, metric pills, or callout elements without paired SVG icons
+- generate chips, badges, metric pills, or callout elements without paired glyphs or SVG icons
 - omit the mandatory page-1 heading sequence: eyebrow → h1 → subtitle → summary → chip-row
 - produce a simpler document than the STARTER — the starter is the minimum richness level, not a ceiling
 - place a `<table>` inside a `.grid`, `.fact-grid`, `.metric-grid`, or any multi-column container — tables are always full-width standalone blocks inside `.table-wrap`
-- use `conic-gradient` or `radial-gradient` for pie/donut charts — WeasyPrint does not support `conic-gradient`; always use SVG `<circle>` with `stroke-dasharray` as shown in the donut example
-- use CSS div-based bars, progress bars, or width-percentage fills as data charts — for example, do NOT use `<div class="timeline-fill" style="width: 100%;">` or any CSS bar to represent salary, count, or comparison data; ALL charts must use SVG `<rect>` bars computed from the proportional formula
-- use SVG `<line>` elements as chart bars — a vertical `<line>` drawn from a baseline to a data point is NOT a bar chart; use `<rect>` with computed `height` and `y` only
+- use `conic-gradient` or `radial-gradient` for pie/donut charts — WeasyPrint does not support them; use the built-in `chart--donut` class instead
+- use chart markup outside the built-in chart component library when the library already fits the data
+- render a chart where a lower value has a taller bar than a higher value — that means the math is wrong; stop and recalculate
 - omit data points from a chart — if salary history has 4 entries [$567, $850, $1,200, $2,500], the chart must have exactly 4 bars; omitting the most recent (highest) salary bar is a chart failure
 - generate Cloudflare `__cf_email__` protection anchors in report HTML — emails must be plain text, never `<a class="__cf_email__" data-cfemail="...">...</a>`; that encoding renders the email invisible to the reader
 - use session context variables (`userEmail`, logged-in operator email) as subject data — if an email you are about to write into the report matches the session's user email, it is contaminated; omit it and note it as unavailable
 - calculate age from OSINT or LinkedIn self-reported data — age must be computed from the MCP birth date record using the formula: `age = report_year − birth_year`, minus 1 if the birthday is still ahead of the report date; a person born 23/04/2000 has age 25 on 16/04/2026, not 26 and not 34
-- copy chart SVG examples verbatim — always recompute every bar `x`, `y`, `height` and every label from real data using the proportional formula
-- render more bars than data points, or fewer bars than data points — bar count must equal data point count exactly
-- produce a chart where a lower value has a taller bar than a higher value — this means the math is wrong; stop and recalculate
-- write arbitrary bar heights that do not come from the proportional formula — if barHeight is not `round((value/maxValue)*110)`, it is wrong
-- put wrong Y-axis labels — if the data range is $500–$2500, the Y-axis must reflect that range, not "$0/$100/$200"
-- repeat the same year/label multiple times on the X-axis — each bar gets a unique label
-- allow the last bar or label to extend beyond the SVG viewBox right edge — verify `barX[last] + barWidth ≤ viewBox width - 10`
-- apply `break-inside: avoid-page` to `<section>` elements — large sections will be cut mid-content by WeasyPrint regardless; only apply this to small bounded components (cards, chips, callouts, table-wrap)
+- render a chart outside the built-in formulas or component variables when the report uses numerical, comparative, or time-series data
+- place chart rows, bars, or legends inside a multi-column container that compresses the chart
 - use fixed pixel or mm widths on tables or `.table-wrap` — tables always fill 100% of the content area
 - nest `.section-content` inside another `.section-content` — this creates ugly box-in-box double borders; use flat structure
 - stack metric-pills vertically as individual block elements — always group them in a flex row: `<div style="display:flex;flex-wrap:wrap;gap:4mm;">`

@@ -2,66 +2,56 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <title>Executive PDF</title>
+    <title>Executive PDF Starter</title>
     <style>
-      @font-face {
-        font-family: "PdfSans";
-        src: url("./.opencode/assets/fonts/PdfSans-Variable.ttf") format("truetype");
-        font-weight: 200 800;
-        font-style: normal;
-      }
-
-      @font-face {
-        font-family: "PdfSerif";
-        src: url("./.opencode/assets/fonts/PdfSerif-Variable.ttf") format("truetype");
-        font-weight: 200 900;
-        font-style: normal;
-      }
-
       :root {
         --ink: #0f172a;
         --muted: #475569;
         --line: #d9e2ec;
         --surface: #f8fafc;
         --primary: #102a43;
-        --accent: #1d4ed8;
+        --secondary: #1d4ed8;
+        --accent: #2563eb;
         --accent-soft: #e8f0ff;
-        --watermark: rgba(15, 23, 42, 0.05);
+        --good: #166534;
+        --warn: #92400e;
       }
 
+      @page {
+        size: A4;
+        margin: 24mm 16mm 22mm 16mm;
+      }
+
+      html,
       body {
+        margin: 0;
+        padding: 0;
         color: var(--ink);
+        background: #fff;
         font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
-      }
-
-      .watermark {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-        z-index: 0;
-      }
-
-      .watermark span {
-        transform: rotate(-36deg);
-        font-size: 56pt;
-        font-weight: 700;
-        letter-spacing: 0.35em;
-        color: var(--watermark);
-        text-transform: uppercase;
+        font-size: 10.5pt;
+        line-height: 1.55;
       }
 
       .doc {
-        position: relative;
-        z-index: 1;
+        width: 178mm;
+        margin: 0 auto;
+      }
+
+      .sheet {
+        break-after: page;
+        page-break-after: always;
+        padding: 0;
+      }
+
+      .sheet:last-child {
+        break-after: auto;
+        page-break-after: auto;
       }
 
       .hero {
         padding: 10mm 0 6mm;
         border-bottom: 1px solid var(--line);
-        break-inside: avoid-page;
       }
 
       .eyebrow {
@@ -77,106 +67,21 @@
         color: var(--primary);
         font-family: "PdfSerif", "Liberation Serif", "DejaVu Serif", serif;
         font-size: 25pt;
-        line-height: 1.1;
+        line-height: 1.08;
       }
 
       .subtitle {
-        margin: 0;
         color: var(--muted);
         font-size: 11pt;
+        margin: 0;
       }
 
       .summary {
         margin-top: 8mm;
         padding: 6mm 7mm;
-        background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 68%, white 32%) 0%, var(--accent-soft) 100%);
         border: 1px solid color-mix(in srgb, var(--accent) 18%, white 82%);
         border-radius: 4mm;
-        break-inside: avoid-page;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 4mm 7mm;
-        margin: 8mm 0;
-        break-inside: avoid-page;
-      }
-
-      .card {
-        padding: 5mm 0;
-        border-top: 1px solid var(--line);
-      }
-
-      .label {
-        display: block;
-        color: var(--muted);
-        font-size: 8pt;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .value {
-        display: block;
-        margin-top: 1.5mm;
-        font-size: 10pt;
-      }
-
-      section {
-        margin-top: 9mm;
-        break-inside: avoid-page;
-      }
-
-      h2 {
-        margin: 0 0 4mm;
-        color: var(--primary);
-        font-size: 13pt;
-        font-weight: 700;
-        break-after: avoid-page;
-      }
-
-      .band {
-        padding: 5mm 6mm;
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 3mm;
-      }
-
-      table {
-        margin-top: 4mm;
-      }
-
-      th {
-        color: var(--muted);
-        font-size: 8pt;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        text-align: left;
-        padding: 0 0 2.5mm;
-        border-bottom: 1px solid var(--line);
-      }
-
-      td {
-        padding: 3mm 0;
-        border-bottom: 1px solid #edf2f7;
-        vertical-align: top;
-      }
-
-      ul.clean {
-        margin: 0;
-        padding-left: 5mm;
-      }
-
-      ul.clean li {
-        margin-bottom: 2mm;
-      }
-
-      .footer-note {
-        margin-top: 9mm;
-        color: var(--muted);
-        font-size: 8.5pt;
+        background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 68%, white 32%) 0%, var(--accent-soft) 100%);
       }
 
       .chip-row,
@@ -214,25 +119,87 @@
         color: white;
       }
 
-      .icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 4.5mm;
-        height: 4.5mm;
-        flex: 0 0 auto;
+      .chip .glyph,
+      .badge .glyph,
+      .metric-pill .glyph,
+      .action-tag .glyph,
+      .label .glyph,
+      .callout-head .glyph {
+        width: 1em;
+        height: 1em;
+        font-size: 1em;
       }
 
-      .icon svg {
-        width: 100%;
-        height: 100%;
-      }
-
+      .grid,
       .fact-grid,
       .metric-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 4mm 7mm;
+      }
+
+      .grid {
+        margin: 8mm 0;
+      }
+
+      .fact-card {
+        padding: 5mm 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .label {
+        display: flex;
+        align-items: center;
+        gap: 2mm;
+        color: var(--muted);
+        font-size: 8pt;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .value {
+        display: block;
+        margin-top: 1.5mm;
+        font-size: 10pt;
+      }
+
+      section {
+        margin-top: 9mm;
+      }
+
+      h2 {
+        margin: 0 0 4mm;
+        color: var(--primary);
+        font-size: 13pt;
+        font-weight: 700;
+        break-after: avoid-page;
+      }
+
+      h3 {
+        margin: 5mm 0 2mm;
+        color: var(--secondary);
+        font-size: 10.5pt;
+        font-weight: 700;
+      }
+
+      p {
+        margin: 0 0 2mm;
+        text-align: justify;
+      }
+
+      .band,
+      .callout,
+      .table-wrap {
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+
+      .band {
+        padding: 5mm 6mm;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 3mm;
       }
 
       .callout {
@@ -243,273 +210,226 @@
         border-radius: 0 3mm 3mm 0;
       }
 
-      .table-wrap {
-        margin-top: 4mm;
-        break-inside: avoid-page;
-      }
-
-      .metric-value {
-        display: block;
-        margin-top: 1.5mm;
-        font-size: 15pt;
-        font-weight: 700;
-        color: var(--primary);
-      }
-
-      .label-icon {
-        display: inline-flex;
+      .callout-head {
+        display: flex;
         align-items: center;
-        gap: 1.5mm;
-        vertical-align: middle;
+        gap: 2mm;
+        margin-bottom: 3mm;
+        color: var(--primary);
+        font-size: 9pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
-      .label-icon svg {
-        width: 3.5mm;
-        height: 3.5mm;
-        flex: 0 0 auto;
+      .footer-note {
+        margin-top: 9mm;
+        color: var(--muted);
+        font-size: 8.5pt;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 8pt;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-align: left;
+        padding: 0 0 2.5mm;
+        border-bottom: 1px solid var(--line);
+      }
+
+      td {
+        padding: 3mm 0;
+        border-bottom: 1px solid #edf2f7;
+        vertical-align: top;
+      }
+
+      ul.clean {
+        margin: 0;
+        padding-left: 5mm;
+      }
+
+      ul.clean li {
+        margin-bottom: 2mm;
       }
     </style>
   </head>
   <body>
-    <div class="watermark"><span>${ACCOUNT_ID}</span></div>
     <main class="doc">
-
-      <!-- ═══════════════════════════════════════════
-           HOJA 1 — Hero · Hechos clave · Hallazgos
-           Mantener siempre la secuencia completa:
-           eyebrow → h1 → subtitle → summary → chip-row
-           ═══════════════════════════════════════════ -->
       <section class="sheet">
-        <header class="hero">
-          <div class="eyebrow">Executive Report</div>
-          <h1>Título del documento</h1>
-          <p class="subtitle">Subtítulo o contexto ejecutivo — período o alcance</p>
+        <div class="hero">
+          <div class="eyebrow">Reporte Ejecutivo</div>
+          <h1>Nombre del sujeto o tema</h1>
+          <p class="subtitle">Cédula / período / contexto editorial</p>
+
           <div class="summary">
-            <strong>Resumen ejecutivo.</strong> Introducción breve, clara y editorialmente cuidada.
-            Este párrafo interpreta los hallazgos, no los enumera. Debe invitar al lector a continuar.
+            <p>
+              Resumen ejecutivo de 2 a 4 frases. Debe interpretar, no repetir datos.
+              Esta zona es la capa más importante de lectura rápida y debe quedar limpia.
+            </p>
           </div>
-          <!-- CHIPS: siempre con iconos SVG inline — no usar letras como placeholder -->
+
           <div class="chip-row">
-            <span class="chip">
-              <span class="icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                </svg>
-              </span>
-              <span>Chip editorial</span>
-            </span>
-            <span class="badge">
-              <span class="icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                </svg>
-              </span>
-              <span>Badge sobrio</span>
-            </span>
-            <span class="metric-pill">
-              <span class="icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
-                </svg>
-              </span>
-              <span>Métrica clave</span>
-            </span>
-            <span class="action-tag">
-              <span class="icon" style="color: white;">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-              </span>
-              <span>Etiqueta visual</span>
-            </span>
+            <span class="chip"><span class="glyph glyph-id-card"></span>Identificación</span>
+            <span class="chip"><span class="glyph glyph-shield"></span>Estado legal</span>
+            <span class="chip"><span class="glyph glyph-trending-up"></span>Actividad</span>
+            <span class="chip"><span class="glyph glyph-package"></span>Patrimonio</span>
           </div>
-        </header>
+        </div>
 
-        <!-- Hechos clave: 4 cards en 2×2 para llenar el espacio -->
-        <section>
-          <h2>Hechos clave</h2>
-          <div class="grid">
-            <div class="card">
-              <span class="label">Campo A</span>
-              <span class="value">Valor descriptivo completo</span>
-            </div>
-            <div class="card">
-              <span class="label">Campo B</span>
-              <span class="value">Valor descriptivo completo</span>
-            </div>
-            <div class="card">
-              <span class="label">Campo C</span>
-              <span class="value">Valor descriptivo completo</span>
-            </div>
-            <div class="card">
-              <span class="label">Campo D</span>
-              <span class="value">Valor descriptivo completo</span>
-            </div>
+        <div class="grid">
+          <div class="fact-card">
+            <div class="label"><span class="glyph glyph-user"></span>Edad</div>
+            <span class="value">25 años</span>
           </div>
-        </section>
-
-        <!-- Hallazgos: mínimo 4–5 puntos para que la sección tenga peso visual -->
-        <section>
-          <h2>Hallazgos principales</h2>
-          <div class="band">
-            <ul class="clean">
-              <li>Punto de alto valor editorial — interpretación, no datos crudos</li>
-              <li>Segundo hallazgo relevante con contexto analítico claro</li>
-              <li>Tercer punto con señal fuerte y perspectiva ejecutiva</li>
-              <li>Cuarto hallazgo con implicación directa para el negocio</li>
-              <li>Quinto punto de cierre con orientación de acción</li>
-            </ul>
+          <div class="fact-card">
+            <div class="label"><span class="glyph glyph-map-pin"></span>Origen</div>
+            <span class="value">Pedro Carbo, Guayas</span>
           </div>
-        </section>
+          <div class="fact-card">
+            <div class="label"><span class="glyph glyph-graduation-cap"></span>Formación</div>
+            <span class="value">Universidad / bachiller / egresado</span>
+          </div>
+          <div class="fact-card">
+            <div class="label"><span class="glyph glyph-dollar-sign"></span>Ingreso actual</div>
+            <span class="value">$2,500 USD</span>
+          </div>
+        </div>
       </section>
 
-      <!-- ═══════════════════════════════════════════
-           HOJA 2 — Análisis · Métricas · Tabla · Cierre
-           Esta hoja debe estar tan cargada como la primera.
-           No crear .sheet con una sola sección pequeña.
-           ═══════════════════════════════════════════ -->
       <section class="sheet">
+        <h2>Señales Principales</h2>
+        <p>
+          Usa esta sección para hallazgos, señales y contexto. Mantén el texto corto y acompáñalo con un componente visual.
+        </p>
 
-        <!-- Callout destacado -->
-        <section>
-          <h2>Análisis detallado</h2>
-          <div class="callout">
-            <strong>Punto de atención.</strong> Este bloque destaca un hallazgo o contexto
-            relevante que merece énfasis visual. Úsalo para hechos que no deben perderse en
-            la lectura diagonal del ejecutivo.
+        <div class="callout">
+          <div class="callout-head"><span class="glyph glyph-bar-chart"></span>Evolución Salarial</div>
+          <div class="chart chart--bar" style="--bars:4; --max:2500;">
+            <div class="chart__title">Evolución Salarial IESS (USD)</div>
+            <div class="chart__bars">
+              <div class="chart__item">
+                <div class="chart__fill" style="--h:25px;"></div>
+                <div class="chart__value">$567</div>
+                <div class="chart__label">2021</div>
+              </div>
+              <div class="chart__item">
+                <div class="chart__fill" style="--h:37px;"></div>
+                <div class="chart__value">$850</div>
+                <div class="chart__label">2022</div>
+              </div>
+              <div class="chart__item">
+                <div class="chart__fill" style="--h:53px;"></div>
+                <div class="chart__value">$1,200</div>
+                <div class="chart__label">2023</div>
+              </div>
+              <div class="chart__item">
+                <div class="chart__fill" style="--h:110px;"></div>
+                <div class="chart__value">$2,500</div>
+                <div class="chart__label">2024</div>
+              </div>
+            </div>
+            <div class="chart__note">Fuente: registros de afiliación IESS</div>
           </div>
-        </section>
+        </div>
 
-        <!-- Métricas con iconos en el label — siempre usar SVG, nunca solo texto -->
-        <section>
-          <h2>Métricas del período</h2>
-          <div class="fact-grid">
-            <div class="card">
-              <span class="label">
-                <span class="label-icon">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
-                  </svg>
-                  Métrica principal
-                </span>
-              </span>
-              <span class="metric-value">$0.00</span>
+        <div class="metric-grid" style="margin-top:6mm;">
+          <div class="metric-pill"><span class="glyph glyph-clock"></span><span>Antigüedad</span><strong class="value" style="margin:0;">5 años</strong></div>
+          <div class="metric-pill"><span class="glyph glyph-search"></span><span>OSINT</span><strong class="value" style="margin:0;">48 resultados</strong></div>
+          <div class="metric-pill"><span class="glyph glyph-briefcase"></span><span>Rol</span><strong class="value" style="margin:0;">Coordinador</strong></div>
+          <div class="metric-pill"><span class="glyph glyph-check-circle"></span><span>Estado</span><strong class="value" style="margin:0;">Completo</strong></div>
+        </div>
+      </section>
+
+      <section class="sheet">
+        <h2>Comparación y Detalle</h2>
+        <p>Cuando tengas varios valores, usa la comparación horizontal o la tabla. No mezcles ambos dentro de una grilla apretada.</p>
+
+        <div class="band">
+          <div class="chart chart--hbar">
+            <div class="chart__title">Distribución de Resultados OSINT</div>
+            <div class="chart__rows">
+              <div class="chart__row">
+                <div class="chart__label">Documentos PDF</div>
+                <div class="chart__track"><div class="chart__fill" style="--w:26%;"></div></div>
+                <div class="chart__value">6</div>
+              </div>
+              <div class="chart__row">
+                <div class="chart__label">Redes Sociales</div>
+                <div class="chart__track"><div class="chart__fill" style="--w:100%;"></div></div>
+                <div class="chart__value">23</div>
+              </div>
+              <div class="chart__row">
+                <div class="chart__label">Otros</div>
+                <div class="chart__track"><div class="chart__fill" style="--w:65%;"></div></div>
+                <div class="chart__value">15</div>
+              </div>
             </div>
-            <div class="card">
-              <span class="label">
-                <span class="label-icon">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                  </svg>
-                  Métrica secundaria
-                </span>
-              </span>
-              <span class="metric-value">00%</span>
-            </div>
-            <div class="card">
-              <span class="label">
-                <span class="label-icon">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                  </svg>
-                  Tercer indicador
-                </span>
-              </span>
-              <span class="metric-value">—</span>
-            </div>
-            <div class="card">
-              <span class="label">
-                <span class="label-icon">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                  </svg>
-                  Cuarto indicador
-                </span>
-              </span>
-              <span class="metric-value">—</span>
-            </div>
+            <div class="chart__note">Fuente: búsqueda OSINT</div>
           </div>
-        </section>
+        </div>
 
-        <!-- Tabla editorial con mínimo 4 filas y chips de estado con iconos -->
-        <section>
-          <h2>Detalle tabular</h2>
+        <div class="callout">
+          <div class="callout-head"><span class="glyph glyph-info"></span>Tabla Base</div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Campo</th>
-                  <th>Descripción</th>
-                  <th>Estado</th>
+                  <th>Periodo</th>
+                  <th>Empresa</th>
+                  <th>Cargo</th>
+                  <th>Salario</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Fila 1</td>
-                  <td>Valor detallado con wrapping limpio si es necesario</td>
-                  <td>
-                    <span class="chip" style="font-size: 7.5pt;">
-                      <span class="icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                        </svg>
-                      </span>
-                      <span>Activo</span>
-                    </span>
-                  </td>
+                  <td>2021-2023</td>
+                  <td>Empresa A</td>
+                  <td>Programador</td>
+                  <td>$567 → $1,200</td>
                 </tr>
                 <tr>
-                  <td>Fila 2</td>
-                  <td>Valor detallado con wrapping limpio si es necesario</td>
-                  <td>
-                    <span class="chip" style="font-size: 7.5pt;">
-                      <span class="icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                        </svg>
-                      </span>
-                      <span>Pendiente</span>
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Fila 3</td>
-                  <td>Valor detallado con wrapping limpio si es necesario</td>
-                  <td>
-                    <span class="chip" style="font-size: 7.5pt;">
-                      <span class="icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                        </svg>
-                      </span>
-                      <span>Activo</span>
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Fila 4</td>
-                  <td>Valor detallado con wrapping limpio si es necesario</td>
-                  <td>
-                    <span class="chip" style="font-size: 7.5pt;">
-                      <span class="icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                        </svg>
-                      </span>
-                      <span>Activo</span>
-                    </span>
-                  </td>
+                  <td>2024</td>
+                  <td>Empresa B</td>
+                  <td>Coordinador</td>
+                  <td>$2,500</td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </section>
-
-        <div class="footer-note">
-          Nota de cierre opcional. Fuente de los datos, período cubierto, o comentario editorial de contexto.
         </div>
       </section>
 
+      <section class="sheet">
+        <h2>Proporción y Cierre</h2>
+        <p>Usa donut para proporciones. Mantén los segmentos claros y la leyenda corta.</p>
+
+        <div class="band">
+          <div class="chart chart--donut">
+            <svg class="chart__svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+              <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#1d4ed8; --dash:183.78; --offset:0;"></circle>
+              <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#7c3aed; --dash:56.55; --offset:-183.78;"></circle>
+              <circle class="chart__slice" cx="60" cy="60" r="45" style="--color:#94a3b8; --dash:42.41; --offset:-240.33;"></circle>
+              <text class="chart__center" x="60" y="55" font-size="16">65%</text>
+              <text class="chart__center" x="60" y="67" font-size="7">Empleado</text>
+            </svg>
+            <div class="chart__legend">
+              <div class="chart__legend-row"><span class="chart__swatch" style="--color:#1d4ed8;"></span><strong>Empleado</strong> — 65%</div>
+              <div class="chart__legend-row"><span class="chart__swatch" style="--color:#7c3aed;"></span>Independiente — 20%</div>
+              <div class="chart__legend-row"><span class="chart__swatch" style="--color:#94a3b8;"></span>Sin actividad — 15%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-note">Nota editorial de cierre o fuente de datos.</div>
+      </section>
     </main>
   </body>
 </html>
