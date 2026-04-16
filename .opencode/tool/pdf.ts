@@ -112,7 +112,8 @@ The filename returned by this tool is the only valid PDF path. Do not announce a
 
     ctx.metadata({
       title: "Rendering PDF",
-      metadata: { path: out, filename: name },
+      path: out,
+      filename: name,
     })
 
     const run = Bun.spawn(["python3", script, input], {
