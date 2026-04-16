@@ -397,31 +397,54 @@ Notice: the $2,500 bar (height=110) is always the tallest. The $567 bar (height=
 
 ### Donut chart example (proportional split)
 
+**CRITICAL — WeasyPrint does NOT support CSS `conic-gradient`.** Never use it for pie or donut charts. The only valid approach is SVG with `stroke-dasharray` on `<circle>` elements.
+
+**Math for donut segments** (circumference = 2 × π × r = 2 × 3.14159 × 45 ≈ 282.74):
+
+```
+FOR EACH segment[i] with percent[i]:
+  dash[i]   = 282.74 × (percent[i] / 100)
+  gap[i]    = 282.74 - dash[i]
+  offset[i] = -(sum of dash[0..i-1])   ← negative cumulative sum of previous dashes
+```
+
+Example — segments 60%, 25%, 15%:
+| i | % | dash | gap | offset |
+|---|---|------|-----|--------|
+| 0 | 60 | 169.6 | 113.1 | 0 |
+| 1 | 25 | 70.7 | 211.9 | −169.6 |
+| 2 | 15 | 42.4 | 240.3 | −240.3 |
+
+Use solid, distinct colors for each segment (no opacity — low opacity segments are nearly invisible):
+
 ```html
 <div class="chart-wrap" style="margin-top:5mm;display:flex;align-items:center;gap:8mm;">
   <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style="width:50mm;height:50mm;flex:0 0 auto;">
-    <!-- Donut segments — computed as SVG arc paths. cx=60,cy=60,r=45,stroke-width=22 -->
-    <!-- Segment 1: 60% = 216deg -->
+    <!-- All circles share cx=60,cy=60,r=45,stroke-width=22,fill=none.
+         rotate(-90 60 60) starts segments at the top (12 o'clock). -->
+    <!-- Segment 1: 60% — dash=169.6, gap=113.1, offset=0 -->
     <circle cx="60" cy="60" r="45" fill="none" stroke="#1d4ed8" stroke-width="22"
-      stroke-dasharray="169.6 113.1" stroke-dashoffset="0" transform="rotate(-90 60 60)" opacity="0.85"/>
-    <!-- Segment 2: 25% = 90deg -->
-    <circle cx="60" cy="60" r="45" fill="none" stroke="#1d4ed8" stroke-width="22"
-      stroke-dasharray="70.7 211.9" stroke-dashoffset="-169.6" transform="rotate(-90 60 60)" opacity="0.45"/>
-    <!-- Segment 3: 15% = 54deg -->
-    <circle cx="60" cy="60" r="45" fill="none" stroke="#64748b" stroke-width="22"
-      stroke-dasharray="42.4 240.3" stroke-dashoffset="-240.3" transform="rotate(-90 60 60)" opacity="0.55"/>
+      stroke-dasharray="169.6 113.1" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+    <!-- Segment 2: 25% — dash=70.7, gap=211.9, offset=-169.6 -->
+    <circle cx="60" cy="60" r="45" fill="none" stroke="#7c3aed" stroke-width="22"
+      stroke-dasharray="70.7 211.9" stroke-dashoffset="-169.6" transform="rotate(-90 60 60)"/>
+    <!-- Segment 3: 15% — dash=42.4, gap=240.3, offset=-240.3 -->
+    <circle cx="60" cy="60" r="45" fill="none" stroke="#0891b2" stroke-width="22"
+      stroke-dasharray="42.4 240.3" stroke-dashoffset="-240.3" transform="rotate(-90 60 60)"/>
     <!-- Center label -->
     <text x="60" y="56" text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="14" font-weight="700" fill="#102a43">60%</text>
     <text x="60" y="68" text-anchor="middle" font-family="Liberation Sans,sans-serif" font-size="7.5" fill="#64748b">principal</text>
   </svg>
-  <!-- Legend -->
-  <div style="font-family:Liberation Sans,sans-serif;font-size:8.5pt;line-height:1.8;">
-    <div><span style="display:inline-block;width:8px;height:8px;background:#1d4ed8;opacity:.85;border-radius:2px;margin-right:4px;"></span> Categoría A — 60%</div>
-    <div><span style="display:inline-block;width:8px;height:8px;background:#1d4ed8;opacity:.45;border-radius:2px;margin-right:4px;"></span> Categoría B — 25%</div>
-    <div><span style="display:inline-block;width:8px;height:8px;background:#64748b;opacity:.55;border-radius:2px;margin-right:4px;"></span> Categoría C — 15%</div>
+  <!-- Legend — inline colored squares, NOT conic-gradient -->
+  <div style="font-family:Liberation Sans,sans-serif;font-size:8.5pt;line-height:1.9;">
+    <div><span style="display:inline-block;width:9px;height:9px;background:#1d4ed8;border-radius:2px;margin-right:5px;vertical-align:middle;"></span> Categoría A — 60%</div>
+    <div><span style="display:inline-block;width:9px;height:9px;background:#7c3aed;border-radius:2px;margin-right:5px;vertical-align:middle;"></span> Categoría B — 25%</div>
+    <div><span style="display:inline-block;width:9px;height:9px;background:#0891b2;border-radius:2px;margin-right:5px;vertical-align:middle;"></span> Categoría C — 15%</div>
   </div>
 </div>
 ```
+
+**Validation:** sum of all dashes = circumference (282.74). If the segments don't add up, the chart won't look right.
 
 ### Chart CSS to add
 
@@ -445,6 +468,30 @@ Notice: the $2,500 bar (height=110) is always the tallest. The $567 bar (height=
 - Tables should be used to clarify facts, not to replace narrative reasoning.
 - If a section is better expressed as bullets, use bullets.
 - If a section is better expressed as cards or fact rows, use those.
+
+### Contact Data Formatting
+
+Multiple values in the same field (emails, phones, addresses) must **never** be stacked with blank lines between them. Present them compactly:
+
+- **1 value**: show inline as plain text in a fact row or card
+- **2–3 values**: comma-separated on one line: `correo1@x.com, correo2@x.com`
+- **4+ values**: use a tight `<ul>` with no margins, or a two-column micro-table — never a `<p>` per item with `margin-bottom`
+
+```html
+<!-- WRONG — empty lines between each email, wastes space -->
+<p>correo1@example.com</p>
+<p></p>
+<p>correo2@example.com</p>
+
+<!-- CORRECT — compact inline -->
+<span>correo1@example.com, correo2@example.com</span>
+
+<!-- CORRECT — compact list for 4+ items -->
+<ul style=”margin:0;padding-left:12px;line-height:1.6;”>
+  <li>correo1@example.com</li>
+  <li>correo2@example.com</li>
+</ul>
+```
 
 ## Tool Use Preflight
 
@@ -627,6 +674,7 @@ Do not:
 - omit the mandatory page-1 heading sequence: eyebrow → h1 → subtitle → summary → chip-row
 - produce a simpler document than the STARTER — the starter is the minimum richness level, not a ceiling
 - place a `<table>` inside a `.grid`, `.fact-grid`, `.metric-grid`, or any multi-column container — tables are always full-width standalone blocks inside `.table-wrap`
+- use `conic-gradient` or `radial-gradient` for pie/donut charts — WeasyPrint does not support `conic-gradient`; always use SVG `<circle>` with `stroke-dasharray` as shown in the donut example
 - use CSS div-based bars, progress bars, or width-percentage fills as data charts — for example, do NOT use `<div class="timeline-fill" style="width: 100%;">` or any CSS bar to represent salary, count, or comparison data; ALL charts must use SVG `<rect>` bars computed from the proportional formula
 - copy chart SVG examples verbatim — always recompute every bar `x`, `y`, `height` and every label from real data using the proportional formula
 - render more bars than data points, or fewer bars than data points — bar count must equal data point count exactly

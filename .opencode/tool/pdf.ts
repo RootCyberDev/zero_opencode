@@ -97,9 +97,11 @@ The filename returned by this tool is the only valid PDF path. Do not announce a
       }),
     )
 
+    // Store the filename (relative to ctx.directory) — the /file/download endpoint
+    // resolves paths relative to the project root, so an absolute path would 404.
     ctx.metadata({
       title: "Rendering PDF",
-      metadata: { path: out, filename: name },
+      metadata: { path: name, filename: name },
     })
 
     const run = Bun.spawn(["python3", script, input], {
@@ -111,10 +113,22 @@ The filename returned by this tool is the only valid PDF path. Do not announce a
       },
     })
 
-    const [code, stderr, stdout] = await Promise.all([
-      run.exited,
-      new Response(run.stderr).text(),
-      new Response(run.stdout).text(),
+    // 120-second hard timeout — if WeasyPrint hangs (e.g. on unreachable resources),
+    // kill the process and surface a clear error instead of freezing the chat forever.
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => {
+        run.kill()
+        reject(new Error("PDF rendering timed out after 120 seconds. The HTML may reference unreachable resources."))
+      }, 120_000),
+    )
+
+    const [code, stderr, stdout] = await Promise.race([
+      Promise.all([
+        run.exited,
+        new Response(run.stderr).text(),
+        new Response(run.stdout).text(),
+      ]),
+      timeout,
     ])
 
     await fs.unlink(input).catch(() => {})

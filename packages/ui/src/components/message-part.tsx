@@ -1974,7 +1974,7 @@ ToolRegistry.register({
     const path = createMemo(() => props.input.filePath || "")
     const filename = () => getFilename(props.input.filePath ?? "")
     const pending = () => props.status === "pending" || props.status === "running"
-    const downloadable = createMemo(() => /\.(pdf|html?)$/i.test(props.input.filePath ?? ""))
+    const downloadable = createMemo(() => /\.pdf$/i.test(props.input.filePath ?? ""))
     const download = (event?: MouseEvent) => {
       event?.preventDefault()
       event?.stopPropagation()

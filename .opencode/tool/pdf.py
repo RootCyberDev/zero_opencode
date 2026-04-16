@@ -4,6 +4,16 @@ import os
 import sys
 
 from weasyprint import CSS, HTML
+import weasyprint
+
+
+def safe_url_fetcher(url):
+    """Block all network requests so WeasyPrint never hangs on unreachable resources.
+    Only file:// and data: URIs are allowed through."""
+    if url.startswith("file://") or url.startswith("data:"):
+        return weasyprint.default_url_fetcher(url)
+    # Remote URL — block silently instead of fetching (prevents hanging)
+    raise OSError(f"Remote URL blocked by pdf renderer: {url}")
 
 
 BASE_CSS = """
@@ -267,7 +277,7 @@ def main():
     base = data["base"]
 
     os.makedirs(os.path.dirname(output), exist_ok=True)
-    HTML(string=html, base_url=base).write_pdf(
+    HTML(string=html, base_url=base, url_fetcher=safe_url_fetcher).write_pdf(
         output,
         stylesheets=[CSS(string=BASE_CSS), CSS(string=css)] if css else [CSS(string=BASE_CSS)],
     )
