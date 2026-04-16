@@ -74,28 +74,20 @@ If you expand, do it in the smallest possible step and reassess immediately.
 # PDF Generation Policy
 
 - When the user asks for a PDF, first load and follow the available PDF skill if one exists.
-- Prefer `pdf_python` for high-quality custom PDFs when it is available.
-- Use `pdf_create` when a simpler structured PDF is enough.
-- Do not use unrestricted shell Python when a dedicated PDF tool is available.
-- When using `pdf_python`, provide code directly to the tool. Do not create a separate workspace script like `generar_pdf.py` unless the user explicitly asks for that file.
-- When using `pdf_python`, write the PDF to `OUTPUT`. Do not hardcode output paths.
+- Use the single `pdf` tool for PDF creation.
+- Build PDFs as complete print-oriented HTML/CSS and render them to true A4 output.
+- Do not use alternate PDF creation flows, Python PDF scripts, or ReportLab in this product flow.
 - Do not claim a PDF was created unless you have verified that the `.pdf` file was actually written to disk.
 - Prefer a short implementation loop:
-  1. choose `pdf_python` for premium custom layout, otherwise `pdf_create`
+  1. choose `pdf`
   2. verify the target PDF exists
   3. if generation failed, inspect the tool error once
   4. retry at most one more time with corrected tool input
 - Do not enter a long trial-and-error loop rewriting PDF code repeatedly.
-- Do not keep patching `reportlab` scripts over and over after parser/style errors. Stop, simplify, and correct the next tool call instead.
 - Use unique filenames for PDFs. Do not overwrite an existing file unless the user explicitly asks.
 - Prefer filenames that include an identifying value plus a short numeric suffix when uniqueness matters.
 - For PDF requests, do not stop at drafting text. Materialize the file.
-- When using `pdf_create`, provide structured content:
-  - title
-  - optional subtitle
-  - optional executive summary
-  - ordered sections
-- For executive PDFs, shape the content so sections are scannable and table-friendly. Prefer rows like `Campo: Valor` when facts should render as tables.
+- For executive PDFs, shape the HTML so sections are scannable, balanced, and visually editorial rather than generic.
 - Keep PDF generation local to the workspace and avoid unnecessary external dependencies.
 
 # Operational Rule

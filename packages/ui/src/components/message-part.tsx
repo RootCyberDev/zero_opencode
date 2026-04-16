@@ -2349,7 +2349,7 @@ function registerPdf(name: string) {
       const title = createMemo(() => {
         const value = props.input.title
         if (typeof value === "string" && value) return value
-        return i18n.t("ui.basicTool.called", { tool: "pdf_create" })
+        return i18n.t("ui.basicTool.called", { tool: name })
       })
       const filename = createMemo(() => getFilename(file() || (typeof props.input.filename === "string" ? props.input.filename : "")))
       const click = (event?: MouseEvent) => {
@@ -2392,8 +2392,7 @@ function registerPdf(name: string) {
   })
 }
 
-registerPdf("pdf_create")
-registerPdf("pdf-create")
+registerPdf("pdf")
 
 ToolRegistry.register({
   name: "skill",

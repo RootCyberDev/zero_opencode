@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Executive PDF</title>
+    <style>
+      :root {
+        --ink: #0f172a;
+        --muted: #475569;
+        --line: #d9e2ec;
+        --panel: #f8fafc;
+        --navy: #102a43;
+        --accent: #1d4ed8;
+        --soft: #e8f0ff;
+      }
+
+      body {
+        color: var(--ink);
+        font-family: "Liberation Sans", "DejaVu Sans", sans-serif;
+      }
+
+      .watermark {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .watermark span {
+        transform: rotate(-36deg);
+        font-size: 56pt;
+        font-weight: 700;
+        letter-spacing: 0.35em;
+        color: rgba(15, 23, 42, 0.05);
+        text-transform: uppercase;
+      }
+
+      .doc {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero {
+        padding: 10mm 0 6mm;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .eyebrow {
+        color: var(--accent);
+        font-size: 9pt;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 4mm 0 2mm;
+        color: var(--navy);
+        font-family: "Liberation Serif", "DejaVu Serif", serif;
+        font-size: 25pt;
+        line-height: 1.1;
+      }
+
+      .subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 11pt;
+      }
+
+      .summary {
+        margin-top: 8mm;
+        padding: 6mm 7mm;
+        background: linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
+        border: 1px solid #d7e3ff;
+        border-radius: 4mm;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4mm 7mm;
+        margin: 8mm 0;
+      }
+
+      .card {
+        padding: 5mm 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .label {
+        display: block;
+        color: var(--muted);
+        font-size: 8pt;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .value {
+        display: block;
+        margin-top: 1.5mm;
+        font-size: 10pt;
+      }
+
+      section {
+        margin-top: 9mm;
+      }
+
+      h2 {
+        margin: 0 0 4mm;
+        color: var(--navy);
+        font-size: 13pt;
+        font-weight: 700;
+      }
+
+      .band {
+        padding: 5mm 6mm;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 3mm;
+      }
+
+      table {
+        margin-top: 4mm;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 8pt;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-align: left;
+        padding: 0 0 2.5mm;
+        border-bottom: 1px solid var(--line);
+      }
+
+      td {
+        padding: 3mm 0;
+        border-bottom: 1px solid #edf2f7;
+        vertical-align: top;
+      }
+
+      ul.clean {
+        margin: 0;
+        padding-left: 5mm;
+      }
+
+      .footer-note {
+        margin-top: 9mm;
+        color: var(--muted);
+        font-size: 8.5pt;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="watermark"><span>${ACCOUNT_ID}</span></div>
+    <main class="doc">
+      <header class="hero">
+        <div class="eyebrow">Executive Report</div>
+        <h1>Título del documento</h1>
+        <p class="subtitle">Subtítulo o contexto ejecutivo</p>
+        <div class="summary">
+          <strong>Resumen ejecutivo.</strong> Introducción breve, clara y editorialmente cuidada.
+        </div>
+      </header>
+
+      <section>
+        <h2>Hechos clave</h2>
+        <div class="grid">
+          <div class="card"><span class="label">Campo</span><span class="value">Valor</span></div>
+          <div class="card"><span class="label">Campo</span><span class="value">Valor</span></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Hallazgos</h2>
+        <div class="band">
+          <ul class="clean">
+            <li>Punto de alto valor</li>
+            <li>Punto de alto valor</li>
+            <li>Punto de alto valor</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2>Tabla editorial</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Campo</th>
+              <th>Detalle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Campo</td>
+              <td>Valor detallado con buen wrapping.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>
