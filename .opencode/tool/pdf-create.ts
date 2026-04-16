@@ -9,7 +9,21 @@ const accent = tool.schema.enum(["blue", "teal", "emerald", "slate"]).default("b
 const section = tool.schema.object({
   heading: tool.schema.string().describe("Section title"),
   body: tool.schema.string().describe("Section content in plain text or markdown-like text"),
+  kind: tool.schema
+    .enum(["auto", "text", "facts", "table", "highlights"])
+    .optional()
+    .describe("Preferred rendering mode for this section"),
+  rows: tool.schema
+    .array(tool.schema.tuple([tool.schema.string(), tool.schema.string()]))
+    .optional()
+    .describe("Explicit table rows as [label, value]"),
+  items: tool.schema.array(tool.schema.string()).optional().describe("Bullet-like highlight items"),
 })
+
+const meta = tool.schema
+  .array(tool.schema.tuple([tool.schema.string(), tool.schema.string()]))
+  .optional()
+  .describe("Top document facts shown in an executive facts panel")
 
 function mark(dir: string) {
   const parts = dir.split(path.sep).filter(Boolean)
@@ -44,7 +58,14 @@ The tool expects structured content instead of raw HTML. Keep the text concise a
 - title for the document heading
 - optional subtitle for secondary context
 - optional summary for the executive overview block
+- optional meta facts for the top facts panel
 - sections for the main body
+
+Sections can be richer than plain text:
+- kind="facts" with rows
+- kind="table" with rows
+- kind="highlights" with items
+- kind="text" or kind omitted for narrative content
 
 Returns the saved PDF path inside the workspace.`,
   args: {
@@ -54,6 +75,7 @@ Returns the saved PDF path inside the workspace.`,
     title: tool.schema.string().describe("Primary PDF title"),
     subtitle: tool.schema.string().optional().describe("Short subtitle shown below the title"),
     summary: tool.schema.string().optional().describe("Executive summary block near the top of the document"),
+    meta,
     accent,
     sections: tool.schema.array(section).min(1).describe("Ordered content sections to render in the PDF"),
   },
@@ -70,6 +92,7 @@ Returns the saved PDF path inside the workspace.`,
         title: args.title,
         subtitle: args.subtitle,
         summary: args.summary,
+        meta: args.meta,
         accent: args.accent,
         sections: args.sections,
         watermark: mark(ctx.directory),

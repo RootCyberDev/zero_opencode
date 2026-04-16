@@ -9,23 +9,62 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.platypus import HRFlowable, KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import HRFlowable, KeepTogether, ListFlowable, ListItem, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 
 ACCENTS = {
-    "blue": "#1A73C8",
-    "teal": "#0F766E",
-    "emerald": "#047857",
-    "slate": "#334155",
+    "blue": {
+        "primary": "#153B66",
+        "secondary": "#2F6EA5",
+        "soft": "#EEF4FA",
+        "line": "#D8E4F0",
+        "accent": "#A88232",
+    },
+    "teal": {
+        "primary": "#144C4A",
+        "secondary": "#1E6F6A",
+        "soft": "#EDF8F7",
+        "line": "#D6ECE9",
+        "accent": "#A88232",
+    },
+    "emerald": {
+        "primary": "#174A3A",
+        "secondary": "#20725A",
+        "soft": "#EEF7F3",
+        "line": "#D8EBE4",
+        "accent": "#A88232",
+    },
+    "slate": {
+        "primary": "#253142",
+        "secondary": "#44556C",
+        "soft": "#F2F5F8",
+        "line": "#DFE6EC",
+        "accent": "#8C6A2D",
+    },
 }
 
 
 def text(value):
+    value = clean(value)
     return (value or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>")
 
 
 def plain(value):
-    return " ".join((value or "").replace("\r", "\n").split())
+    return " ".join(clean(value).replace("\r", "\n").split())
+
+
+def clean(value):
+    value = value or ""
+    value = value.replace("el sujeto", "la persona")
+    value = value.replace("El sujeto", "La persona")
+    value = value.replace("Resultados OSINT", "Hallazgos relevantes")
+    value = value.replace("resultado OSINT", "hallazgo relevante")
+    value = value.replace("$-\\$", "$")
+    value = value.replace("$\\$", "$")
+    value = value.replace("$", "")
+    value = value.replace("_ugar", "Lugar")
+    value = value.replace("\u00a0", " ")
+    return value
 
 
 def rows(value):
@@ -42,6 +81,28 @@ def rows(value):
         if not left or not right:
             continue
         out.append((left, right))
+    return out
+
+
+def explicit_rows(value):
+    out = []
+    for item in value or []:
+        if not isinstance(item, (list, tuple)) or len(item) != 2:
+            continue
+        left = plain(item[0])
+        right = plain(item[1])
+        if not left or not right:
+            continue
+        out.append((left, right))
+    return out
+
+
+def bullets(value):
+    out = []
+    for item in value or []:
+        text = plain(item)
+        if text:
+            out.append(text)
     return out
 
 
@@ -65,11 +126,13 @@ def wrap(value, style):
     return Paragraph(text(value), style)
 
 
-def body_table(items, palette, head_style, cell_style):
+def body_table(items, palette, head_style, cell_style, header=("Campo", "Detalle"), widths=(1.55 * inch, 4.75 * inch)):
     data = [["Campo", "Detalle"], *[[wrap(left, head_style), wrap(right, cell_style)] for left, right in items]]
+    if header:
+        data[0] = [wrap(header[0], head_style), wrap(header[1], head_style)]
     table = Table(
         data,
-        colWidths=[1.55 * inch, 4.75 * inch],
+        colWidths=list(widths),
         repeatRows=1,
         hAlign="LEFT",
         splitByRow=1,
@@ -77,15 +140,16 @@ def body_table(items, palette, head_style, cell_style):
     table.setStyle(
         TableStyle(
             [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(palette)),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(palette["soft"])),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor(palette["primary"])),
                 ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
                 ("FONTSIZE", (0, 0), (-1, -1), 8.8),
                 ("LEADING", (0, 0), (-1, -1), 11),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.HexColor("#F8FBFF"), colors.white]),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAFCFD")]),
                 ("TEXTCOLOR", (0, 1), (-1, -1), colors.HexColor("#172033")),
-                ("GRID", (0, 0), (-1, -1), 0.6, colors.HexColor("#D6E4F5")),
-                ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#D6E4F5")),
+                ("LINEBELOW", (0, 0), (-1, 0), 0.8, colors.HexColor(palette["line"])),
+                ("LINEBELOW", (0, 1), (-1, -1), 0.35, colors.HexColor(palette["line"])),
+                ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor(palette["line"])),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ("LEFTPADDING", (0, 0), (-1, -1), 8),
                 ("RIGHTPADDING", (0, 0), (-1, -1), 8),
@@ -101,7 +165,7 @@ def chrome(canvas: Canvas, doc, palette, mark):
     page = canvas.getPageNumber()
     width, height = A4
     canvas.saveState()
-    canvas.setStrokeColor(colors.HexColor(palette))
+    canvas.setStrokeColor(colors.HexColor(palette["line"]))
     canvas.setLineWidth(1)
     canvas.line(doc.leftMargin, height - 0.58 * inch, width - doc.rightMargin, height - 0.58 * inch)
     canvas.line(doc.leftMargin, 0.52 * inch, width - doc.rightMargin, 0.52 * inch)
@@ -154,6 +218,7 @@ def main():
         alignment=TA_CENTER,
         textColor=colors.HexColor("#0B1F3A"),
         spaceAfter=6,
+        wordWrap="LTR",
     )
     subtitle = ParagraphStyle(
         "Subtitle",
@@ -162,8 +227,9 @@ def main():
         fontSize=10.5,
         leading=14,
         alignment=TA_CENTER,
-        textColor=colors.HexColor(palette),
+        textColor=colors.HexColor(palette["secondary"]),
         spaceAfter=10,
+        wordWrap="LTR",
     )
     meta = ParagraphStyle(
         "Meta",
@@ -182,7 +248,7 @@ def main():
         fontSize=9,
         leading=11,
         alignment=TA_LEFT,
-        textColor=colors.HexColor(palette),
+        textColor=colors.HexColor(palette["accent"]),
         spaceAfter=4,
     )
     summary = ParagraphStyle(
@@ -196,8 +262,8 @@ def main():
         borderPadding=12,
         borderRadius=6,
         borderWidth=1,
-        borderColor=colors.HexColor("#D6E4F5"),
-        backColor=colors.HexColor("#F7FAFD"),
+        borderColor=colors.HexColor(palette["line"]),
+        backColor=colors.HexColor(palette["soft"]),
         spaceAfter=16,
     )
     heading = ParagraphStyle(
@@ -207,9 +273,11 @@ def main():
         fontSize=11.2,
         leading=13.6,
         alignment=TA_LEFT,
-        textColor=colors.white,
-        backColor=colors.HexColor(palette),
-        borderPadding=(6, 8, 6),
+        textColor=colors.HexColor(palette["primary"]),
+        backColor=colors.HexColor(palette["soft"]),
+        borderColor=colors.HexColor(palette["line"]),
+        borderWidth=0.6,
+        borderPadding=(6, 9, 6),
         spaceAfter=8,
         spaceBefore=10,
         wordWrap="LTR",
@@ -255,30 +323,71 @@ def main():
         textColor=colors.HexColor("#172033"),
         wordWrap="LTR",
     )
+    lead = ParagraphStyle(
+        "Lead",
+        parent=styles["BodyText"],
+        fontName="Helvetica",
+        fontSize=9.2,
+        leading=13,
+        alignment=TA_LEFT,
+        textColor=colors.HexColor("#52606D"),
+        spaceAfter=12,
+    )
+    bullet = ParagraphStyle(
+        "Bullet",
+        parent=styles["BodyText"],
+        fontName="Helvetica",
+        fontSize=9.6,
+        leading=13,
+        alignment=TA_LEFT,
+        textColor=colors.HexColor("#1E293B"),
+        leftIndent=0,
+        firstLineIndent=0,
+        wordWrap="LTR",
+    )
 
     story.append(Paragraph(text(fit(data["title"], 220)), title))
     if data.get("subtitle"):
         story.append(Paragraph(text(fit(data["subtitle"], 220)), subtitle))
     story.append(Paragraph("Documento ejecutivo listo para lectura rapida, sintesis y decision.", meta))
-    story.append(HRFlowable(width="100%", thickness=1.2, color=colors.HexColor(palette), spaceAfter=14))
+    story.append(HRFlowable(width="100%", thickness=0.9, color=colors.HexColor(palette["line"]), spaceAfter=14))
 
     if data.get("summary"):
         story.append(Paragraph("Resumen Ejecutivo", summary_label))
         story.append(Paragraph(text(data["summary"]), summary))
 
-    table_rows = [
-        ("Documento", plain(data["title"])),
-        ("Generado", "Resumen ejecutivo generado automaticamente"),
-        ("Cuenta", mark or "N/D"),
-        ("Secciones", str(len(data["sections"]))),
-    ]
-    story.append(body_table(table_rows, palette, table_head, table_body))
-    story.append(Spacer(1, 12))
+    meta_rows = explicit_rows(data.get("meta"))
+    if not meta_rows:
+        meta_rows = [
+            ("Documento", plain(data["title"])),
+            ("Cuenta", mark or "N/D"),
+            ("Secciones", str(len(data["sections"]))),
+        ]
+    story.append(body_table(meta_rows, palette, table_head, table_body, header=("Perfil", "Valor")))
+    story.append(Spacer(1, 8))
+    story.append(Paragraph("La informacion se presenta con prioridad de lectura, contraste y escaneo ejecutivo.", lead))
 
     for item in data["sections"]:
         block = [Paragraph(text(fit(item["heading"], 140)), heading)]
-        parsed = rows(item["body"])
-        if len(parsed) >= 3:
+        mode = item.get("kind") or "auto"
+        parsed = explicit_rows(item.get("rows")) or rows(item["body"])
+        listed = bullets(item.get("items"))
+        if mode in ("facts", "table") and parsed:
+            block.append(body_table(parsed, palette, table_head, table_body))
+        elif mode == "highlights" and listed:
+            block.append(
+                ListFlowable(
+                    [
+                        ListItem(Paragraph(text(value), bullet), leftIndent=0, value="•")
+                        for value in listed
+                    ],
+                    bulletType="bullet",
+                    leftPadding=14,
+                    spaceBefore=2,
+                    spaceAfter=6,
+                )
+            )
+        elif parsed and len(parsed) >= 2:
             block.append(body_table(parsed, palette, table_head, table_body))
             extra = [
                 line.strip()
@@ -288,6 +397,19 @@ def main():
             if extra:
                 block.append(Spacer(1, 8))
                 block.append(Paragraph(text("\n".join(extra)), body))
+        elif listed:
+            block.append(
+                ListFlowable(
+                    [
+                        ListItem(Paragraph(text(value), bullet), leftIndent=0, value="•")
+                        for value in listed
+                    ],
+                    bulletType="bullet",
+                    leftPadding=14,
+                    spaceBefore=2,
+                    spaceAfter=6,
+                )
+            )
         else:
             block.append(Paragraph(text(item["body"]), body))
         story.append(KeepTogether(block))
