@@ -41,10 +41,10 @@
       }
 
       .doc {
-        width: 170mm;
+        width: 171mm;
         margin: 0 auto;
-        padding-left: 0.4mm;
-        padding-right: 0.4mm;
+        padding-left: 0.2mm;
+        padding-right: 0.2mm;
       }
 
       .sheet {
@@ -244,9 +244,16 @@
       }
 
       .footer-note {
-        margin-top: 9mm;
+        display: block;
+        clear: both;
+        margin-top: 8mm;
+        padding-top: 3mm;
+        border-top: 1px solid var(--line);
         color: var(--muted);
         font-size: 8.5pt;
+        line-height: 1.45;
+        break-inside: avoid-page;
+        page-break-inside: avoid;
       }
 
       table {
@@ -442,7 +449,7 @@
           </div>
         </div>
 
-        <div class="footer-note">Nota editorial de cierre o fuente de datos.</div>
+        <div class="footer-note">Generado el 16 de abril de 2026.</div>
       </section>
     </main>
   </body>

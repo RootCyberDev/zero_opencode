@@ -75,9 +75,9 @@ The document should feel like it was intentionally laid out by a human.
 
 - Respect A4 proportions at all times.
 - The effective content area in this renderer is approximately:
-  - width: `170mm`
+  - width: `171mm`
   - height: `251mm`
-- Treat `170mm` as the hard safe width for any full-page block.
+- Treat `171mm` as the hard safe width for any full-page block.
 - Treat `251mm` as the hard safe height for the visible content stack on a page.
 - Do not design around infinite scroll assumptions.
 - Avoid sections that visually collapse into tiny islands on the page.
@@ -88,7 +88,7 @@ The document should feel like it was intentionally laid out by a human.
 - When you need strong page control, structure the HTML with explicit `.sheet` wrappers.
 - Treat each `.sheet` as one PDF page body.
 - If a section should start on a new page, start a new `.sheet` or use `.page-break`.
-- If unsure, keep the interior width narrower than `170mm` and let the renderer breathe. Margins are safer than edge-to-edge layouts.
+- If unsure, keep the interior width narrower than `171mm` and let the renderer breathe. Margins are safer than edge-to-edge layouts.
 - Assume the renderer adds a tiny top safety offset on each `.sheet` to stabilize page starts. Do not try to cancel it with negative margins.
 - Never set `width`, `height`, or `min-height` on `html`, `body`, `.doc`, or `.sheet`.
 - Never use full-bleed backgrounds on page wrappers. Keep background color and gradients inside cards, bands, or callouts only.
@@ -220,7 +220,7 @@ Available glyph classes:
 - Long values must wrap cleanly.
 - Avoid spreadsheet aesthetics.
 - **NEVER place a `<table>` inside a `.grid`, `.fact-grid`, `.metric-grid`, or any multi-column container.** Tables must live inside a `.table-wrap` which is a full-width block. Placing a table in a 2-column grid compresses it to half width — this is always wrong.
-- Tables always use the full content-area width (170mm). Do not add `width` constraints on tables or `.table-wrap`.
+- Tables always use the full content-area width (171mm). Do not add `width` constraints on tables or `.table-wrap`.
 
 ### Facts, Cards, and Grids
 
@@ -524,6 +524,12 @@ The renderer decides where A4 pages end. Your job is only to group content logic
 - The renderer adds a small top safety padding inside each `.sheet` and resets the first child's top margin.
 - Do not rely on top-margin collapse for spacing at the top of a page.
 - If a page must open with more visual air, add explicit padding inside the first block rather than top margins on the first child.
+
+**CRITICAL — closing footer**
+
+- The closing footer must be a dedicated `.footer-note` block, not loose text appended to the last paragraph.
+- `.footer-note` should contain only the generation date, for example: `Generado el 16 de abril de 2026.`
+- Always leave visual separation before `.footer-note` so it reads as a closing line, not as part of the last paragraph.
 
 ## CSS Rules
 

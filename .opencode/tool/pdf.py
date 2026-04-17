@@ -32,7 +32,7 @@ BASE_CSS = """
 }
 
 html {
-  --page-width: 170mm;
+  --page-width: 171mm;
   --page-height: 251mm;
   --page-top-safety: 1.2mm;
   color: #0f172a;
@@ -64,8 +64,8 @@ body {
   width: var(--page-width);
   max-width: var(--page-width);
   margin: 0 auto;
-  padding-left: 0.4mm;
-  padding-right: 0.4mm;
+  padding-left: 0.2mm;
+  padding-right: 0.2mm;
   height: auto !important;
   max-height: none !important;
   overflow: visible !important;
@@ -285,6 +285,19 @@ pre, code {
 
 .running-footer {
   bottom: -14mm;
+}
+
+.footer-note {
+  display: block;
+  clear: both;
+  margin-top: 8mm;
+  padding-top: 3mm;
+  border-top: 1px solid #d9e2ec;
+  color: #475569;
+  font-size: 8.5pt;
+  line-height: 1.45;
+  break-inside: avoid-page;
+  page-break-inside: avoid;
 }
 """
 
