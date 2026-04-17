@@ -279,6 +279,7 @@ pre, code {
 """
 
 UI_CSS = Path(__file__).resolve().parents[1] / "skills/pdf/pdf-ui.css"
+TOOL_FONTS = Path(__file__).resolve().parents[1] / "assets/fonts"
 ICONS = {
     "glyph-user": 0xE7FD,
     "glyph-users": 0xF233,
@@ -336,6 +337,15 @@ def fill_icons(html):
     return pattern.sub(repl, html)
 
 
+def font_dir(root_path):
+    local = root_path / ".opencode" / "assets" / "fonts"
+    if all((TOOL_FONTS / name).exists() for name in ["PdfSans-Variable.ttf", "PdfSerif-Variable.ttf", "PdfIcons-Outlined.ttf"]):
+        return TOOL_FONTS
+    if all((local / name).exists() for name in ["PdfSans-Variable.ttf", "PdfSerif-Variable.ttf", "PdfIcons-Outlined.ttf"]):
+        return local
+    raise FileNotFoundError(f"PDF fonts not found in {TOOL_FONTS} or {local}")
+
+
 def main():
     if len(sys.argv) != 2:
         raise SystemExit("usage: pdf.py <input.json>")
@@ -350,7 +360,7 @@ def main():
     html = fill_icons(html)
     root_path = Path(base).resolve()
     root = root_path.as_uri()
-    font = root_path / ".opencode" / "assets" / "fonts"
+    font = font_dir(root_path)
     sans = base64.b64encode((font / "PdfSans-Variable.ttf").read_bytes()).decode()
     serif = base64.b64encode((font / "PdfSerif-Variable.ttf").read_bytes()).decode()
     icons = base64.b64encode((font / "PdfIcons-Outlined.ttf").read_bytes()).decode()

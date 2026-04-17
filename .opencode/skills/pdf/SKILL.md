@@ -22,7 +22,7 @@ Do not switch to ReportLab, Python PDF scripting, or alternative PDF generation 
 Use the `pdf` tool with:
 
 - `filename`
-- `html_file`
+- `html_file` as the exact HTML filename written in the project root, for example `reporte-0950804518-20260416-xxxx.html`
 - optional `css`
 
 The tool will:

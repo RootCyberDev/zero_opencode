@@ -156,7 +156,7 @@ MCP returns each family member with an explicit relationship type (padre, madre,
 ### Recommended flow for person reports (comprehensive, multi-page)
 
 1. Write the complete HTML to a `.html` file using the Write tool.
-2. Call the `pdf` tool with **only** `filename` and `html_file` — nothing else.
+2. Call the `pdf` tool with **only** `filename` and `html_file` — nothing else. Pass the root HTML filename, not an absolute path.
 3. Verify the PDF exists.
 
 ### HTML File Location — Mandatory
@@ -164,6 +164,7 @@ MCP returns each family member with an explicit relationship type (padre, madre,
 - **Always write the HTML file to the project root directory.** Never write to a subdirectory like `reportes/`, `output/`, `tmp/`, or any nested path.
 - Correct: `reporte-0950804518-20260416-xxxx.html`
 - Wrong: `reportes/reporte-0950804518.html`, `output/reporte.html`
+- In the `pdf` tool call, use `html_file: "reporte-0950804518-20260416-xxxx.html"`. Do not pass `/data/.../workspace/...html` or any other absolute path.
 - The `/file/download` endpoint resolves paths relative to the project root. Files in subdirectories will not be found.
 - If the HTML filename is wrong or missing, fix it in the HTML-writing step. Do not narrate a rewrite or renaming step to the user. The PDF call is a conversion step only.
 

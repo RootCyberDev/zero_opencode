@@ -407,7 +407,7 @@ export default function Page() {
       "PASO 3 — ESCRIBIR EL HTML: Con todos los datos recopilados, compone el HTML completo siguiendo la skill PDF y escribe el archivo usando la tool Write. El HTML debe cubrir TODOS los datos obtenidos del MCP, organizados en las capas del reporte. Un reporte completo ocupa 4-8 paginas o mas. No resumas ni descartes datos.",
       `El nombre del archivo HTML ya esta definido: "${htmlFilename}". Escribe el HTML completo en ese archivo exacto.`,
 
-      `PASO 4 — CONVERTIR A PDF (NO REESCRIBIR): Una vez escrito el archivo HTML, llama a la tool 'pdf' con EXACTAMENTE estos dos parametros: filename="${filename}" y html_file="<ruta absoluta del archivo ${htmlFilename}>". PROHIBIDO usar el parametro 'html' inline. PROHIBIDO regenerar o reescribir el HTML. PROHIBIDO producir ningún contenido HTML en este paso. El unico trabajo de este paso es pasar la ruta del archivo ya escrito. La tool lee el archivo del disco, genera el PDF, y borra el HTML automaticamente.`,
+      `PASO 4 — CONVERTIR A PDF (NO REESCRIBIR): Una vez escrito el archivo HTML en la raiz del proyecto, llama a la tool 'pdf' con EXACTAMENTE estos dos parametros: filename="${filename}" y html_file="${htmlFilename}". PROHIBIDO usar rutas absolutas o subdirectorios. PROHIBIDO usar el parametro 'html' inline. PROHIBIDO regenerar o reescribir el HTML. PROHIBIDO producir ningun contenido HTML en este paso. El unico trabajo de este paso es pasar el nombre exacto del archivo ya escrito en la raiz. La tool lee el archivo del disco, genera el PDF, y borra el HTML automaticamente.`,
       "PASO 5: Verifica que el archivo PDF exista en el workspace. Solo entonces anuncia el resultado.",
 
       // — Estructura obligatoria del reporte —

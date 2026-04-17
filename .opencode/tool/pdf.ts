@@ -57,7 +57,7 @@ export default tool({
 ## Standard flow (ALWAYS use this)
 
 1. Write the complete HTML to a \`.html\` file using the Write tool.
-2. Call this tool with \`html_file\` = the exact path of that file.
+2. Call this tool with \`html_file\` = the exact root filename of that file.
 3. The tool reads the file, renders the PDF, and **deletes the HTML file automatically**.
 
 **CRITICAL: do NOT regenerate or rewrite the HTML when calling this tool.**
@@ -66,19 +66,29 @@ export default tool({
 
 The only thing this tool call needs is:
 - \`filename\`: the desired PDF name
-- \`html_file\`: the path to the HTML file you already wrote
+- \`html_file\`: the root HTML filename you already wrote
 
 Nothing else. Do not produce HTML content here.
 
 The filename returned by this tool is the only valid PDF path. Do not announce a filename before calling this tool.`,
   args: {
     filename: tool.schema.string().describe("Desired output filename. It will be sanitized and forced to end in .pdf"),
-    html_file: tool.schema.string().describe("Absolute path to a .html file already written to disk. The file is read, rendered to PDF, then deleted."),
+    html_file: tool.schema.string().describe("HTML filename already written to the project root. Absolute paths are tolerated, but the basename in the project root is preferred. The file is read, rendered to PDF, then deleted."),
     css: tool.schema.string().optional().describe("Optional extra CSS layered on top of the base print CSS"),
   },
   async execute(args, ctx) {
-    const htmlFilePath = args.html_file
-    const rawHtml = await fs.readFile(htmlFilePath, "utf-8")
+    const raw = args.html_file.trim()
+    const root = path.join(ctx.directory, path.basename(raw))
+    const htmlFilePath = path.isAbsolute(raw) ? raw : root
+    const src = await fs
+      .readFile(htmlFilePath, "utf-8")
+      .then(() => htmlFilePath)
+      .catch(async () => {
+        if (root === htmlFilePath) throw new Error(`html source not found: ${htmlFilePath}`)
+        await fs.readFile(root, "utf-8")
+        return root
+      })
+    const rawHtml = await fs.readFile(src, "utf-8")
     const html = stripRemoteAssets(stripScripts(rawHtml))
     const css = args.css ? stripRemoteAssets(args.css) : undefined
     const name = file(args.filename)
@@ -131,7 +141,7 @@ The filename returned by this tool is the only valid PDF path. Do not announce a
     await fs.unlink(input).catch(() => {})
 
     // Delete the source HTML file after rendering
-    await fs.unlink(htmlFilePath).catch(() => {})
+    await fs.unlink(src).catch(() => {})
 
     if (code !== 0) {
       const msg = stderr.trim() || stdout.trim() || "Unknown PDF render error"
