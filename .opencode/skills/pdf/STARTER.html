@@ -15,11 +15,18 @@
         --accent-soft: #e8f0ff;
         --good: #166534;
         --warn: #92400e;
+        --page-top-safety: 1.2mm;
       }
 
       @page {
         size: A4;
         margin: 24mm 16mm 22mm 16mm;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
       }
 
       html,
@@ -34,19 +41,26 @@
       }
 
       .doc {
-        width: 172mm;
+        width: 170mm;
         margin: 0 auto;
+        padding-left: 0.4mm;
+        padding-right: 0.4mm;
       }
 
       .sheet {
+        display: flow-root;
         break-after: page;
         page-break-after: always;
-        padding: 0;
+        padding: var(--page-top-safety) 0 0;
       }
 
       .sheet:last-child {
         break-after: auto;
         page-break-after: auto;
+      }
+
+      .sheet > :first-child {
+        margin-top: 0 !important;
       }
 
       .hero {

@@ -32,8 +32,9 @@ BASE_CSS = """
 }
 
 html {
-  --page-width: 172mm;
+  --page-width: 170mm;
   --page-height: 251mm;
+  --page-top-safety: 1.2mm;
   color: #0f172a;
   font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
   font-size: 10.5pt;
@@ -63,6 +64,8 @@ body {
   width: var(--page-width);
   max-width: var(--page-width);
   margin: 0 auto;
+  padding-left: 0.4mm;
+  padding-right: 0.4mm;
   height: auto !important;
   max-height: none !important;
   overflow: visible !important;
@@ -235,7 +238,9 @@ pre, code {
    All height overrides use !important to win over any AI-generated inline style. */
 .sheet,
 .page {
+  display: flow-root;
   width: var(--page-width);
+  padding-top: var(--page-top-safety);
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
@@ -251,6 +256,11 @@ pre, code {
 .page:last-child {
   break-after: auto;
   page-break-after: auto;
+}
+
+.sheet > :first-child,
+.page > :first-child {
+  margin-top: 0 !important;
 }
 
 .sheet-fill {
