@@ -15,6 +15,7 @@ PORT="${PORT:-8001}"
 API_KEY="${API_KEY:-change-me}"
 HF_HOME="${HF_HOME:-$LLAMA_CPP_HOME/huggingface}"
 HUGGINGFACE_HUB_CACHE="${HUGGINGFACE_HUB_CACHE:-$HF_HOME/hub}"
+HF_TOKEN="${HF_TOKEN:-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}"
 HF_REPO="${HF_REPO:-HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive}"
 HF_FILE="${HF_FILE:-Qwen3.5-9B-Uncensored-HauhauCS-Aggressive-Q8_0.gguf}"
 CTX_SIZE="${CTX_SIZE:-131072}"
@@ -38,6 +39,7 @@ Uso:
 Variables útiles:
   LLAMA_CPP_HOME
   HF_HOME
+  HF_TOKEN
   HF_REPO
   HF_FILE
   HOST
@@ -182,6 +184,7 @@ WorkingDirectory=${LLAMA_CPP_HOME}
 Environment=HOME=${HOME}
 Environment=HF_HOME=${HF_HOME}
 Environment=HUGGINGFACE_HUB_CACHE=${HUGGINGFACE_HUB_CACHE}
+$([[ -n "$HF_TOKEN" ]] && echo "Environment=HF_TOKEN=${HF_TOKEN}")
 ExecStartPre=/usr/bin/test -e /dev/nvidiactl
 ExecStartPre=/usr/bin/test -e /dev/nvidia0
 ExecStart=${LLAMA_SERVER_BIN} $(build_server_args)
@@ -210,6 +213,7 @@ serve_llama_cpp() {
 
   HF_HOME="$HF_HOME" \
   HUGGINGFACE_HUB_CACHE="$HUGGINGFACE_HUB_CACHE" \
+  ${HF_TOKEN:+HF_TOKEN="$HF_TOKEN"} \
   exec "$LLAMA_SERVER_BIN" $(build_server_args)
 }
 
