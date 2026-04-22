@@ -671,6 +671,8 @@ Skipping any of these is a layout failure.
 
 Do not:
 
+- **declare `@page` rules of any kind** — the renderer owns page size, margins (24mm top, 16mm sides, 22mm bottom) and the automatic page-number slot. Do not emit `@page { size: A4 }`, `@page { margin: 0 }`, `@page { ... }` with ANY body, ever. Adding your own `@page` shifts the whole document to the left edge and breaks the balanced layout
+- **set `margin`, `padding`, `width`, `max-width`, or `min-width` on `html` or `body`** — the renderer owns these too. Any `html, body { margin: 0; width: 100% }` block cancels the auto-centering and produces a left-skewed page with huge empty right margin
 - write the HTML file to a subdirectory — always write to the project root (e.g. `reporte-cedula-date.html` not `reportes/reporte.html`)
 - use `.page`, `.slide`, `.section`, or any class other than `.sheet` as page wrapper divs — only `.sheet` (or `.page` as fallback) receives the WeasyPrint layout overrides; other class names will have unconstrained height and min-height, causing 1-page PDFs or cumulative page drift
 - use ReportLab

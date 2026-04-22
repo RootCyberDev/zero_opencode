@@ -20,6 +20,12 @@ def safe_url_fetcher(url):
 
 
 BASE_CSS = """
+/* @page rules cascade by declaration order — the last one wins.
+   AI-generated HTML routinely drops `@page { margin: 0 }` at the top of its
+   <style> block, which zeroes out our 24/16/22/16 margins and parks content
+   against the left page edge. To defend against that, a second @page rule is
+   appended at the end of this stylesheet (see APPENDIX below) so that this
+   stylesheet's values are the final author-cascade declaration. */
 @page {
   size: A4;
   margin: 24mm 16mm 22mm 16mm;
@@ -48,17 +54,24 @@ html {
 }
 
 body {
-  margin: 0 auto;
-  /* Defensive centering: if the model forgets the <main class="doc"> wrapper,
-     body itself clamps to the 171mm content column so the page still reads
-     balanced instead of hugging the left edge. .doc, when present, nests
-     cleanly inside this since both are 171mm centered. */
-  max-width: var(--page-width);
+  /* Defensive centering with !important so AI-generated `body { margin: 0 }`
+     cannot park content against the left page edge. If the model adds
+     <main class="doc"> (171mm, margin: 0 auto) the two nest cleanly. */
+  margin: 0 auto !important;
+  max-width: var(--page-width) !important;
+  padding: 0 !important;
   background: white !important;
   /* CRITICAL: fixed body height is the #1 cause of 1-page PDFs in WeasyPrint */
   height: auto !important;
   max-height: none !important;
   overflow: visible !important;
+}
+
+/* Same defensive clamp for the .doc wrapper when it IS used — make sure no
+   AI-generated rule can override the 171mm centered column. */
+.doc {
+  margin: 0 auto !important;
+  max-width: var(--page-width) !important;
 }
 
 /* ── Width control ─────────────────────────────────────────────
@@ -320,6 +333,26 @@ pre, code {
 }
 """
 
+
+# APPENDIX — stylesheet fragment injected into the HTML AFTER any AI-generated
+# <style> block. Because @page cascades by declaration order (not specificity),
+# this guarantees the renderer's page margins and page-number slot are the
+# final declaration, overriding any AI `@page { margin: 0 }` that tried to
+# zero the page out. Kept outside BASE_CSS so WeasyPrint sees it as "author"
+# CSS from the document, not "user" CSS from the stylesheets list.
+PAGE_OVERRIDE_CSS = """
+@page {
+  size: A4;
+  margin: 24mm 16mm 22mm 16mm;
+  @bottom-right {
+    content: counter(page) " / " counter(pages);
+    font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
+    font-size: 9pt;
+    color: #64748b;
+  }
+}
+"""
+
 UI_CSS = Path(__file__).resolve().parents[1] / "skills/pdf/pdf-ui.css"
 TOOL_FONTS = Path(__file__).resolve().parents[1] / "assets/fonts"
 ICONS = {
@@ -490,13 +523,22 @@ def main():
 .glyph-star::before { content: "\\e838" !important; }
 .glyph-settings::before { content: "\\e8b8" !important; }
 """
+    # Font + glyph styles — these go near the top of <head> so any later
+    # document style can still reference the families without FOUT issues.
     block = f"<style>{faces}{glyphs}</style>"
+    # Page-override — injected at the VERY END of <head> so its @page rule is
+    # the last declaration in the cascade, winning over any AI-generated
+    # `@page { margin: 0 }` placed earlier in the document <style>.
+    page_override = f"<style>{PAGE_OVERRIDE_CSS}</style>"
     if "</head>" in html:
-        html = html.replace("</head>", f"{block}</head>", 1)
+        html = html.replace("</head>", f"{block}{page_override}</head>", 1)
     elif "<head>" in html:
         html = html.replace("<head>", f"<head>{block}", 1)
+        # No </head> to append before — prepend override as the last thing
+        # before the first body element.
+        html = html + page_override
     else:
-        html = f"{block}{html}"
+        html = f"{block}{page_override}{html}"
     ui = UI_CSS.read_text(encoding="utf-8")
 
     os.makedirs(os.path.dirname(output), exist_ok=True)

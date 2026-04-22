@@ -1010,6 +1010,26 @@ export function UserMessageDisplay(props: { message: UserMessage; parts: PartTyp
 
   const text = createMemo(() => textPart()?.text || "")
 
+  // OpenZero action detection. When the parent frame fires a PDF report action,
+  // the prompt starts with `[OPENZERO_ACTION:<action_id>]` followed by a long
+  // instruction block the LLM needs. The chat UI renders a compact card instead
+  // of the raw prompt so the operator sees "Generando PDF · cédula …" instead
+  // of the full flow document.
+  const action = createMemo(() => {
+    const raw = text()
+    const match = raw.match(/^\[OPENZERO_ACTION:([a-z0-9_-]+)\]\s*(.*)/is)
+    if (!match) return null
+    const id = match[1]
+    const rest = match[2] ?? ""
+    const cedulaMatch = rest.match(/c[eé]dula[^\d]{0,20}(\d{6,13})/i)
+    const nameMatch = rest.match(/(?:persona|sujeto|nombre)[^:]*:\s*([A-Za-zÁÉÍÓÚÜÑáéíóúüñ][^\.\n]{2,60})/i)
+    return {
+      id,
+      cedula: cedulaMatch?.[1],
+      name: nameMatch?.[1]?.trim(),
+    }
+  })
+
   const files = createMemo(() => (props.parts?.filter((p) => p.type === "file") as FilePart[]) ?? [])
 
   const attachments = createMemo(() => files().filter(attached))
@@ -1116,9 +1136,31 @@ export function UserMessageDisplay(props: { message: UserMessage; parts: PartTyp
       <Show when={text()}>
         <>
           <div data-slot="user-message-body">
-            <div data-slot="user-message-text">
-              <HighlightedText text={text()} references={inlineFiles()} agents={agents()} />
-            </div>
+            <Show
+              when={action()}
+              fallback={
+                <div data-slot="user-message-text">
+                  <HighlightedText text={text()} references={inlineFiles()} agents={agents()} />
+                </div>
+              }
+            >
+              {(act) => (
+                <div data-slot="user-message-action-card" data-action={act().id}>
+                  <div data-slot="user-message-action-icon">
+                    <Icon name="open-file" size="large" />
+                  </div>
+                  <div data-slot="user-message-action-body">
+                    <div data-slot="user-message-action-title">Generando reporte PDF</div>
+                    <div data-slot="user-message-action-subtitle">
+                      <Show when={act().name} fallback={<>Cédula {act().cedula ?? "—"}</>}>
+                        {act().name}
+                        <Show when={act().cedula}> · {act().cedula}</Show>
+                      </Show>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </Show>
           </div>
           <div data-slot="user-message-copy-wrapper">
             <Show when={metaHead() || metaTail()}>

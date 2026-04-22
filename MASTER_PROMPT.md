@@ -232,6 +232,17 @@ The `pdf` tool reads an HTML file from disk and renders it. It does NOT accept H
 
 Calling `pdf` before Write will fail with `html source not found: <path>`. If you see that error, it means you skipped step 2 — retry from step 1, do not retry the pdf call with the same missing file.
 
+### No parallel tool-calls for Write + pdf
+
+**Write and pdf MUST run in separate turns.** Do not batch them in a single parallel tool-call block. The sequence is:
+
+- Turn N: call `Write` only. Wait for the success response.
+- Turn N+1: call `pdf` only, using the basename you just wrote.
+
+If you emit Write and pdf in the same parallel tool-call batch, pdf races Write and fails with `html source not found`. Treat this as an absolute ordering constraint, not a suggestion. Paralleling these two calls is always wrong, even if a small model "thinks" it saves a step.
+
+Similarly, MCP calls (PASO 2), Write (PASO 3) and pdf (PASO 4) must each complete before the next begins — no parallel across PASO boundaries.
+
 ### Recommended flow for person reports (comprehensive, multi-page)
 
 1. Write the complete HTML to a `.html` file using the Write tool.
@@ -267,6 +278,7 @@ Do not skip layers. Do not put a single section per page when content can be gro
 
 ## Design Standards — Mandatory
 
+- **Page geometry is owned by the renderer.** Never declare `@page { ... }` of any kind, and never set `margin`, `padding`, `width`, `max-width`, or `min-width` on `html` or `body`. The renderer stamps A4 size, 24/16/22/16 mm margins, and page numbering automatically. Adding your own `@page { margin: 0 }` parks content against the left edge with a huge empty right margin — classic symptom of this bug.
 - **Icons**: every chip, badge, metric-pill, and callout must have a paired icon. Prefer the `.glyph` font-based classes from the PDF skill's `pdf-ui.css` library (e.g. `<span class="glyph glyph-user"></span>`) — the renderer substitutes the correct codepoint automatically. Use inline SVG only as a fallback when no glyph class fits.
 - **Heading hierarchy**: eyebrow → H1 (serif font) → H2 → H3. Never place an H2 at the bottom of a page alone.
 - **Background**: never add background-color to `.sheet`, `.doc`, `html`, or `body`. The renderer controls the page background.
