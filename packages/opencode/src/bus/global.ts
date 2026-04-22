@@ -8,3 +8,7 @@ export const GlobalBus = new EventEmitter<{
     },
   ]
 }>()
+
+// Each connected SSE client adds a listener. 10 is too low for multi-tenant
+// deployments where many embedded clients subscribe concurrently.
+GlobalBus.setMaxListeners(0)

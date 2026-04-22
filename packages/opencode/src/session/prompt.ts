@@ -1516,7 +1516,16 @@ NOTE: At any point in time through this workflow you should feel free to ask the
                   sessionID,
                   parentSessionID: session.parentID,
                   system,
-                  messages: [...modelMsgs, ...(isLastStep ? [{ role: "assistant" as const, content: MAX_STEPS }] : [])],
+                  messages: [
+                    ...modelMsgs,
+                    ...(isLastStep
+                      ? [
+                          ProviderTransform.hasThinking(model)
+                            ? { role: "user" as const, content: MAX_STEPS }
+                            : { role: "assistant" as const, content: MAX_STEPS },
+                        ]
+                      : []),
+                  ],
                   tools,
                   model,
                   toolChoice: format.type === "json_schema" ? "required" : undefined,

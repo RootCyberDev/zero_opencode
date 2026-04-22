@@ -741,6 +741,31 @@ export namespace ProviderTransform {
     return {}
   }
 
+  // Returns true when the model is configured (via options() above) with an
+  // explicit thinking/reasoning toggle that is known to be rejected by the
+  // provider when combined with an assistant-role prefill message. Keep this
+  // in sync with the branches in options().
+  export function hasThinking(model: Provider.Model): boolean {
+    const id = model.api.id.toLowerCase()
+    const npm = model.api.npm
+    if (model.providerID === "baseten") return true
+    if (model.providerID === "opencode" && ["kimi-k2-thinking", "glm-4.6"].includes(model.api.id)) return true
+    if (["zai", "zhipuai"].includes(model.providerID) && npm === "@ai-sdk/openai-compatible") return true
+    if (
+      (npm === "@ai-sdk/anthropic" || npm === "@ai-sdk/google-vertex/anthropic") &&
+      (id.includes("k2p5") || id.includes("kimi-k2.5") || id.includes("kimi-k2p5"))
+    )
+      return true
+    if (
+      model.providerID === "alibaba-cn" &&
+      model.capabilities.reasoning &&
+      npm === "@ai-sdk/openai-compatible" &&
+      !id.includes("kimi-k2-thinking")
+    )
+      return true
+    return false
+  }
+
   export function options(input: {
     model: Provider.Model
     sessionID: string

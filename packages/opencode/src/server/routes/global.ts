@@ -12,6 +12,8 @@ import { Log } from "../../util/log"
 import { lazy } from "../../util/lazy"
 import { Config } from "../../config/config"
 import { errors } from "../error"
+import { Tenant } from "@/tenant"
+import { Flag } from "@/flag/flag"
 
 const log = Log.create({ service: "server" })
 
@@ -122,8 +124,13 @@ export const GlobalRoutes = lazy(() =>
         c.header("X-Accel-Buffering", "no")
         c.header("X-Content-Type-Options", "nosniff")
 
+        // In embed mode each connection is bound to a tenant; filter out events
+        // from other tenants so embedded clients never see cross-tenant traffic.
+        const scope = Flag.OPENCODE_EMBED ? Tenant.current()?.workspace : undefined
+
         return streamEvents(c, (q) => {
           async function handler(event: any) {
+            if (scope && event?.directory !== scope) return
             q.push(JSON.stringify(event))
           }
           GlobalBus.on("event", handler)

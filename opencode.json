@@ -9,15 +9,15 @@
         "apiKey": "change-me"
       },
       "models": {
-        "unsloth/Qwen3.5-9B-GGUF": {
-          "name": "unsloth/Qwen3.5-9B-GGUF",
+        "HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive": {
+          "name": "Qwen3.5-9B Uncensored (Aggressive)",
           "tool_call": true
         }
       }
     }
   },
-  "model": "llama-local/unsloth/Qwen3.5-9B-GGUF",
-  "small_model": "llama-local/unsloth/Qwen3.5-9B-GGUF",
+  "model": "llama-local/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive",
+  "small_model": "llama-local/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive",
   "instructions": [
     "/config/MASTER_PROMPT.md"
   ],
