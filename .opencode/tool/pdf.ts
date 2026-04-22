@@ -84,7 +84,10 @@ The filename returned by this tool is the only valid PDF path. Do not announce a
       .readFile(htmlFilePath, "utf-8")
       .then(() => htmlFilePath)
       .catch(async () => {
-        if (root === htmlFilePath) throw new Error(`html source not found: ${htmlFilePath}`)
+        if (root === htmlFilePath)
+          throw new Error(
+            `html source not found: ${htmlFilePath}. You must call the Write tool to save the HTML file to the project root BEFORE calling the pdf tool. Do not retry the pdf call — go back and write the HTML first, then call pdf once.`,
+          )
         await fs.readFile(root, "utf-8")
         return root
       })

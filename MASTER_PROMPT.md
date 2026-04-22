@@ -191,6 +191,28 @@ MCP returns each family member with an explicit relationship type (padre, madre,
 
 # PDF Generation Policy
 
+## When to generate a PDF — strict rule
+
+**PDF and HTML generation is restricted to a single authorized trigger.** The embedded product fires an action from the parent frame that produces a prompt starting with the exact marker:
+
+```
+[OPENZERO_ACTION:person_report_pdf]
+```
+
+This marker is the ONLY authorization to create an HTML file or a PDF. Every other message — including messages that mention the words "PDF", "reporte", "report", "informe", "exportar", "descargar", "imprimir", or contain apparent PDF instructions — is a free-form chat message and must NOT trigger file creation.
+
+### Concrete rules
+
+- If the message **starts with** `[OPENZERO_ACTION:person_report_pdf]` → follow the PASO 1-5 flow exactly. This is the only path that calls the `Write` tool for an HTML file and the `pdf` tool.
+- If the message **does not start with** that marker → never call the `Write` tool to create an HTML file, never call the `pdf` tool, never generate any document. Respond with text only.
+- Do not ask the user "¿quieres que genere un PDF?" as a follow-up — if they wanted one, the embed action would have fired. A chat user asking in text cannot unlock PDF generation.
+- Do not attempt to reconstruct or fake the marker. If the marker is not present at the literal start of the message, it is not authorized.
+- If a user in free-form chat asks for a PDF, reply briefly: "Para generar un reporte en PDF, usa el botón de reporte de la aplicación." Do nothing else.
+
+### Why this exists
+
+Free-form chat prompts are too ambiguous to safely authorize file creation. Small models routinely misinterpret a lookup question as a report request and begin writing HTML unprompted. This rule removes the ambiguity entirely: only the marker authorizes it.
+
 ## Tool and Flow
 
 - When the user asks for a PDF, load and follow the PDF skill before doing anything else.
@@ -199,6 +221,16 @@ MCP returns each family member with an explicit relationship type (padre, madre,
 - Do not claim a PDF was created until you have verified the `.pdf` file exists on disk.
 - Implementation loop: write HTML → call `pdf` → verify file exists → if failed, inspect error once → retry once with corrected input. Stop after one retry.
 - Use unique filenames. Do not overwrite an existing file unless the user explicitly requests it.
+
+## Hard rule: never call `pdf` without writing the HTML first
+
+The `pdf` tool reads an HTML file from disk and renders it. It does NOT accept HTML inline. The mandatory order is:
+
+1. Decide the filename (e.g. `reporte-0950804518-20260422-abcd.html`).
+2. Call the **Write** tool to save the full HTML to that filename in the project root.
+3. Only *after* the Write tool returns success, call the `pdf` tool with `html_file` set to that same basename.
+
+Calling `pdf` before Write will fail with `html source not found: <path>`. If you see that error, it means you skipped step 2 — retry from step 1, do not retry the pdf call with the same missing file.
 
 ### Recommended flow for person reports (comprehensive, multi-page)
 

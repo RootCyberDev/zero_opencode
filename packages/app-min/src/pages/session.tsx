@@ -397,6 +397,10 @@ export default function Page() {
     const filename = pdfFilename(cedula)
     const htmlFilename = filename.replace(/\.pdf$/i, ".html")
     return [
+      // Signature marker — MASTER_PROMPT authorizes PDF/HTML generation ONLY
+      // when a prompt starts with this exact token. Any free-form chat message
+      // that lacks this marker must never produce a .html or .pdf file.
+      "[OPENZERO_ACTION:person_report_pdf]",
       `Crear un PDF ejecutivo premium de la persona con numero de cedula: ${cedula}.`,
 
       // — Flujo obligatorio —
