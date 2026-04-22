@@ -15,6 +15,9 @@ import type { SystemError } from "bun"
 import type { Provider } from "@/provider/provider"
 import { ModelID, ProviderID } from "@/provider/schema"
 import { Effect } from "effect"
+import { Log } from "../util/log"
+
+const messageLog = Log.create({ service: "message-v2" })
 
 /** Error shape thrown by Bun's fetch() when gzip/br decompression fails mid-stream */
 interface FetchDecompressionError extends Error {
@@ -800,15 +803,45 @@ export namespace MessageV2 {
 
     const tools = Object.fromEntries(Array.from(toolNames).map((toolName) => [toolName, { toModelOutput }]))
 
-    return yield* Effect.promise(() =>
-      convertToModelMessages(
-        result.filter((msg) => msg.parts.some((part) => part.type !== "step-start")),
-        {
-          //@ts-expect-error (convertToModelMessages expects a ToolSet but only actually needs tools[name]?.toModelOutput)
-          tools,
-        },
-      ),
+    const filtered = result.filter((msg) => msg.parts.some((part) => part.type !== "step-start"))
+
+    const converted = yield* Effect.promise(() =>
+      convertToModelMessages(filtered, {
+        //@ts-expect-error (convertToModelMessages expects a ToolSet but only actually needs tools[name]?.toModelOutput)
+        tools,
+      }),
     )
+
+    // Qwen3 (and other reasoning models that embed `enable_thinking=true` in
+    // their Jinja chat template) abort with
+    //   "Assistant response prefill is incompatible with enable_thinking"
+    // whenever the last message is role="assistant" — because the template
+    // interprets that as a prefill/continuation request and rejects it when
+    // thinking is on. In OpenCode's agent loop we never *intend* a prefill
+    // when invoking the model for a fresh generation, so a trailing assistant
+    // here is always an upstream artifact: an interrupted stream, an aborted
+    // session that left an assistant with no tool_result, or the AI SDK
+    // splitting an assistant's post-tool text into its own trailing message.
+    //
+    // Drop trailing assistant messages so the model always sees a user or
+    // tool message as the final turn. The dropped content remains earlier in
+    // the conversation when it had prior context, so the model still has
+    // everything needed to continue. Log the drop so we can trace when and
+    // where upstream produces this state.
+    let dropped = 0
+    while (converted.length > 0 && converted[converted.length - 1].role === "assistant") {
+      converted.pop()
+      dropped++
+    }
+    if (dropped > 0) {
+      messageLog.warn("dropped trailing assistant from model payload", {
+        dropped,
+        model: `${model.providerID}/${model.id}`,
+        finalRole: converted[converted.length - 1]?.role,
+      })
+    }
+
+    return converted
   })
 
   export function toModelMessages(
