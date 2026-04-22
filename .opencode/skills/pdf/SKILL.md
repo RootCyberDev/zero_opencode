@@ -86,7 +86,7 @@ The document should feel like it was intentionally laid out by a human.
 - Prefer balanced sections that fill pages naturally.
 - Use `break-before`, `break-inside`, and table/header semantics when needed.
 - When you need strong page control, structure the HTML with explicit `.sheet` wrappers.
-- Treat each `.sheet` as one PDF page body.
+- A `.sheet` is a **page-break signal**, not a page-size container. It means "force a page break after this block". WeasyPrint controls the A4 dimensions via `@page`. A `.sheet` whose content is short ends with whitespace; a `.sheet` whose content overflows naturally spans two physical pages. Both are correct. Never set `min-height` or `height` on `.sheet` to "fill" a page.
 - If a section should start on a new page, start a new `.sheet` or use `.page-break`.
 - If unsure, keep the interior width narrower than `171mm` and let the renderer breathe. Margins are safer than edge-to-edge layouts.
 - Assume the renderer adds a tiny top safety offset on each `.sheet` to stabilize page starts. Do not try to cancel it with negative margins.
@@ -285,7 +285,7 @@ A professional executive report always follows a deliberate section order. Use t
 ### Last page — Closing Layer
 
 12. **Conclusions or recommendations** (if applicable)
-13. **Footer note** — data source, period covered, or editorial caveat
+13. **Footer note** — the generation date only. Nothing else: no data source, no system name, no disclaimer, no "fuente de datos", no period covered, no editorial caveat. See the Footer Rules section below for the exact prohibitions.
 
 This order is not rigid, but skipping layers without reason produces thin documents. Each layer should feel complete before moving to the next.
 
@@ -355,37 +355,39 @@ Use `chart--bar` when the category order matters. The library uses inline SVG ba
 Validation:
 
 - The tallest bar must correspond to the largest value.
-- The number of `.chart__item` blocks must equal the number of data points.
-- If the data changes, recompute `--h` for every bar.
+- The number of `<rect>` bar elements must equal the number of data points.
+- If the data changes, recompute the `height` attribute for every `<rect>` bar using the formula above.
 
 ### Horizontal bar chart
 
 Use `chart--hbar` when labels are long or when a ranked comparison reads better horizontally. Keep it as inline SVG so the bar lengths stay exact in PDF.
 
-**Math:** `width = round((value / maxValue) * 100)%`
+**Math (viewBox units, track width = 244):** `width = round((value / maxValue) * 244)`
 
 ```html
 <div class="chart chart--hbar">
   <div class="chart__title">Distribución de Resultados OSINT</div>
   <svg class="chart__svg" viewBox="0 0 420 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Distribución de resultados OSINT">
     <text x="16" y="30" font-size="10" fill="#475569">Documentos PDF</text>
-    <rect x="128" y="20" width="244" height="12" rx="999" fill="#f8fafc" stroke="#d9e2ec" />
-    <rect x="128" y="20" width="57" height="12" rx="999" fill="#1d4ed8" />
+    <rect x="128" y="20" width="244" height="12" rx="6" fill="#f8fafc" stroke="#d9e2ec" />
+    <rect x="128" y="20" width="57" height="12" rx="6" fill="#1d4ed8" />
     <text x="382" y="30" font-size="10" fill="#102a43" font-weight="700">6</text>
 
     <text x="16" y="64" font-size="10" fill="#475569">Redes Sociales</text>
-    <rect x="128" y="54" width="244" height="12" rx="999" fill="#f8fafc" stroke="#d9e2ec" />
-    <rect x="128" y="54" width="244" height="12" rx="999" fill="#1d4ed8" />
+    <rect x="128" y="54" width="244" height="12" rx="6" fill="#f8fafc" stroke="#d9e2ec" />
+    <rect x="128" y="54" width="244" height="12" rx="6" fill="#1d4ed8" />
     <text x="382" y="64" font-size="10" fill="#102a43" font-weight="700">23</text>
 
     <text x="16" y="98" font-size="10" fill="#475569">Otros</text>
-    <rect x="128" y="88" width="244" height="12" rx="999" fill="#f8fafc" stroke="#d9e2ec" />
-    <rect x="128" y="88" width="159" height="12" rx="999" fill="#1d4ed8" />
+    <rect x="128" y="88" width="244" height="12" rx="6" fill="#f8fafc" stroke="#d9e2ec" />
+    <rect x="128" y="88" width="159" height="12" rx="6" fill="#1d4ed8" />
     <text x="382" y="98" font-size="10" fill="#102a43" font-weight="700">15</text>
   </svg>
   <div class="chart__note">Fuente: búsqueda OSINT — 48 resultados totales</div>
 </div>
 ```
+
+**CRITICAL — SVG rect radius rule:** always use `rx="3"` to `rx="6"` for bar chart rects. **NEVER use `rx="999"` or any value greater than half the rect's height** — WeasyPrint renders those as warped ellipses instead of rounded rectangles. The safe range is `rx <= height / 2`. A 12px tall bar uses `rx="6"` at most.
 
 Validation:
 
@@ -400,12 +402,14 @@ Use `chart--donut` for proportional splits. The library uses SVG circles, but th
 
 ```html
 <div class="chart chart--donut">
-  <svg class="chart__svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-    <circle class="chart__slice" cx="60" cy="60" r="45" style="stroke:#1d4ed8; --dash:183.78; --offset:0;"></circle>
-    <circle class="chart__slice" cx="60" cy="60" r="45" style="stroke:#7c3aed; --dash:56.55; --offset:-183.78;"></circle>
-    <circle class="chart__slice" cx="60" cy="60" r="45" style="stroke:#94a3b8; --dash:42.41; --offset:-240.33;"></circle>
-    <text class="chart__center" x="60" y="55" font-size="16">65%</text>
-    <text class="chart__center" x="60" y="67" font-size="7">Empleado</text>
+  <svg class="chart__svg" width="50mm" height="50mm" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <g transform="rotate(-90 60 60)">
+      <circle cx="60" cy="60" r="45" fill="none" stroke="#1d4ed8" stroke-width="22" stroke-dasharray="183.78 282.74" stroke-dashoffset="0" />
+      <circle cx="60" cy="60" r="45" fill="none" stroke="#7c3aed" stroke-width="22" stroke-dasharray="56.55 282.74" stroke-dashoffset="-183.78" />
+      <circle cx="60" cy="60" r="45" fill="none" stroke="#94a3b8" stroke-width="22" stroke-dasharray="42.41 282.74" stroke-dashoffset="-240.33" />
+    </g>
+    <text x="60" y="58" text-anchor="middle" font-size="16" font-weight="700" fill="#102a43">65%</text>
+    <text x="60" y="70" text-anchor="middle" font-size="7" fill="#475569">Empleado</text>
   </svg>
   <div class="chart__legend">
     <div class="chart__legend-row"><span class="chart__swatch" style="background:#1d4ed8;"></span><strong>Empleado</strong> — 65%</div>
@@ -415,11 +419,78 @@ Use `chart--donut` for proportional splits. The library uses SVG circles, but th
 </div>
 ```
 
+**CRITICAL — SVG presentation attributes rule (WeasyPrint constraint):**
+WeasyPrint does NOT apply external CSS (from `<style>` blocks or stylesheets) to SVG child elements like `<circle>`, `<rect>`, `<line>`, `<path>`, `<text>`. It only applies CSS to the outer `<svg>` element itself.
+
+Inside every `<svg>`, set visual properties with **SVG presentation attributes** (or inline `style="..."` on the element) — never via a class that lives in an external stylesheet.
+
+- Set `fill="none"`, `stroke="#1d4ed8"`, `stroke-width="22"`, `stroke-dasharray="183.78 282.74"` directly on each `<circle>`/`<rect>`.
+- Wrap rotations in a `<g transform="rotate(-90 60 60)">` — never rely on `transform` from external CSS.
+- Give every `<svg>` explicit `width` and `height` attributes (e.g. `width="50mm" height="50mm"` for donuts) so it does not expand to the full container width.
+- Put `font-size` and `fill` as attributes on `<text>` elements, not as CSS classes.
+
+Violating this rule produces a solid black filled circle (missing `fill="none"`), a ring at full circumference (missing `stroke-dasharray`), or a donut that fills the whole page width (missing `width=/height=`).
+
 Validation:
 
 - The sum of the segment percentages must be 100%.
 - The sum of the `dash` values must equal the circle circumference.
 - Use solid colors and avoid opacity when the chart must print clearly.
+
+## Chart Pre-Write Checklist (MANDATORY)
+
+Before writing any chart into the HTML, confirm every item in this list. If even one fails, the chart is invalid — rewrite it before emitting.
+
+1. **Rect count equals data-point count.** If you have 4 salary entries, the SVG must contain exactly 4 `<rect>` bar elements — not 3, not 5. Counting axis lines does not count.
+2. **The tallest bar corresponds to the largest value.** If $2,500 is the max, its `<rect>` must have the largest `height` (vertical bar) or `width` (horizontal bar) in the SVG.
+3. **All `<rect>` bars are present.** A chart with only `<text>` labels and no `<rect>` elements is not a chart — it is a caption with dates. Never emit one.
+4. **`rx` is small.** Every bar rect uses `rx="3"` to `rx="6"`. Never `rx="999"` — that renders as an ellipse in WeasyPrint.
+5. **No `<line>` as a bar.** Bars are always `<rect>`. A vertical or horizontal `<line>` is an axis, not a bar.
+6. **No CSS progress-bar fallback.** Never render a chart as `<div>` with a `width: 57%` fill. Always real SVG `<rect>`.
+7. **No `conic-gradient` or `radial-gradient`.** WeasyPrint does not paint them. Use the donut template with `stroke-dasharray` math instead.
+8. **Math is explicit.** Bar math: `height = round((value / max) * 110)`. Hbar width: `width = round((value / max) * 244)`. Donut dash: `dash = round(282.74 * percent / 100, 2)`.
+9. **The viewBox is 420×190 for bars, 420×132 for hbars, 120×120 for donuts.** Stick to these so the chart prints crisply inside the A4 content column.
+10. **Axis + baseline lines are drawn.** Bar charts include both a left axis and a bottom baseline. Hbars include a light grey track behind the fill.
+
+If after the checklist you cannot produce a valid chart, **render a 2–3 row micro-table instead** and note the numeric data there. Never emit a broken chart.
+
+## Common Visual Failures and Fixes
+
+These are the failures that appear most often in generated reports. Recognize and fix them before the PDF tool call.
+
+| Failure | Symptom in PDF | Fix |
+|---|---|---|
+| Bars missing in bar chart | Dates/labels float on a line with no bars | Re-emit the SVG with one `<rect>` per data point; recompute `height` with the formula |
+| Bars look like elongated ovals | Hbar bars are curved, lens-shaped | Use `rx="6"` (never `rx="999"`) |
+| Tallest bar wrong | A smaller number has a taller bar than a larger number | Sort values, find the max, divide each value by the max |
+| Donut renders as a solid black disc | No segments visible, just a filled circle | Each `<circle>` needs `fill="none"` as an attribute (not via CSS class). External CSS does not reach SVG children in WeasyPrint |
+| Donut fills the whole page width | Huge circle, legend squished into a narrow column | Add `width="50mm" height="50mm"` as attributes on the `<svg>`, not via CSS |
+| Donut ring is fully filled | Blue ring at full circumference, no percent split | Each `<circle>` needs `stroke-dasharray="<dash> 282.74"` and `stroke-dashoffset="<offset>"` as inline SVG attributes; the segment `dash` values must sum to 282.74 |
+| Last page is almost empty | Only the footer on its own page | The `.footer-note` must live inside the LAST content `.sheet`, not its own `.sheet`. Never wrap the footer in its own sheet |
+| Page with one small section wastes whitespace | A full A4 page shows 3 lines then 200mm blank | Merge the small section into the previous `.sheet`. Never use one `.sheet` per micro-section |
+| Icons render blank | Chip/badge text shows no icon | Use only the glyph classes listed in this document. Unknown glyph names render as empty |
+| Table clamped to half-width | A wide table appears compressed on the left half | A `<table>` must never live inside a `.grid`, `.fact-grid`, or `.metric-grid`. Always wrap in `.table-wrap` as a full-width block |
+| Content hugs left edge | Page visibly unbalanced, right margin twice the left | Wrap the entire document in `<main class="doc"> ... </main>` so the 171mm content column is auto-centered in the 178mm content area |
+
+## Last-Page Rule (footer placement)
+
+The `.footer-note` with the generation date must always be the last child of the last content `.sheet`. Never put it in its own `.sheet`. Never put it after `</section>` at document root.
+
+- **WRONG** — this produces a blank final page with only the footer:
+  ```html
+  <section class="sheet"><h2>Conclusiones</h2><p>...</p></section>
+  <section class="sheet"><div class="footer-note">Generado el ...</div></section>
+  ```
+- **CORRECT** — the footer closes the last sheet in-place:
+  ```html
+  <section class="sheet">
+    <h2>Conclusiones</h2>
+    <p>...</p>
+    <div class="footer-note">Generado el ...</div>
+  </section>
+  ```
+
+If the last section's content already fills the page, WeasyPrint will flow the footer onto the next page naturally — that is fine. What is not fine is forcing it into its own `.sheet`, which guarantees a blank page.
 
 ## Content Rules
 
@@ -635,6 +706,12 @@ Do not:
 - stack metric-pills vertically as individual block elements — always group them in a flex row: `<div style="display:flex;flex-wrap:wrap;gap:4mm;">`
 - add background color or gradient to the `.eyebrow` element — eyebrow is plain uppercase text with a color, no background fill
 - add background color or gradient to `html`, `body`, `.doc`, or `.sheet` — the renderer controls the page background
+
+## Page Numbering
+
+- The renderer stamps `page / total` in the bottom-right corner of every page automatically via `@page { @bottom-right }`.
+- **Do NOT add manual page numbers** (no counters inside `.sheet`, no "Página 1 de 8" labels, no footer page strips). They will overlap the renderer's numbering and look broken.
+- The automatic numbering uses `PdfSans` at 9pt muted color. Do not attempt to restyle it from document CSS.
 
 ## Completion Rule
 

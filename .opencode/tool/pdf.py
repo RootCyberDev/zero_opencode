@@ -48,7 +48,12 @@ html {
 }
 
 body {
-  margin: 0;
+  margin: 0 auto;
+  /* Defensive centering: if the model forgets the <main class="doc"> wrapper,
+     body itself clamps to the 171mm content column so the page still reads
+     balanced instead of hugging the left edge. .doc, when present, nests
+     cleanly inside this since both are 171mm centered. */
+  max-width: var(--page-width);
   background: white !important;
   /* CRITICAL: fixed body height is the #1 cause of 1-page PDFs in WeasyPrint */
   height: auto !important;
@@ -109,7 +114,7 @@ svg.icon {
 
 /* Defensive cap: SVGs used as inline icons that lack class="icon".
    Applies inside chips, badges, callouts, cards, and similar components.
-   Does NOT apply inside .chart-wrap (where SVGs should be full-width). */
+   Does NOT apply inside .chart or .chart-wrap (where SVGs are full-width visuals). */
 .chip svg:not(.icon),
 .badge svg:not(.icon),
 .metric-pill svg:not(.icon),
@@ -126,6 +131,20 @@ svg.icon {
   height: 16px !important;
   flex-shrink: 0;
   display: inline-block;
+}
+
+/* Chart SVGs are full-width data visuals. They must escape the 16x16
+   inline-icon cap above when they live inside .callout / .band / .card.
+   More-specific .chart--donut .chart__svg { width: 50mm } wins over this
+   for donut charts (class-chain specificity is higher). */
+.chart svg.chart__svg,
+.chart-wrap svg.chart__svg,
+.chart > svg,
+.chart-wrap > svg {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  display: block !important;
 }
 
 /* Chips and badges must never break mid-word */

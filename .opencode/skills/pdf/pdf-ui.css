@@ -71,8 +71,8 @@ h6 {
 .glyph-home::before { content: "\e88a"; }
 .glyph-globe::before { content: "\e80b"; }
 .glyph-briefcase::before { content: "\e8f9"; }
-.glyph-building::before { content: "\xea40"; }
-.glyph-dollar-sign::before { content: "\xef63"; }
+.glyph-building::before { content: "\ea40"; }
+.glyph-dollar-sign::before { content: "\ef63"; }
 .glyph-trending-up::before { content: "\e8e5"; }
 .glyph-bar-chart::before { content: "\e26b"; }
 .glyph-alert-triangle::before { content: "\e002"; }
@@ -81,7 +81,7 @@ h6 {
 .glyph-x-circle::before { content: "\e14c"; }
 .glyph-scale::before { content: "\eaf6"; }
 .glyph-graduation-cap::before { content: "\e80c"; }
-.glyph-book-open::before { content: "\xea19"; }
+.glyph-book-open::before { content: "\ea19"; }
 .glyph-file-text::before { content: "\e873"; }
 .glyph-folder::before { content: "\e2c7"; }
 .glyph-phone::before { content: "\e0b0"; }
@@ -126,120 +126,30 @@ h6 {
   color: var(--muted);
 }
 
-.chart--bar {
-  --chart-height: 110px;
-  --chart-gap: 4mm;
-}
-
-.chart--bar .chart__bars {
-  display: grid;
-  grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
-  gap: var(--chart-gap);
-  align-items: end;
-  min-height: 138px;
-  padding-bottom: 5mm;
-  border-bottom: 1px solid var(--line);
-}
-
-.chart--bar .chart__item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  min-height: 138px;
-}
-
-.chart--bar .chart__fill {
-  width: 64%;
-  height: var(--h);
-  border-radius: 3px 3px 0 0;
-  background: linear-gradient(180deg, var(--secondary) 0%, var(--accent) 100%);
-  order: 2;
-}
-
-.chart--bar .chart__value {
-  order: 1;
-  margin-bottom: 1.5mm;
-  font-size: 8pt;
-  font-weight: 700;
-  color: var(--primary);
-  white-space: nowrap;
-}
-
-.chart--bar .chart__label {
-  order: 3;
-  margin-top: 1.5mm;
-  font-size: 8pt;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-.chart--hbar .chart__rows {
-  display: grid;
-  gap: 2.8mm;
-}
-
-.chart--hbar .chart__row {
-  display: grid;
-  grid-template-columns: minmax(28mm, 1.2fr) 1fr auto;
-  gap: 3mm;
-  align-items: center;
-}
-
-.chart--hbar .chart__label {
-  font-size: 8.5pt;
-  color: var(--muted);
-}
-
-.chart--hbar .chart__track {
-  height: 5mm;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.chart--hbar .chart__fill {
-  height: 100%;
-  width: var(--w);
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--secondary) 0%, var(--accent) 100%);
-}
-
-.chart--hbar .chart__value {
-  font-size: 8pt;
-  font-weight: 700;
-  color: var(--primary);
-  white-space: nowrap;
-}
+/*
+ * Chart styling rule
+ * ------------------
+ * All chart visuals — bars, tracks, donut slices, fills, segment strokes — live
+ * on the SVG presentation attributes INSIDE the <svg>. WeasyPrint does not apply
+ * external CSS to SVG children, so any class-based styling on <rect>/<circle>
+ * would be silently ignored. Keep SVG styling inline on the element.
+ *
+ * The classes below style only the chart CONTAINER (title, note, legend box) —
+ * elements that live in regular HTML flow outside the SVG.
+ */
 
 .chart--donut {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 50mm 1fr;
   gap: 8mm;
+  align-items: center;
 }
 
 .chart--donut .chart__svg {
-  width: 50mm;
-  height: 50mm;
-  flex: 0 0 auto;
-}
-
-.chart--donut .chart__slice {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 22;
-  stroke-dasharray: var(--dash) 282.74;
-  stroke-dashoffset: var(--offset);
-  transform: rotate(-90deg);
-  transform-origin: 60px 60px;
-}
-
-.chart--donut .chart__center {
-  font-family: "PdfSans", "Liberation Sans", "DejaVu Sans", sans-serif;
-  font-weight: 700;
-  fill: var(--primary);
-  text-anchor: middle;
+  /* Override the generic .chart__svg { width: 100% } — the donut
+     must be a fixed 50mm square regardless of container width. */
+  width: 50mm !important;
+  height: 50mm !important;
 }
 
 .chart--donut .chart__legend {
@@ -247,6 +157,7 @@ h6 {
   gap: 2mm;
   font-size: 8.5pt;
   line-height: 1.6;
+  min-width: 0;
 }
 
 .chart--donut .chart__legend-row {
