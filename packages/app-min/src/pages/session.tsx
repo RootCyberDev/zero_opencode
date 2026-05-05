@@ -1,5 +1,6 @@
-import type { Project, UserMessage, VcsFileDiff } from "@opencode-ai/sdk/v2"
+import type { FileNode, Project, UserMessage, VcsFileDiff } from "@opencode-ai/sdk/v2"
 import { useDialog } from "@opencode-ai/ui/context/dialog"
+import { Dialog } from "@opencode-ai/ui/dialog"
 import { useMutation } from "@tanstack/solid-query"
 import {
   batch,
@@ -1683,17 +1684,49 @@ export default function Page() {
     return out
   })
 
+  function MobileDialogConfirmFileDelete(props: { node: FileNode }) {
+    const handleDelete = async () => {
+      dialog.close()
+      await file.tree.remove(props.node.path)
+    }
+    return (
+      <Dialog title={language.t("session.files.delete.button")} fit>
+        <div class="flex flex-col gap-4 pl-6 pr-2.5 pb-3">
+          <span class="text-14-regular text-text-strong">
+            {language.t("session.files.delete.confirm", { name: props.node.name })}
+          </span>
+          <div class="flex justify-end gap-2">
+            <Button variant="ghost" size="large" onClick={() => dialog.close()}>
+              {language.t("common.cancel")}
+            </Button>
+            <Button variant="primary" size="large" onClick={handleDelete}>
+              {language.t("common.delete")}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    )
+  }
+
+  const requestMobileFileDelete = (node: FileNode) => {
+    dialog.show(() => <MobileDialogConfirmFileDelete node={node} />)
+  }
+
   const mobileFiles = () => (
-    <div class="relative h-full overflow-hidden bg-background-stronger px-3 py-0">
+    <div
+      class="relative h-full bg-background-stronger px-3 py-0 overflow-y-auto overflow-x-hidden"
+      data-scope="filetree"
+    >
       <Switch>
         <Match when={nofiles()}>{empty(language.t("session.files.empty"))}</Match>
         <Match when={true}>
           <FileTree
             path=""
-            class="pt-3"
+            class="pt-3 pb-4"
             modified={mobileDiffFiles()}
             kinds={mobileKinds()}
             onFileClick={(node) => openPath(node.path)}
+            onFileDelete={requestMobileFileDelete}
           />
         </Match>
       </Switch>

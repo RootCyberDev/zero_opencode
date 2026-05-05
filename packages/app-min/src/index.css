@@ -67,22 +67,26 @@
     }
   }
 
-  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"] {
+  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"],
+  [data-scope="filetree"]:not([data-component="tabs"]) {
     scrollbar-width: thin;
     scrollbar-color: var(--border-base) transparent;
   }
 
-  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"]::-webkit-scrollbar {
+  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"]::-webkit-scrollbar,
+  [data-scope="filetree"]:not([data-component="tabs"])::-webkit-scrollbar {
     display: block;
     width: 8px;
   }
 
-  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"]::-webkit-scrollbar-thumb {
+  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"]::-webkit-scrollbar-thumb,
+  [data-scope="filetree"]:not([data-component="tabs"])::-webkit-scrollbar-thumb {
     background-color: var(--border-base);
     border-radius: 4px;
   }
 
-  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"]::-webkit-scrollbar-track {
+  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"]::-webkit-scrollbar-track,
+  [data-scope="filetree"]:not([data-component="tabs"])::-webkit-scrollbar-track {
     background: transparent;
   }
 }

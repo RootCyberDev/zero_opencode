@@ -151,7 +151,7 @@ const FileTreeNode = (
     <Dynamic
       component={local.as ?? "div"}
       classList={{
-        "w-full min-w-0 h-6 flex items-center justify-start gap-x-1.5 rounded-md px-1.5 py-0 text-left hover:bg-surface-raised-base-hover active:bg-surface-base-active transition-colors cursor-pointer": true,
+        "group/filetree-node w-full min-w-0 h-6 flex items-center justify-start gap-x-1.5 rounded-md px-1.5 py-0 text-left hover:bg-surface-raised-base-hover active:bg-surface-base-active transition-colors cursor-pointer": true,
         "bg-surface-base-active": local.node.path === local.active,
         ...(local.classList ?? {}),
         [local.class ?? ""]: !!local.class,
@@ -197,7 +197,7 @@ const FileTreeNode = (
           tabindex={0}
           aria-label={language.t("session.files.delete.button")}
           title={language.t("session.files.delete.button")}
-          class="shrink-0 size-4 -mr-0.5 flex items-center justify-center rounded-sm text-icon-weak hover:text-icon-strong hover:bg-surface-stronger-base opacity-0 group-hover/filetree:opacity-100 focus:opacity-100 focus-visible:opacity-100 transition-opacity outline-none focus-visible:ring-1 focus-visible:ring-border-strong-base"
+          class="shrink-0 size-4 -mr-0.5 flex items-center justify-center rounded-sm text-icon-weak hover:text-icon-strong hover:bg-surface-stronger-base opacity-0 group-hover/filetree-node:opacity-100 focus:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity outline-none focus-visible:ring-1 focus-visible:ring-border-strong-base"
           onClick={(event) => {
             event.preventDefault()
             event.stopPropagation()
