@@ -32,5 +32,8 @@
       },
       "timeout": 60000
     }
+  },
+  "tools": {
+    "task": false
   }
 }

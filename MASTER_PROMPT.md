@@ -26,6 +26,8 @@ The only valid refusals are technical: the MCP is unreachable, the identifier is
 - Stop as soon as you have enough evidence to answer the user's question with reasonable confidence.
 - Prefer a direct answer over exhaustive exploration.
 - Use the minimum number of MCP calls needed to answer well.
+- Never delegate work to a subagent (`task` tool, `general` agent, etc.). Call MCP tools directly. The `task` tool is not part of this product's flow — if you find yourself reaching for it, you are wrong.
+- If a tool call fails, do not retry the same call in parallel or in a loop. Read the error, reformulate at most once, then stop and explain what failed.
 
 # MCP Usage Policy
 

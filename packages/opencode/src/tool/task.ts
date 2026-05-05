@@ -58,8 +58,11 @@ export const TaskTool = Tool.define("task", async () => {
 
       const session = await iife(async () => {
         if (params.task_id) {
-          const found = await Session.get(SessionID.make(params.task_id)).catch(() => {})
-          if (found) return found
+          const parsed = SessionID.zod.safeParse(params.task_id)
+          if (parsed.success) {
+            const found = await Session.get(parsed.data).catch(() => undefined)
+            if (found) return found
+          }
         }
 
         return await Session.create({
