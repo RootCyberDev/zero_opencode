@@ -1,4 +1,5 @@
 import { useFile } from "@/context/file"
+import { useLanguage } from "@/context/language"
 import { encodeFilePath } from "@/context/file/path"
 import { Collapsible } from "@opencode-ai/ui/collapsible"
 import { FileIcon } from "@opencode-ai/ui/file-icon"
@@ -120,6 +121,7 @@ const FileTreeNode = (
       kinds?: ReadonlyMap<string, Kind>
       marks?: Set<string>
       as?: "div" | "button"
+      onDelete?: (node: FileNode) => void
     },
 ) => {
   const [local, rest] = splitProps(p, [
@@ -131,10 +133,12 @@ const FileTreeNode = (
     "kinds",
     "marks",
     "as",
+    "onDelete",
     "children",
     "class",
     "classList",
   ])
+  const language = useLanguage()
   const kind = () => visibleKind(local.node, local.kinds, local.marks)
   const active = () => !!kind() && !local.node.ignored
   const color = () => {
@@ -187,6 +191,29 @@ const FileTreeNode = (
         }
         return <div class="shrink-0 size-1.5 mr-1.5 rounded-full" style={kindDotColor(value)} />
       })()}
+      <Show when={local.onDelete && local.node.type === "file"}>
+        <span
+          role="button"
+          tabindex={0}
+          aria-label={language.t("session.files.delete.button")}
+          title={language.t("session.files.delete.button")}
+          class="shrink-0 size-4 -mr-0.5 flex items-center justify-center rounded-sm text-icon-weak hover:text-icon-strong hover:bg-surface-stronger-base opacity-0 group-hover/filetree:opacity-100 focus:opacity-100 focus-visible:opacity-100 transition-opacity outline-none focus-visible:ring-1 focus-visible:ring-border-strong-base"
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            local.onDelete?.(local.node)
+          }}
+          onPointerDown={(event) => event.stopPropagation()}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter" && event.key !== " ") return
+            event.preventDefault()
+            event.stopPropagation()
+            local.onDelete?.(local.node)
+          }}
+        >
+          <Icon name="trash" size="small" />
+        </span>
+      </Show>
     </Dynamic>
   )
 }
@@ -202,6 +229,7 @@ export default function FileTree(props: {
   kinds?: ReadonlyMap<string, Kind>
   draggable?: boolean
   onFileClick?: (file: FileNode) => void
+  onFileDelete?: (file: FileNode) => void
 
   _filter?: Filter
   _marks?: Set<string>
@@ -441,6 +469,7 @@ export default function FileTree(props: {
                         active={props.active}
                         draggable={props.draggable}
                         onFileClick={props.onFileClick}
+                        onFileDelete={props.onFileDelete}
                         _filter={filter()}
                         _marks={marks()}
                         _deeps={deeps()}
@@ -462,6 +491,7 @@ export default function FileTree(props: {
                   marks={marks()}
                   as="button"
                   type="button"
+                  onDelete={props.onFileDelete}
                   onClick={() => props.onFileClick?.(node)}
                 >
                   <div class="w-4 shrink-0" />

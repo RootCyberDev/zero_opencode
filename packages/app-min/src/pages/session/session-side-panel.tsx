@@ -2,13 +2,15 @@ import { For, Match, Show, Switch, createEffect, createMemo, onCleanup, type JSX
 import { createStore } from "solid-js/store"
 import { createMediaQuery } from "@solid-primitives/media"
 import { Tabs } from "@opencode-ai/ui/tabs"
+import { Button } from "@opencode-ai/ui/button"
+import { Dialog } from "@opencode-ai/ui/dialog"
 import { IconButton } from "@opencode-ai/ui/icon-button"
 import { TooltipKeybind } from "@opencode-ai/ui/tooltip"
 import { ResizeHandle } from "@opencode-ai/ui/resize-handle"
 import { Mark } from "@opencode-ai/ui/logo"
 import { DragDropProvider, DragDropSensors, DragOverlay, SortableProvider, closestCenter } from "@thisbeyond/solid-dnd"
 import type { DragEvent } from "@thisbeyond/solid-dnd"
-import type { SnapshotFileDiff, VcsFileDiff } from "@opencode-ai/sdk/v2"
+import type { FileNode, SnapshotFileDiff, VcsFileDiff } from "@opencode-ai/sdk/v2"
 import { ConstrainDragYAxis, getDraggableId } from "@/utils/solid-dnd"
 import { useDialog } from "@opencode-ai/ui/context/dialog"
 
@@ -140,6 +142,34 @@ export function SessionSidePanel(props: {
   const showAllFiles = () => {
     if (fileTreeTab() !== "changes") return
     layout.fileTree.setTab("all")
+  }
+
+  function DialogConfirmFileDelete(props: { node: FileNode }) {
+    const handleDelete = async () => {
+      dialog.close()
+      await file.tree.remove(props.node.path)
+    }
+    return (
+      <Dialog title={language.t("session.files.delete.button")} fit>
+        <div class="flex flex-col gap-4 pl-6 pr-2.5 pb-3">
+          <span class="text-14-regular text-text-strong">
+            {language.t("session.files.delete.confirm", { name: props.node.name })}
+          </span>
+          <div class="flex justify-end gap-2">
+            <Button variant="ghost" size="large" onClick={() => dialog.close()}>
+              {language.t("common.cancel")}
+            </Button>
+            <Button variant="primary" size="large" onClick={handleDelete}>
+              {language.t("common.delete")}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    )
+  }
+
+  const requestFileDelete = (node: FileNode) => {
+    dialog.show(() => <DialogConfirmFileDelete node={node} />)
   }
 
   const [store, setStore] = createStore({
@@ -375,7 +405,10 @@ export function SessionSidePanel(props: {
                     {language.t("session.files.all")}
                   </Tabs.Trigger>
                 </Tabs.List>
-                <Tabs.Content value="changes" class="bg-background-stronger px-3 py-0">
+                <Tabs.Content
+                  value="changes"
+                  class="bg-background-stronger px-3 py-0 flex-1 min-h-0 overflow-y-auto overflow-x-hidden"
+                >
                   <Switch>
                     <Match when={props.hasReview() || !props.diffsReady()}>
                       <Show
@@ -389,28 +422,33 @@ export function SessionSidePanel(props: {
                       >
                         <FileTree
                           path=""
-                          class="pt-3"
+                          class="pt-3 pb-4"
                           allowed={diffFiles()}
                           kinds={kinds()}
                           draggable={false}
                           active={props.activeDiff}
                           onFileClick={(node) => props.focusReviewDiff(node.path)}
+                          onFileDelete={requestFileDelete}
                         />
                       </Show>
                     </Match>
                     <Match when={true}>{empty(props.empty())}</Match>
                   </Switch>
                 </Tabs.Content>
-                <Tabs.Content value="all" class="bg-background-stronger px-3 py-0">
+                <Tabs.Content
+                  value="all"
+                  class="bg-background-stronger px-3 py-0 flex-1 min-h-0 overflow-y-auto overflow-x-hidden"
+                >
                   <Switch>
                     <Match when={nofiles()}>{empty(language.t("session.files.empty"))}</Match>
                     <Match when={true}>
                       <FileTree
                         path=""
-                        class="pt-3"
+                        class="pt-3 pb-4"
                         modified={diffFiles()}
                         kinds={kinds()}
                         onFileClick={(node) => openTab(file.tab(node.path))}
+                        onFileDelete={requestFileDelete}
                       />
                     </Match>
                   </Switch>

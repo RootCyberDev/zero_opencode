@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import { describeRoute, validator, resolver } from "hono-openapi"
 import path from "path"
+import { stat, unlink } from "fs/promises"
 import z from "zod"
 import { File } from "../../file"
 import { Ripgrep } from "../../file/ripgrep"
@@ -225,6 +226,41 @@ export const FileRoutes = lazy(() =>
       async (c) => {
         const content = await File.status()
         return c.json(content)
+      },
+    )
+    .delete(
+      "/file",
+      describeRoute({
+        summary: "Delete file",
+        description: "Delete a file from the workspace on disk.",
+        operationId: "file.delete",
+        responses: {
+          200: {
+            description: "File deleted",
+            content: {
+              "application/json": {
+                schema: resolver(z.object({ ok: z.literal(true) })),
+              },
+            },
+          },
+          404: { description: "Not found" },
+        },
+      }),
+      validator(
+        "query",
+        z.object({
+          path: z.string(),
+        }),
+      ),
+      async (c) => {
+        const file = c.req.valid("query").path
+        const full = path.join(Instance.directory, file)
+        if (!Instance.containsPath(full)) throw new Error("Access denied: path escapes project directory")
+        const info = await stat(full).catch(() => null)
+        if (!info) return c.notFound()
+        if (info.isDirectory()) throw new Error("Cannot delete a directory through this endpoint")
+        await unlink(full)
+        return c.json({ ok: true as const })
       },
     ),
 )

@@ -245,6 +245,30 @@ export const { use: useFile, provider: FileProvider } = createSimpleContext({
       viewCache.clear()
     })
 
+    const removeFile = async (input: string) => {
+      const file = path.normalize(input)
+      if (!file) return
+      try {
+        await sdk.client.file.delete({ path: file })
+      } catch (e) {
+        showToast({
+          variant: "error",
+          title: language.t("toast.file.deleteFailed.title"),
+          description: errorMessage(e, language.t("error.chain.unknown")),
+        })
+        return
+      }
+      const parent = file.includes("/") ? file.slice(0, file.lastIndexOf("/")) : ""
+      setStore(
+        "file",
+        produce((draft) => {
+          delete draft[file]
+        }),
+      )
+      removeFileContentBytes(file)
+      await tree.listDir(parent, { force: true }).catch(() => {})
+    }
+
     return {
       ready: () => view().ready(),
       normalize: path.normalize,
@@ -257,6 +281,7 @@ export const { use: useFile, provider: FileProvider } = createSimpleContext({
         children: tree.children,
         expand: tree.expandDir,
         collapse: tree.collapseDir,
+        remove: removeFile,
         toggle(input: string) {
           if (tree.dirState(input)?.expanded) {
             tree.collapseDir(input)

@@ -66,4 +66,23 @@
       width: auto;
     }
   }
+
+  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"] {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-base) transparent;
+  }
+
+  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"]::-webkit-scrollbar {
+    display: block;
+    width: 8px;
+  }
+
+  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"]::-webkit-scrollbar-thumb {
+    background-color: var(--border-base);
+    border-radius: 4px;
+  }
+
+  [data-component="tabs"][data-scope="filetree"] [data-slot="tabs-content"]::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }

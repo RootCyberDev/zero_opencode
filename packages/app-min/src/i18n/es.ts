@@ -423,6 +423,7 @@ export const dict = {
 
   "toast.file.loadFailed.title": "Fallo al cargar archivo",
   "toast.file.listFailed.title": "Fallo al listar archivos",
+  "toast.file.deleteFailed.title": "Fallo al eliminar archivo",
 
   "toast.context.noLineSelection.title": "Sin selección de líneas",
   "toast.context.noLineSelection.description": "Primero selecciona un rango de líneas en una pestaña de archivo.",
@@ -516,6 +517,8 @@ export const dict = {
   "session.files.all": "Todos los archivos",
   "session.files.empty": "Sin archivos",
   "session.files.binaryContent": "Archivo binario (el contenido no puede ser mostrado)",
+  "session.files.delete.button": "Eliminar archivo",
+  "session.files.delete.confirm": '¿Eliminar "{{name}}" del disco? Esta acción no se puede deshacer.',
 
   "session.messages.renderEarlier": "Renderizar mensajes anteriores",
   "session.messages.loadingEarlier": "Cargando mensajes anteriores...",
